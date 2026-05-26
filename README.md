@@ -1,37 +1,68 @@
+
 # Rynqor — Real-time Chat App
 
-A realtime, threaded chat application built with a React + Vite frontend and an Express + Socket.IO backend. Supports auth, conversations, messages, typing indicators, presence, read receipts and media uploads (Cloudinary).
+Overview
+--------
+Rynqor is a MERN-style real-time chat application that demonstrates common chat features: authentication, one-to-one and group conversations, message history, media uploads, presence (online/offline), typing indicators, and read receipts. The UI is a React app built with Vite; the server is an Express API with Socket.IO for realtime features.
 
-**Status:** Works locally. See quick-start for running both client and server.
+Why this repo
+----------------
+- Good reference for building chat apps with Socket.IO and MongoDB.
+- Demonstrates combining REST APIs (for standard CRUD) with realtime sockets (for low-latency updates).
+- Lightweight and easy to run locally.
 
-**Features**
-- Auth (signup / login) with access & refresh tokens
-- Conversations with participants and threaded messages
-- Real-time messaging using Socket.IO
-- Presence (online/offline), typing indicators and read receipts
-- Media upload (Cloudinary)
-- REST API for users, conversations and messages
+Key features (explained)
+-------------------------
+- Authentication: Users can sign up and log in. The server issues access and refresh tokens (JWT). Access tokens are short-lived; refresh tokens renew them.
 
-**Tech stack**
-- Frontend: React 19, Vite, TailwindCSS, react-query
-- Backend: Node 18+, Express 5, Mongoose (MongoDB), Socket.IO
-- Media/storage: Cloudinary
+- Conversations: Conversations store participants and metadata. The client lists conversations and shows the last message and unread counts.
 
-Repository layout
-- client/ — React/Vite frontend ([client/package.json](client/package.json))
-- server/ — Express API + Socket.IO backend ([server/package.json](server/package.json))
+- Messaging: Messages are persisted in MongoDB and delivered in realtime via Socket.IO. The system supports optimistic local messages (client shows a pending message while the server confirms).
+
+- Presence: The server tracks online users and broadcasts `online_users`, `user_online` and `user_offline` events so the UI can show who is online and when someone was last seen.
+
+- Typing indicators: While a user types, the client emits `typing`/`stop_typing` and other participants see live typing indicators.
+
+- Read receipts: When messages are read, clients emit `mark_read`; the server updates message statuses and broadcasts `messages_read` so senders see their messages marked as read.
+
+- Media uploads: Images and media can be uploaded and stored via Cloudinary from the server. Cloudinary credentials are optional locally but required for media features.
+
+Architecture & important files
+-----------------------------
+- Frontend (client): React app using Vite. Entry: [client/src/main.jsx](client/src/main.jsx). The frontend manages sockets in [client/src/services/socket/SocketProvider.jsx](client/src/services/socket/SocketProvider.jsx) and connects to `http://localhost:8000` by default in [client/src/services/socket/socket.js](client/src/services/socket/socket.js).
+
+- Backend (server): Express app. Server bootstrap: [server/src/index.js](server/src/index.js). Express routes and middleware are wired in [server/src/app.js](server/src/app.js). Socket.IO setup is in [server/src/socket/index.js](server/src/socket/index.js) and realtime logic lives in [server/src/socket/handlers.js](server/src/socket/handlers.js).
+
+- Database: MongoDB via Mongoose. Connection code: [server/src/config/db.js](server/src/config/db.js).
+
+Tech stack (detailed)
+---------------------
+- Frontend
+	- React 19 — UI library
+	- Vite — fast dev server and bundler
+	- TailwindCSS — utility-first CSS (configured in the client)
+	- react-query (@tanstack/react-query) — server-state and caching for REST requests
+	- socket.io-client — realtime socket connection
+
+- Backend
+	- Node (ESM) and Express 5 — HTTP API
+	- socket.io — realtime events and rooms
+	- Mongoose — MongoDB ODM
+	- JWT (jsonwebtoken) — access & refresh tokens
+	- multer + cloudinary — file uploads
+
+- Dev / tools
+	- eslint, vite, react-hot-toast, axios
 
 Quick start (development)
-
+-------------------------
 Prerequisites
-- Node (18+) and npm
-- MongoDB running and reachable
-- Cloudinary account for media uploads (optional for image uploads)
+- Node.js (18+) and npm
+- MongoDB (local or remote)
 
 1) Install dependencies
 
 ```bash
-# from repo root
 cd server
 npm install
 
@@ -39,75 +70,96 @@ cd ../client
 npm install
 ```
 
-2) Configure server environment
+2) Configure environment (server/.env)
 
-Create a `.env` file in `server/` with the values below (example):
+Create `server/.env` with at least these values (example):
 
 ```env
-# server/.env
 PORT=8000
 MONGODB_URL=mongodb://localhost:27017
 DB_NAME=rynqor
 
-# Cloudinary (if used for media uploads)
+# Optional: Cloudinary for media uploads
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 
-# JWT tokens
+# JWT
 ACCESS_TOKEN_SECRET=some_long_secret
 ACCESS_TOKEN_EXPIRY=15m
 REFRESH_TOKEN_SECRET=another_long_secret
 REFRESH_TOKEN_EXPIRY=7d
 ```
 
-Note: The server reads `PORT` from [server/src/config/config.js](server/src/config/config.js). The client socket client currently points to `http://localhost:8000` in [client/src/services/socket/socket.js](client/src/services/socket/socket.js). Ensure the server `PORT` and the client socket URL agree, or update the client socket URL accordingly.
+Notes
+- The client socket URL is set in [client/src/services/socket/socket.js](client/src/services/socket/socket.js). By default it points to `http://localhost:8000`. If you run the server on a different `PORT`, update that URL or set `PORT=8000` in your `.env`.
 
-3) Run server and client
+3) Run
 
 ```bash
-# start server (from server/)
+# start server
+cd server
 npm run dev
 
-# start client (from client/)
+# start client
+cd ../client
 npm run dev
 ```
 
 API overview
-- Base URL: `http://localhost:<PORT>/api/v1`
+-------------
+- Base: `http://localhost:<PORT>/api/v1`
 - Auth: `/api/v1/auth` — signup, login, refresh, logout
-- Users: `/api/v1/users` — current user, profile updates
-- Conversations: `/api/v1/conversations` — create/list/join conversations
-- Messages: `/api/v1/messages` — fetch messages, send (server also accepts via sockets)
+- Users: `/api/v1/users` — profile, search, sessions
+- Conversations: `/api/v1/conversations` — list, create, update participants
+- Messages: `/api/v1/messages` — fetch messages, pagination
 
-Realtime (Socket.IO)
-Socket server is initialized in [server/src/socket/index.js](server/src/socket/index.js) and handlers are implemented in [server/src/socket/handlers.js](server/src/socket/handlers.js).
+Realtime socket events (more detail)
+-----------------------------------
+- Connection
+	- The server authenticates socket connections with `socketAuth` middleware before registering handlers.
 
-Common socket events (client ⇄ server)
-- `join_conversation` — join a conversation room
-- `send_message` — send message payload; server emits `message_sent` (ack to sender) and `new_message` (to room)
-- `message_sent`, `new_message`, `message_failed` — message lifecycle
-- `mark_read` / `messages_read` — read receipts
-- `typing` / `stop_typing` — typing indicators
-- `online_users`, `user_online`, `user_offline` — presence
+- Presence
+	- `online_users` (server → client): initial list of online user IDs
+	- `user_online` / `user_offline` (server → client): broadcast when a user comes online/goes offline
 
-Important files
-- Server entry: [server/src/index.js](server/src/index.js)
-- Express app: [server/src/app.js](server/src/app.js)
-- Socket handlers: [server/src/socket/handlers.js](server/src/socket/handlers.js)
-- Client socket: [client/src/services/socket/socket.js](client/src/services/socket/socket.js)
-- Client app entry: [client/src/main.jsx](client/src/main.jsx)
+- Conversation control
+	- `join_conversation` (client → server): request to join a conversation room (server validates membership)
+
+- Sending messages
+	- `send_message` (client → server): payload includes `conversationId`, `text`, optional `media`, and a `clientTempId` for optimistic UI
+	- `message_sent` (server → sender): ack with saved message (used to clear optimistic state)
+	- `new_message` (server → room): new message delivered to other participants
+	- `message_failed` (server → sender): indicates server-side failure to persist/send
+
+- Read receipts
+	- `mark_read` (client → server): includes `conversationId` and optional `lastReadAt`
+	- `messages_read` (server → room): informs participants which messages were marked read
+
+- Typing
+	- `typing` / `stop_typing` (client → server) and broadcast to room so others can show typing indicators
 
 Development notes & troubleshooting
-- CORS: server allows origin `http://localhost:5173` (vite dev). Update in `server/src/app.js` if you run client on a different origin.
-- Socket URL mismatch: If you change the server `PORT`, update `client/src/services/socket/socket.js`'s `io()` URL or set the server to run on the same port referenced by the client.
-- Uploads: Cloudinary credentials must be set for media uploads to work; otherwise image upload features will fail gracefully (check client UI and server logs).
+----------------------------------
+- CORS: server currently allows origin `http://localhost:5173`. Change `server/src/app.js` if your client runs on another origin.
+- Socket URL mismatch: keep `PORT` and client socket URL in sync (see [client/src/services/socket/socket.js](client/src/services/socket/socket.js)).
+- Media uploads: if Cloudinary is not configured, media upload UI may still appear but will fail — add Cloudinary env vars or mock uploads in dev.
+
+Extending the app
+------------------
+- Add typing indicators per-conversation with timestamps for better UX.
+- Add delivery receipts separate from read receipts.
+- Add message search and pagination improvements.
 
 Contributing
-- Open an issue or submit a PR. Keep changes focused and include tests where applicable.
+------------
+- Fork, make focused changes, open a PR. Describe breaking changes and migration steps.
 
 License
-- See repository for license or add a `LICENSE` file.
+-------
+- No license file present. Add a `LICENSE` if you want to define reuse terms.
 
 Acknowledgements
-- Built as a MERN-style real-time chat reference application.
+-----------------
+- Built as a reference MERN realtime chat application combining REST + Socket.IO patterns.
+
