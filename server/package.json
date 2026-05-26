@@ -1,0 +1,29 @@
+{
+  "name": "rynqor-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/index.js",
+    "start": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "Abhishek Rawat",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.9.0",
+    "cookie": "^1.1.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "geoip-lite": "^1.4.10",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.3",
+    "multer": "^2.1.1",
+    "socket.io": "^4.8.3",
+    "ua-parser-js": "^2.0.10"
+  }
+}

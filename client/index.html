@@ -1,0 +1,67 @@
+<!doctype html>
+<html
+  lang="en"
+  style="background:#0f172a"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="preload" as="image" href="/favicon.png" />
+    <script>
+
+  (() => {
+
+    const theme =
+      localStorage.getItem(
+        "themeMode"
+      ) || "system";
+
+    const systemDark =
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+
+    const isDark =
+      theme === "dark" ||
+      (
+        theme === "system" &&
+        systemDark
+      );
+
+    if (isDark) {
+
+      document.documentElement.classList.add(
+        "dark"
+      );
+
+      document.documentElement.style.background =
+        "#0f172a";
+
+      document.documentElement.style.colorScheme =
+        "dark";
+
+    }
+
+  })();
+
+</script>
+    <style>
+
+  html {
+    background: #0f172a;
+  }
+
+</style>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta
+      name="description"
+      content="Chat application for messaging, searching users, and real-time conversations."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rynqor - Chat App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

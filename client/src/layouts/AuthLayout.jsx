@@ -1,0 +1,211 @@
+import { Outlet } from "react-router-dom";
+
+import authImage
+    from "../assets/Images/authImage.png";
+
+const AuthLayout = () => {
+
+    return (
+        <div
+            className="
+        flex
+        h-screen
+        overflow-hidden
+        w-full
+
+        bg-background
+
+        transition-colors
+        duration-300
+      "
+        >
+
+            {/* LEFT SIDE */}
+            <div
+                className="
+          relative
+
+          hidden
+          flex-[1.2]
+          items-center
+          justify-center
+
+          overflow-hidden
+
+          border-r
+          border-border
+
+          bg-surface
+
+          px-10
+
+          lg:flex
+        "
+            >
+
+                {/* GLOW */}
+                <div
+                    className="
+            absolute
+            left-1/2
+            top-1/2
+
+            h-[520px]
+            w-[520px]
+
+            -translate-x-1/2
+            -translate-y-1/2
+
+            rounded-full
+
+            bg-accent/10
+
+            blur-3xl
+          "
+                />
+
+                {/* CONTENT */}
+                <div
+                    className="
+            relative
+            z-10
+
+            flex
+            max-w-2xl
+            flex-col
+            items-center
+          "
+                >
+
+                    {/* BRAND */}
+                    <h1
+                        className="
+    mb-2
+
+    text-4xl
+    font-bold
+    tracking-tight
+
+    text-foreground
+
+    lg:text-5xl
+    2xl:text-6xl
+    3xl:text-7xl
+  "
+                    >
+                        Rynqor
+                    </h1>
+
+                    <p
+                        className="
+    max-w-sm
+
+    text-sm
+    leading-relaxed
+
+    text-muted
+
+    lg:text-base
+    2xl:max-w-xl
+    2xl:text-lg
+  "
+                    >
+                        Fast, modern, real-time messaging
+                        for seamless conversations.
+                    </p>
+
+                    {/* IMAGE */}
+                    <img
+                        src={authImage}
+                        alt="Auth visual"
+                        className="
+              w-full
+              max-w-lg
+
+              object-contain
+
+              2xl:max-w-xl
+            "
+                    />
+
+                </div>
+
+            </div>
+
+            {/* RIGHT SIDE */}
+            <div
+                className="
+          flex
+          flex-1
+          items-center
+          justify-center
+          px-6
+
+          lg:px-16
+
+          2xl:px-24
+        "
+            >
+
+                <div
+                    className="
+    w-full
+
+    max-w-sm
+
+    lg:max-w-md
+    xl:max-w-lg
+    2xl:max-w-xl
+  "
+                >
+
+                    {/* MOBILE BRAND */}
+                    <div
+                        className="
+              mb-10
+
+              text-center
+
+              lg:hidden
+            "
+                    >
+
+                        <h1
+                            className="
+                text-4xl
+                font-bold
+
+                text-foreground
+              "
+                        >
+                            Rynqor
+                        </h1>
+
+                        <p
+                            className="
+                mt-2
+
+                text-sm
+
+                text-muted
+              "
+                        >
+                            Connect instantly.
+                        </p>
+
+                    </div>
+
+                    {/* FORM */}
+                    <main className="w-full">
+                        <Outlet />
+                    </main>
+
+                </div>
+
+            </div>
+
+        </div>
+    );
+};
+
+export default AuthLayout;
