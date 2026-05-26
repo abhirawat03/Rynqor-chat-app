@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import { Client_URL } from "./config/config.js";
+import { CLIENT_URL } from "./config/config.js";
 
 
 const app = express();
@@ -10,7 +10,7 @@ app.use(
     cors({
         origin:[
       "http://localhost:5173",
-      Client_URL,
+      CLIENT_URL,
     ],
         credentials:true,
     })
