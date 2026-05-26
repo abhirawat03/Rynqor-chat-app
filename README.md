@@ -104,8 +104,6 @@ Configuration facts
 - Socket client URL: the client uses `http://localhost:8000` by default (see `client/src/services/socket/socket.js`).
 - Port: the server reads `PORT` from `server/src/config/config.js`.
 
-License
--------
-- No license file present in the repository.
+
 
 
