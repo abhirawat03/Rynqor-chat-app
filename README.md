@@ -76,7 +76,7 @@ Create `server/.env` with at least these values (example):
 
 ```env
 PORT=8000
-MONGODB_URL=mongodb://localhost:27017
+MONGODB_URL=mongodb_url
 DB_NAME=rynqor
 
 # Optional: Cloudinary for media uploads
