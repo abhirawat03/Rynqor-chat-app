@@ -1,8 +1,6 @@
 
 # Rynqor — Real-time Chat App
 
-# Rynqor — Real-time Chat App
-
 Overview
 --------
 Rynqor is a MERN-style real-time chat application. The repository contains a React frontend and an Express backend with Socket.IO for realtime messaging. The app includes authentication, conversations, message persistence, realtime delivery, presence, typing indicators, read receipts, and media uploads via Cloudinary.
@@ -55,7 +53,7 @@ Environment (example `server/.env`)
 
 ```env
 PORT=8000
-MONGODB_URL=mongodb://localhost:27017
+MONGODB_URL=mongodb_url
 DB_NAME=rynqor
 
 # Cloudinary (if used)
