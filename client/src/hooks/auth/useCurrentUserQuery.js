@@ -12,7 +12,7 @@ export const useCurrentUserQuery = () => {
 
     gcTime: 1000 * 60 * 5,
 
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     refetchOnReconnect: true,
     refetchOnMount: true,
   });

@@ -350,6 +350,7 @@ const showResults =
                     username={user.username}
                     fullName={user.fullName}
                     avatar={user.avatar}
+                    bio={user.bio}
                     isLoading={
                       startingChatId === user._id
                     }

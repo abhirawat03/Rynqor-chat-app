@@ -190,7 +190,7 @@ const searchUserService = async (search) => {
             { fullName: { $regex: `^${search}`, $options: "i" } },
         ],
     })
-        .select("username fullName avatar")
+        .select("username fullName avatar bio")
         .limit(10)
         .lean();
 
@@ -199,6 +199,7 @@ const searchUserService = async (search) => {
         username: user.username,
         fullName: formatName(user.fullName),
         avatar: user.avatar || null,
+        bio: user.bio,
     }));
 }
 

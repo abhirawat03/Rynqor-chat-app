@@ -5,7 +5,6 @@ import { CLIENT_URL } from "./config/config.js";
 
 
 const app = express();
-console.log(CLIENT_URL);
 
 app.use(
     cors({

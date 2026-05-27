@@ -2,6 +2,7 @@ const SearchCard = ({
   avatar,
   username,
   fullName,
+  bio,
   onClick,
   isLoading
 }) => {
@@ -131,6 +132,19 @@ const SearchCard = ({
         >
           @{username}
         </p>
+        {bio && (
+          <p
+            className="
+              mt-1
+              line-clamp-2
+
+              text-xs
+              text-muted
+            "
+          >
+            {bio}
+          </p>
+        )}
 
       </div>
 

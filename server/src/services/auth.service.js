@@ -216,7 +216,6 @@ async (incomingRefreshToken) => {
         );
     }
 
-    // verify jwt
     const decoded =
         verifyRefreshToken(
             incomingRefreshToken
@@ -229,24 +228,6 @@ async (incomingRefreshToken) => {
         );
     }
 
-    const hashedIncomingToken =
-        hashToken(incomingRefreshToken);
-
-    // atomic delete
-    const storedToken =
-        await RefreshToken.findOneAndDelete({
-            token: hashedIncomingToken,
-            user: decoded._id
-        });
-
-    if (!storedToken) {
-        throw new ApiError(
-            401,
-            "Refresh token expired or already used"
-        );
-    }
-
-    // verify user still exists
     const user =
         await User.findById(decoded._id);
 
@@ -257,7 +238,32 @@ async (incomingRefreshToken) => {
         );
     }
 
-    // generate new tokens
+    const hashedIncomingToken =
+        hashToken(incomingRefreshToken);
+
+    const storedToken =
+        await RefreshToken.findOne({
+            token: hashedIncomingToken,
+            user: decoded._id
+        });
+
+    if (!storedToken) {
+        throw new ApiError(
+            401,
+            "Refresh token expired or invalid"
+        );
+    }
+
+    if (storedToken.expiresAt < new Date()) {
+
+        await storedToken.deleteOne();
+
+        throw new ApiError(
+            401,
+            "Refresh token expired"
+        );
+    }
+
     const accessToken =
         generateAccessToken(user._id);
 
@@ -267,31 +273,19 @@ async (incomingRefreshToken) => {
     const hashedRefreshToken =
         hashToken(refreshToken);
 
-    // create new rotated token
-    await RefreshToken.create({
-        user: user._id,
+    storedToken.token =
+        hashedRefreshToken;
 
-        token: hashedRefreshToken,
+    storedToken.lastUsedAt =
+        new Date();
 
-        device:
-            storedToken.device,
-
-        ipAddress:
-            storedToken.ipAddress,
-
-        location:
-            storedToken.location,
-
-        userAgent:
-            storedToken.userAgent,
-
-        lastUsedAt: new Date(),
-
-        expiresAt: new Date(
+    storedToken.expiresAt =
+        new Date(
             Date.now() +
             7 * 24 * 60 * 60 * 1000
-        )
-    });
+        );
+
+    await storedToken.save();
 
     return {
         accessToken,
