@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const Api = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL}`,
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
   withCredentials: true,
 });
 
@@ -25,7 +25,7 @@ Api.interceptors.response.use(
 
         // refresh token request
         await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/auth/refresh-token`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/refresh-token`,
           {},
           {
             withCredentials: true,
