@@ -1553,412 +1553,414 @@ const [
     >
 
       <div
+  className="
+    w-full
+    max-w-2xl
+
+    rounded-3xl
+
+    bg-surface
+    p-6
+  "
+>
+
+  <div
+    className="
+      flex
+      items-center
+      justify-between
+    "
+  >
+
+    <div>
+
+      <h2
         className="
-          w-full
-          max-w-2xl
-
-          rounded-3xl
-
-          bg-surface
-
-          p-6
+          text-xl
+          font-semibold
         "
       >
+        Active Sessions
+      </h2>
+
+      <p
+        className="
+          mt-1
+
+          text-sm
+
+          text-muted
+        "
+      >
+        Devices currently
+        logged into your
+        account
+      </p>
+
+    </div>
+
+    <button
+      onClick={() =>
+        setShowSessionsModal(
+          false
+        )
+      }
+
+      className="
+        text-xl
+      "
+    >
+      ✕
+    </button>
+
+  </div>
+
+  {/* SCROLLABLE CONTAINER */}
+  <div
+    className="
+      mt-6
+
+      max-h-[70vh]
+      overflow-y-auto
+
+      pr-2
+
+      space-y-6
+      scrollbar-hide
+    "
+  >
+
+    {currentSession && (
+
+      <div>
+
+        <h3
+          className="
+            mb-3
+
+            text-sm
+            font-semibold
+
+            text-muted
+          "
+        >
+          Current Device
+        </h3>
 
         <div
           className="
             flex
             items-center
             justify-between
-          "
-        >
-
-          <div>
-
-            <h2
-              className="
-                text-xl
-                font-semibold
-              "
-            >
-              Active Sessions
-            </h2>
-
-            <p
-              className="
-                mt-1
-
-                text-sm
-
-                text-muted
-              "
-            >
-              Devices currently
-              logged into your
-              account
-            </p>
-
-          </div>
-
-          <button
-            onClick={() =>
-              setShowSessionsModal(
-                false
-              )
-            }
-
-            className="
-              text-xl
-            "
-          >
-            ✕
-          </button>
-
-        </div>
-
-        <div
-          className="
-            mt-6
-
-            grid
-            gap-3
-          "
-        >
-
-          {currentSession && (
-
-  <div
-    className="
-      mb-6
-    "
-  >
-
-    <h3
-      className="
-        mb-3
-
-        text-sm
-        font-semibold
-
-        text-muted
-      "
-    >
-      Current Device
-    </h3>
-
-    <div
-      className="
-        flex
-        items-center
-        justify-between
-
-        rounded-2xl
-
-        border
-        border-accent/20
-
-        bg-accent/5
-
-        p-4
-      "
-    >
-
-      <div
-        className="
-          flex
-          items-center
-          gap-3
-        "
-      >
-
-        <div
-          className="
-            flex
-            h-11
-            w-11
-            items-center
-            justify-center
 
             rounded-2xl
 
-            bg-accent/10
+            border
+            border-accent/20
 
-            text-accent
+            bg-accent/5
+
+            p-4
           "
         >
 
-          {currentSession.device
-            ?.toLowerCase()
-            ?.includes(
-              "iphone"
-            ) ||
-
-          currentSession.device
-            ?.toLowerCase()
-            ?.includes(
-              "android"
-            )
-
-            ? (
-              <IoPhonePortrait
-                size={20}
-              />
-            )
-
-            : (
-              <IoDesktop
-                size={20}
-              />
-            )}
-
-        </div>
-
-        <div>
-
-          <h5
-            className="
-              text-sm
-              font-medium
-            "
-          >
-            {
-              currentSession.device
-            }
-          </h5>
-
-          <p
-            className="
-              mt-1
-
-              text-xs
-
-              text-muted
-            "
-          >
-            {
-              currentSession.location
-            }
-          </p>
-
-          <p
-                  className="
-                    mt-1
-
-                    text-xs
-
-                    text-muted
-                  "
-                >
-                  {new Date(
-                    currentSession.lastUsedAt
-                  ).toLocaleString()}
-                </p>
-
-        </div>
-
-      </div>
-
-      <div
-        className="
-          rounded-full
-
-          bg-green-500/10
-
-          px-3
-          py-1
-
-          text-xs
-          font-medium
-
-          text-green-500
-        "
-      >
-        Current
-      </div>
-
-    </div>
-
-  </div>
-
-)}
-{otherSessions.length > 0 && (
-
-  <div>
-
-    <h3
-      className="
-        mb-3
-
-        text-sm
-        font-semibold
-
-        text-muted
-      "
-    >
-      Other Devices
-    </h3>
-
-    <div
-      className="
-        grid
-        gap-3
-      "
-    >
-
-      {otherSessions.map(
-        (session) => (
-
           <div
-            key={session._id}
-
             className="
               flex
               items-center
-              justify-between
-
-              rounded-2xl
-
-              border
-              border-border
-
-              bg-background
-
-              p-4
+              gap-3
             "
           >
 
             <div
               className="
                 flex
+                h-11
+                w-11
                 items-center
-                gap-3
+                justify-center
+
+                rounded-2xl
+
+                bg-accent/10
+
+                text-accent
               "
             >
 
-              <div
-                className="
-                  flex
-                  h-11
-                  w-11
-                  items-center
-                  justify-center
+              {currentSession.device
+                ?.toLowerCase()
+                ?.includes(
+                  "iphone"
+                ) ||
 
-                  rounded-2xl
+              currentSession.device
+                ?.toLowerCase()
+                ?.includes(
+                  "android"
+                )
 
-                  bg-accent/10
+                ? (
+                  <IoPhonePortrait
+                    size={20}
+                  />
+                )
 
-                  text-accent
-                "
-              >
-
-                {session.device
-                  ?.toLowerCase()
-                  ?.includes(
-                    "iphone"
-                  ) ||
-
-                session.device
-                  ?.toLowerCase()
-                  ?.includes(
-                    "android"
-                  )
-
-                  ? (
-                    <IoPhonePortrait
-                      size={20}
-                    />
-                  )
-
-                  : (
-                    <IoDesktop
-                      size={20}
-                    />
-                  )}
-
-              </div>
-
-              <div>
-
-                <h5
-                  className="
-                    text-sm
-                    font-medium
-                  "
-                >
-                  {
-                    session.device
-                  }
-                </h5>
-
-                <p
-                  className="
-                    mt-1
-
-                    text-xs
-
-                    text-muted
-                  "
-                >
-                  {
-                    session.location
-                  }
-                </p>
-
-                <p
-                  className="
-                    mt-1
-
-                    text-xs
-
-                    text-muted
-                  "
-                >
-                  {new Date(
-                    session.createdAt
-                  ).toLocaleString()}
-                </p>
-
-              </div>
+                : (
+                  <IoDesktop
+                    size={20}
+                  />
+                )}
 
             </div>
 
-            <button
-              onClick={() =>
-                logoutSessionMutation(
-                  session._id
-                )
-              }
+            <div>
 
-              className="
-                text-sm
+              <h5
+                className="
+                  text-sm
+                  font-medium
+                "
+              >
+                {
+                  currentSession.device
+                }
+              </h5>
 
-                font-medium
+              <p
+                className="
+                  mt-1
 
-                text-red-500
+                  text-xs
 
-                transition-opacity
-                duration-200
+                  text-muted
+                "
+              >
+                {
+                  currentSession.location
+                }
+              </p>
 
-                hover:opacity-80
-              "
-            >
-              Log out
-            </button>
+              <p
+                className="
+                  mt-1
+
+                  text-xs
+
+                  text-muted
+                "
+              >
+                {new Date(
+                  currentSession.lastUsedAt
+                ).toLocaleString()}
+              </p>
+
+            </div>
 
           </div>
 
-        )
-      )}
+          <div
+            className="
+              rounded-full
 
-    </div>
+              bg-green-500/10
 
-  </div>
+              px-3
+              py-1
 
-)}
+              text-xs
+              font-medium
+
+              text-green-500
+            "
+          >
+            Current
+          </div>
 
         </div>
 
       </div>
+
+    )}
+
+    {otherSessions.length > 0 && (
+
+      <div>
+
+        <h3
+          className="
+            mb-3
+
+            text-sm
+            font-semibold
+
+            text-muted
+          "
+        >
+          Other Devices
+        </h3>
+
+        <div
+          className="
+            grid
+            gap-3
+          "
+        >
+
+          {otherSessions.map(
+            (session) => (
+
+              <div
+                key={session._id}
+
+                className="
+                  flex
+                  items-center
+                  justify-between
+
+                  rounded-2xl
+
+                  border
+                  border-border
+
+                  bg-background
+
+                  p-4
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-3
+                  "
+                >
+
+                  <div
+                    className="
+                      flex
+                      h-11
+                      w-11
+                      items-center
+                      justify-center
+
+                      rounded-2xl
+
+                      bg-accent/10
+
+                      text-accent
+                    "
+                  >
+
+                    {session.device
+                      ?.toLowerCase()
+                      ?.includes(
+                        "iphone"
+                      ) ||
+
+                    session.device
+                      ?.toLowerCase()
+                      ?.includes(
+                        "android"
+                      )
+
+                      ? (
+                        <IoPhonePortrait
+                          size={20}
+                        />
+                      )
+
+                      : (
+                        <IoDesktop
+                          size={20}
+                        />
+                      )}
+
+                  </div>
+
+                  <div>
+
+                    <h5
+                      className="
+                        text-sm
+                        font-medium
+                      "
+                    >
+                      {
+                        session.device
+                      }
+                    </h5>
+
+                    <p
+                      className="
+                        mt-1
+
+                        text-xs
+
+                        text-muted
+                      "
+                    >
+                      {
+                        session.location
+                      }
+                    </p>
+
+                    <p
+                      className="
+                        mt-1
+
+                        text-xs
+
+                        text-muted
+                      "
+                    >
+                      {new Date(
+                        session.createdAt
+                      ).toLocaleString()}
+                    </p>
+
+                  </div>
+
+                </div>
+
+                <button
+                  onClick={() =>
+                    logoutSessionMutation(
+                      session._id
+                    )
+                  }
+
+                  className="
+                    text-sm
+
+                    font-medium
+
+                    text-red-500
+
+                    transition-opacity
+                    duration-200
+
+                    hover:opacity-80
+                  "
+                >
+                  Log out
+                </button>
+
+              </div>
+
+            )
+          )}
+
+        </div>
+
+      </div>
+
+    )}
+
+  </div>
+
+</div>
 
     </div>
 
