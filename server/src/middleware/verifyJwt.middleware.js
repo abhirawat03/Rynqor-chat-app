@@ -1,5 +1,6 @@
-import { ApiError }
-from "../utils/ApiError.js";
+import {
+  ApiError
+} from "../utils/ApiError.js";
 
 import {
   verifyAccessToken
@@ -15,7 +16,15 @@ async (
   try {
 
     const token =
-      req.cookies.accessToken;
+
+      req.cookies.accessToken ||
+
+      req.header("Authorization")
+        ?.replace("Bearer ", "");
+
+    // -----------------------------
+    // TOKEN MISSING
+    // -----------------------------
 
     if (!token) {
 
@@ -29,16 +38,31 @@ async (
 
     }
 
-    const decoded =
-      verifyAccessToken(token);
+    // -----------------------------
+    // VERIFY TOKEN
+    // -----------------------------
 
-    req.user = decoded;
+    const decoded =
+      verifyAccessToken(
+        token
+      );
+
+    req.user =
+      decoded;
 
     next();
 
   } catch (err) {
 
-    // token expired
+    console.error(
+      "JWT VERIFY ERROR:",
+      err
+    );
+
+    // -----------------------------
+    // TOKEN EXPIRED
+    // -----------------------------
+
     if (
       err.name ===
       "TokenExpiredError"
@@ -54,12 +78,35 @@ async (
 
     }
 
-    // invalid token
+    // -----------------------------
+    // INVALID TOKEN
+    // -----------------------------
+
+    if (
+      err.name ===
+      "JsonWebTokenError"
+    ) {
+
+      return next(
+        new ApiError(
+          401,
+          "Invalid token",
+          "TOKEN_INVALID"
+        )
+      );
+
+    }
+
+    // -----------------------------
+    // FALLBACK
+    // -----------------------------
+
     return next(
       new ApiError(
         401,
-        "Invalid token",
-        "TOKEN_INVALID"
+        err.message ||
+        "Authentication failed",
+        "AUTH_FAILED"
       )
     );
 
@@ -67,4 +114,6 @@ async (
 
 };
 
-export { verifyJwt };
+export {
+  verifyJwt
+};

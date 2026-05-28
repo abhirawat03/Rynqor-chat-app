@@ -15,6 +15,7 @@ const cookieOptions = {
             "production"
             ? "None"
             : "Lax",
+    path: "/"
 };
 
 const register = async (req, res) => {
@@ -38,7 +39,7 @@ const register = async (req, res) => {
             {
                 ...cookieOptions,
                 maxAge:
-                    7 *
+                    30 *
                     24 *
                     60 *
                     60 *
@@ -52,7 +53,7 @@ const register = async (req, res) => {
                 ...cookieOptions,
 
                 maxAge:
-                    7 *
+                    30 *
                     24 *
                     60 *
                     60 *
@@ -92,7 +93,7 @@ const login = async (req, res) => {
                 ...cookieOptions,
 
                 maxAge:
-                    7 * 24 * 60 * 60 * 1000,
+                    30 * 24 * 60 * 60 * 1000,
             }
         )
         .cookie(
@@ -102,7 +103,7 @@ const login = async (req, res) => {
                 ...cookieOptions,
 
                 maxAge:
-                    7 *
+                    30 *
                     24 *
                     60 *
                     60 *
@@ -128,7 +129,8 @@ const refreshAccessToken = async (
 
     const {
         accessToken,
-        refreshToken
+        refreshToken,
+        sessionId
     } =
         await refreshAccessTokenService(
             incomingRefreshToken
@@ -150,11 +152,27 @@ const refreshAccessToken = async (
             {
                 ...cookieOptions,
                 maxAge:
-                    7 *
+                    30 *
                     24 *
                     60 *
                     60 *
                     1000
+            }
+        )
+        .cookie(
+            "sessionId",
+            sessionId.toString(),
+            {
+
+                ...cookieOptions,
+
+                maxAge:
+                    30 *
+                    24 *
+                    60 *
+                    60 *
+                    1000,
+
             }
         )
         .status(200)

@@ -117,25 +117,28 @@ const MessageInput = ({
 
     const allowedMimeTypes = [
 
-      // IMAGES
-      "image/jpeg",
-      "image/png",
-      "image/webp",
+  // IMAGES
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
 
-      // VIDEO
-      "video/mp4",
-      "video/webm",
+  // VIDEO
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
 
-      // AUDIO
-      "audio/mpeg",
-      "audio/mp3",
-      "audio/wav",
+  // AUDIO
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/wav",
 
-      // DOCUMENTS
-      "application/pdf",
-      "text/plain",
+  // DOCUMENTS
+  "application/pdf",
+  "text/plain",
 
-    ];
+];
 
     const validFiles = [];
 
@@ -362,7 +365,8 @@ setTimeout(() => {
 
   });
 
-  console.error(err);
+  // log only in non-production for debugging
+  if (import.meta.env.MODE !== "production") console.error(err);
 
   toast.error(
     "Failed to upload media"

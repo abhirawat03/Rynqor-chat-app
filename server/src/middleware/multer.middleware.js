@@ -1,42 +1,57 @@
 import multer from "multer";
-
 import path from "path";
+import fs from "fs";
+
+const tempDir =
+  "./public/temp";
+
+// ensure directory exists
+if (!fs.existsSync(tempDir)) {
+
+  fs.mkdirSync(
+    tempDir,
+    { recursive: true }
+  );
+
+}
 
 const storage =
   multer.diskStorage({
 
-    destination:
-      function (
-        req,
-        file,
-        cb
-      ) {
+    destination: function (
+      req,
+      file,
+      cb
+    ) {
 
-        cb(
-          null,
-          "./public/temp"
+      cb(
+        null,
+        tempDir
+      );
+
+    },
+
+    filename: function (
+      req,
+      file,
+      cb
+    ) {
+
+      const safeName =
+        file.originalname.replace(
+          /[^\w.-]/g,
+          "_"
         );
 
-      },
+      const uniqueName =
+        `${Date.now()}-${safeName}`;
 
-    filename:
-      function (
-        req,
-        file,
-        cb
-      ) {
+      cb(
+        null,
+        uniqueName
+      );
 
-        const uniqueName =
-          `${Date.now()}-${
-            file.originalname
-          }`;
-
-        cb(
-          null,
-          uniqueName
-        );
-
-      },
+    },
 
   });
 
@@ -50,10 +65,13 @@ const allowedMimeTypes = [
   "image/jpeg",
   "image/png",
   "image/webp",
+  "image/heic",
+  "image/heif",
 
   // VIDEOS
   "video/mp4",
   "video/webm",
+  "video/quicktime",
 
   // AUDIO
   "audio/mpeg",
@@ -90,7 +108,17 @@ const fileFilter =
     cb
   ) => {
 
-    // MIME TYPE VALIDATION
+    console.log(
+      "Uploading MIME:",
+      file.mimetype
+    );
+
+    console.log(
+      "Uploading file:",
+      file.originalname
+    );
+
+    // MIME VALIDATION
     if (
       !allowedMimeTypes.includes(
         file.mimetype
@@ -99,7 +127,7 @@ const fileFilter =
 
       return cb(
         new Error(
-          "Unsupported file type"
+          `Unsupported file type: ${file.mimetype}`
         ),
         false
       );

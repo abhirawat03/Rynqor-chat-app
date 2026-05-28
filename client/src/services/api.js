@@ -1,41 +1,13 @@
 import axios from "axios";
 
 const Api = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
+
+  baseURL:
+    `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
+
   withCredentials: true,
+
 });
-
-let isRefreshing = false;
-let failedQueue = [];
-
-/**
- * Routes that should NEVER trigger refresh logic
- */
-const AUTH_ROUTES = [
-  "/auth/login",
-  "/auth/register",
-  "/auth/logout",
-  "/auth/refresh-token",
-];
-
-/**
- * Resolve/reject queued requests
- */
-const processQueue = (error = null) => {
-
-  failedQueue.forEach((promise) => {
-
-    if (error) {
-      promise.reject(error);
-    } else {
-      promise.resolve();
-    }
-
-  });
-
-  failedQueue = [];
-
-};
 
 Api.interceptors.response.use(
 
@@ -43,107 +15,95 @@ Api.interceptors.response.use(
 
   async (error) => {
 
-    const originalRequest = error.config;
+    const originalRequest =
+      error.config;
 
-    /**
-     * Network/server crash
-     */
-    if (!error.response) {
-      return Promise.reject(error);
-    }
+    console.log(
+      "Interceptor caught:",
+      error.response?.data
+    );
 
-    const isUnauthorized =
-  error.response.status === 401;
+    // ---------------------------------
+    // PREVENT REFRESH LOOP
+    // ---------------------------------
 
-const errorCode =
-  error.response?.data?.errorCode;
-
-const shouldRefresh =
-  isUnauthorized &&
-  errorCode === "TOKEN_EXPIRED";
-
-const isAuthRoute =
-  AUTH_ROUTES.some((route) =>
-    originalRequest?.url?.includes(route)
-  );
-
-    /**
-     * Skip refresh logic for:
-     * - auth routes
-     * - already retried requests
-     */
     if (
-  !shouldRefresh ||
-  originalRequest._retry ||
-  isAuthRoute
-) {
+      originalRequest?.url?.includes(
+        "/auth/refresh-token"
+      )
+    ) {
 
-      return Promise.reject(error);
-
-    }
-
-    /**
-     * Queue requests while refresh is happening
-     */
-    if (isRefreshing) {
-
-      return new Promise((resolve, reject) => {
-
-        failedQueue.push({
-          resolve,
-          reject,
-        });
-
-      }).then(() => Api(originalRequest));
+      return Promise.reject(
+        error
+      );
 
     }
 
-    originalRequest._retry = true;
-    isRefreshing = true;
+    const code =
+      error.response?.data?.code;
 
-    try {
+    // ---------------------------------
+    // REFRESH ACCESS TOKEN
+    // ---------------------------------
 
-      /**
-       * Refresh access token
-       * Browser automatically sends refresh cookie
-       */
-      await Api.post("/auth/refresh-token");
+    if (
 
-      /**
-       * Retry queued requests
-       */
-      processQueue();
+      error.response?.status === 401 &&
 
-      /**
-       * Retry original request
-       */
-      return Api(originalRequest);
+      !originalRequest._retry &&
 
-    } catch (refreshError) {
+      (
+        code === "TOKEN_EXPIRED" ||
 
-      /**
-       * Reject all queued requests
-       */
-      processQueue(refreshError);
+        code === "TOKEN_MISSING"
+      )
 
-      /**
-       * Redirect only if NOT already on auth page
-       */
-      if (
-        window.location.pathname !== "/auth"
-      ) {
+    ) {
 
-        window.location.href = "/auth";
+      originalRequest._retry = true;
+
+      try {
+
+        console.log(
+          "Refreshing token..."
+        );
+
+        // refresh token request
+        await Api.post(
+          "/auth/refresh-token"
+        );
+
+        console.log(
+          "Retrying request..."
+        );
+
+        // retry original request
+        return Api(
+          originalRequest
+        );
+
+      } catch (refreshError) {
+
+        console.error(
+          "Refresh failed:",
+          refreshError
+        );
+
+        // session truly expired
+        window.location.href =
+          "/auth";
+
+        return Promise.reject(
+          refreshError
+        );
 
       }
 
-      return Promise.reject(refreshError);
-
-    } finally {
-
-      isRefreshing = false;
-
     }
+
+    return Promise.reject(
+      error
+    );
 
   }
 );

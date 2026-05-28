@@ -1,10 +1,5 @@
 import Api from "./api.js";
 
-const sendMessage = async (data) => {
-    const res = await Api.post("/messages", data);
-    return res.data.data;
-}
-
 const getMessage = async (conversationId, cursor = null) => {
     const params =
         new URLSearchParams();
@@ -40,17 +35,10 @@ const uploadMessageMedia =
             await Api.post(
                 "/messages/upload",
                 formData,
-                {
-                    headers: {
-                        "Content-Type":
-                            "multipart/form-data",
-                    },
-
-                }
             );
 
         return res.data.data;
     };
 
 
-export { sendMessage, getMessage, uploadMessageMedia };
+export { getMessage, uploadMessageMedia };

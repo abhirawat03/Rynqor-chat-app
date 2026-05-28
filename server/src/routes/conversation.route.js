@@ -10,8 +10,9 @@ router.route("/")
     .post(createConversation)
     .get(getConversation)
 
+router.route("/:conversationId/media").get(getConversationMedia);
+
 router.route("/:conversationId").get(getConversationById)
 
-router.route("/:conversationId/media").get(getConversationMedia);
 
 export default router

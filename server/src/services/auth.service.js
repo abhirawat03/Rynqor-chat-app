@@ -93,7 +93,7 @@ const registerService = async (
 
             expiresAt: new Date(
                 Date.now() +
-                7 * 24 * 60 * 60 * 1000
+                30 * 24 * 60 * 60 * 1000
             )
         });
 
@@ -180,7 +180,7 @@ const loginService = async (
 
             expiresAt: new Date(
                 Date.now() +
-                7 * 24 * 60 * 60 * 1000
+                30 * 24 * 60 * 60 * 1000
             )
         });
 
@@ -282,14 +282,15 @@ async (incomingRefreshToken) => {
     storedToken.expiresAt =
         new Date(
             Date.now() +
-            7 * 24 * 60 * 60 * 1000
+            30 * 24 * 60 * 60 * 1000
         );
 
     await storedToken.save();
 
     return {
         accessToken,
-        refreshToken
+        refreshToken,
+        sessionId: storedToken._id
     };
 };
 

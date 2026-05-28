@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { ImSearch } from "react-icons/im";
 import { IoClose } from "react-icons/io5";
 
@@ -60,7 +61,8 @@ const SearchPage = () => {
 
     } catch (err) {
 
-      console.error(err);
+      toast.error("Failed to start chat");
+      if (import.meta.env.MODE !== "production") console.error(err);
 
     } finally {
 

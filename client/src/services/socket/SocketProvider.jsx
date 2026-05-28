@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 import {
     createSocket,
@@ -154,18 +155,12 @@ const SocketProvider = ({ children }) => {
         // ---------------------------------------------------
 
         const onConnect = () => {
-
-            console.log(
-                "✅ connected:",
-                socket.id
-            );
+            if (import.meta.env.MODE !== "production") console.log("✅ connected:", socket.id);
         };
 
         const onDisconnect = () => {
-
-            console.log(
-                "❌ disconnected"
-            );
+            toast.error("Disconnected from server");
+            if (import.meta.env.MODE !== "production") console.log("❌ disconnected");
         };
 
         // ---------------------------------------------------

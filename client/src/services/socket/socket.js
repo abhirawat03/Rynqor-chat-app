@@ -1,5 +1,6 @@
 // socket.js
 import { io } from "socket.io-client";
+import toast from "react-hot-toast";
 
 let socket;
 
@@ -12,11 +13,12 @@ export const createSocket = () => {
         });
 
         socket.on("connect", () => {
-            console.log("✅ Socket connected:", socket.id);
+            if (import.meta.env.MODE !== "production") console.log("✅ Socket connected:", socket.id);
         });
 
         socket.on("disconnect", () => {
-            console.log("❌ Socket disconnected");
+            toast.error("Disconnected from server");
+            if (import.meta.env.MODE !== "production") console.log("❌ Socket disconnected");
         });
     }
     return socket;

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createConversation } from "../../services/conversationService";
+import toast from "react-hot-toast";
 
 export const useCreateConversationMutation = () => {
     const queryClient = useQueryClient();
@@ -16,7 +17,8 @@ export const useCreateConversationMutation = () => {
         },
 
         onError: (error) => {
-            console.error("Create conversation failed:", error);
+            toast.error("Failed to create conversation");
+            if (import.meta.env.MODE !== "production") console.error("Create conversation failed:", error);
         },
     });
 };

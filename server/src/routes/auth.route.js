@@ -8,8 +8,9 @@ const router = Router();
 router.route("/register").post(validateRegister, register);
 router.route("/login").post(validateLogin, login);
 router.route("/refresh-token").post(refreshAccessToken);
+
 router.route("/current-user").get(verifyJwt, getCurrentUser);
-router.route("/logout").post(logout);
+router.route("/logout").post( verifyJwt,logout);
 router.route("/sessions").get(verifyJwt, getSessions);
 router.route("/logout-session/:sessionId").post(verifyJwt, logoutSession);
 

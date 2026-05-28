@@ -1,89 +1,67 @@
-// import jwt from "jsonwebtoken";
-// import { ACCESS_TOKEN } from "../config/config.js";
-
-// const verifyToken = (token) => {
-//     const decoded = jwt.verify(token, ACCESS_TOKEN.secret);
-//     return decoded
-// }
-
-// export {verifyToken};
-
 import jwt from "jsonwebtoken";
 
 import {
     ACCESS_TOKEN,
-    REFRESH_TOKEN
+    REFRESH_TOKEN,
 } from "../config/config.js";
 
-import { ApiError } from "../utils/ApiError.js";
+import {
+    ApiError,
+} from "../utils/ApiError.js";
 
-const verifyAccessToken = (token) => {
-    try {
+// -------------------------------------
+// VERIFY ACCESS TOKEN
+// -------------------------------------
+
+const verifyAccessToken =
+    (token) => {
 
         if (!token) {
+
             throw new ApiError(
                 401,
-                "Access token missing"
+                "Access token missing",
+                "TOKEN_MISSING"
             );
+
         }
 
-        const decoded = jwt.verify(
+        // IMPORTANT:
+        // let jwt.verify throw native errors
+        // like TokenExpiredError
+
+        return jwt.verify(
             token,
             ACCESS_TOKEN.secret
         );
 
-        return decoded;
+    };
 
-    } catch (error) {
+// -------------------------------------
+// VERIFY REFRESH TOKEN
+// -------------------------------------
 
-        if (error.name === "TokenExpiredError") {
-            throw new ApiError(
-                401,
-                "Access token expired"
-            );
-        }
-
-        throw new ApiError(
-            401,
-            "Invalid access token"
-        );
-    }
-};
-
-const verifyRefreshToken = (token) => {
-    try {
+const verifyRefreshToken =
+    (token) => {
 
         if (!token) {
+
             throw new ApiError(
                 401,
-                "Refresh token missing"
+                "Refresh token missing",
+                "REFRESH_TOKEN_MISSING"
             );
+
         }
 
-        const decoded = jwt.verify(
+        return jwt.verify(
             token,
             REFRESH_TOKEN.secret
         );
 
-        return decoded;
-
-    } catch (error) {
-
-        if (error.name === "TokenExpiredError") {
-            throw new ApiError(
-                401,
-                "Refresh token expired"
-            );
-        }
-
-        throw new ApiError(
-            401,
-            "Invalid refresh token"
-        );
-    }
-};
+    };
 
 export {
     verifyAccessToken,
-    verifyRefreshToken
+    verifyRefreshToken,
 };
