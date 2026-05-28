@@ -626,6 +626,7 @@ setTimeout(() => {
 
                       className="
                         absolute
+                        cursor-pointer
                         right-1
                         top-1
 
@@ -744,6 +745,7 @@ setTimeout(() => {
                 w-12
                 shrink-0
                 items-center
+                cursor-pointer
                 justify-center
 
                 text-muted
@@ -818,6 +820,7 @@ setTimeout(() => {
               shrink-0
 
               rounded-2xl
+              cursor-pointer
 
               bg-accent
 

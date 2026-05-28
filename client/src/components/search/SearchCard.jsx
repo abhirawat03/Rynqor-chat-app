@@ -28,6 +28,7 @@ const SearchCard = ({
     w-full
 
     items-center
+    cursor-pointer
     gap-3
 
     rounded-2xl

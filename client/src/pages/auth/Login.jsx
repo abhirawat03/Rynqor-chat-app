@@ -417,6 +417,7 @@ const Login = () => {
           w-full
 
           rounded-2xl
+          cursor-pointer
 
           bg-accent
 

@@ -48,6 +48,7 @@ const ChatHeader = ({
           w-10
           items-center
           justify-center
+          cursor-pointer
 
           rounded-xl
 
@@ -82,6 +83,7 @@ const ChatHeader = ({
 
   className="
     flex
+    cursor-pointer
     min-w-0
     flex-1
     items-center

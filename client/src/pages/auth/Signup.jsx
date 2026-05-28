@@ -621,6 +621,7 @@ const Signup = () => {
 
                 className="
           w-full
+          cursor-pointer
 
           rounded-2xl
 

@@ -180,6 +180,7 @@ const UserProfilePage = ({
               w-10
               items-center
               justify-center
+              cursor-pointer
 
               rounded-xl
 
@@ -252,6 +253,7 @@ const UserProfilePage = ({
               className="
                 transition-transform
                 duration-200
+                cursor-pointer
 
                 hover:scale-[1.02]
                 active:scale-[0.98]
@@ -545,6 +547,7 @@ const UserProfilePage = ({
                               aspect-square
                               h-full
                               w-full
+                              cursor-pointer
 
                               object-cover
 
@@ -559,19 +562,20 @@ const UserProfilePage = ({
 
                       )}
 
-{/* VIDEO */}
-{item.type === "video" && (
+                      {/* VIDEO */}
+                      {item.type === "video" && (
 
-  <button
-    type="button"
+                        <button
+                          type="button"
 
-    onClick={() =>
-      setSelectedMedia(item)
-    }
+                          onClick={() =>
+                            setSelectedMedia(item)
+                          }
 
-    className="
+                          className="
       group
       relative
+      cursor-pointer
 
       block
       h-full
@@ -579,23 +583,23 @@ const UserProfilePage = ({
 
       overflow-hidden
     "
-  >
+                        >
 
-    <video
-      src={item.url}
+                          <video
+                            src={item.url}
 
-      className="
+                            className="
         aspect-square
         h-full
         w-full
 
         object-cover
       "
-    />
+                          />
 
-    {/* OVERLAY */}
-    <div
-      className="
+                          {/* OVERLAY */}
+                          <div
+                            className="
         absolute
         inset-0
 
@@ -610,10 +614,10 @@ const UserProfilePage = ({
 
         group-hover:bg-black/40
       "
-    >
+                          >
 
-      <div
-        className="
+                            <div
+                              className="
           flex
           h-12
           w-12
@@ -626,29 +630,30 @@ const UserProfilePage = ({
 
           text-xl
         "
-      >
-        ▶
-      </div>
+                            >
+                              ▶
+                            </div>
 
-    </div>
+                          </div>
 
-  </button>
+                        </button>
 
-)}
+                      )}
 
-{/* AUDIO */}
-{item.type === "audio" && (
+                      {/* AUDIO */}
+                      {item.type === "audio" && (
 
-  <button
-    type="button"
+                        <button
+                          type="button"
 
-    onClick={() =>
-      setSelectedMedia(item)
-    }
+                          onClick={() =>
+                            setSelectedMedia(item)
+                          }
 
-    className="
+                          className="
       group
       relative
+      cursor-pointer
 
       flex
       aspect-square
@@ -666,11 +671,11 @@ const UserProfilePage = ({
 
       p-4
     "
-  >
+                        >
 
-    {/* ICON */}
-    <div
-      className="
+                          {/* ICON */}
+                          <div
+                            className="
         flex
         h-14
         w-14
@@ -689,13 +694,13 @@ const UserProfilePage = ({
 
         group-hover:scale-110
       "
-    >
-      🎵
-    </div>
+                          >
+                            🎵
+                          </div>
 
-    {/* NAME */}
-    <p
-      className="
+                          {/* NAME */}
+                          <p
+                            className="
         line-clamp-2
         max-w-full
 
@@ -704,23 +709,23 @@ const UserProfilePage = ({
 
         text-white/90
       "
-    >
-      {item.name || "Audio"}
-    </p>
+                          >
+                            {item.name || "Audio"}
+                          </p>
 
-  </button>
+                        </button>
 
-)}
+                      )}
 
                       {/* FILE */}
                       {item.type === "file" && (
 
                         <a
-  href={item.url}
-  target="_blank"
-  rel="noreferrer"
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
 
-  className="
+                          className="
     flex
     aspect-square
     flex-col
@@ -737,29 +742,29 @@ const UserProfilePage = ({
 
     hover:bg-hover
   "
->
+                        >
 
-  <div
-    className="
+                          <div
+                            className="
       text-4xl
     "
-  >
-    📄
-  </div>
+                          >
+                            📄
+                          </div>
 
-  <p
-    className="
+                          <p
+                            className="
       line-clamp-2
 
       text-xs
 
       text-foreground
     "
-  >
-    {item.name || "File"}
-  </p>
+                          >
+                            {item.name || "File"}
+                          </p>
 
-</a>
+                        </a>
 
                       )}
 
@@ -839,14 +844,14 @@ const UserProfilePage = ({
       )}
 
       {/* MEDIA MODAL */}
-{selectedMedia && (
+      {selectedMedia && (
 
-  <div
-    onClick={() =>
-      setSelectedMedia(null)
-    }
+        <div
+          onClick={() =>
+            setSelectedMedia(null)
+          }
 
-    className="
+          className="
       fixed
       inset-0
       z-[120]
@@ -861,14 +866,14 @@ const UserProfilePage = ({
 
       backdrop-blur-sm
     "
-  >
+        >
 
-    <div
-      onClick={(e) =>
-        e.stopPropagation()
-      }
+          <div
+            onClick={(e) =>
+              e.stopPropagation()
+            }
 
-      className="
+            className="
         relative
 
         max-h-[90vh]
@@ -882,48 +887,48 @@ const UserProfilePage = ({
 
         shadow-2xl
       "
-    >
+          >
 
-      {/* IMAGE */}
-      {selectedMedia.type === "image" && (
+            {/* IMAGE */}
+            {selectedMedia.type === "image" && (
 
-        <img
-          src={selectedMedia.url}
+              <img
+                src={selectedMedia.url}
 
-          alt={selectedMedia.name}
+                alt={selectedMedia.name}
 
-          className="
+                className="
             max-h-[90vh]
             max-w-[90vw]
 
             object-contain
           "
-        />
+              />
 
-      )}
+            )}
 
-      {/* VIDEO */}
-      {selectedMedia.type === "video" && (
+            {/* VIDEO */}
+            {selectedMedia.type === "video" && (
 
-        <video
-          src={selectedMedia.url}
+              <video
+                src={selectedMedia.url}
 
-          controls
-          autoPlay
+                controls
+                autoPlay
 
-          className="
+                className="
             max-h-[90vh]
             max-w-[90vw]
           "
-        />
+              />
 
-      )}
+            )}
 
-      {/* AUDIO */}
-      {selectedMedia.type === "audio" && (
+            {/* AUDIO */}
+            {selectedMedia.type === "audio" && (
 
-        <div
-          className="
+              <div
+                className="
             flex
             min-w-[320px]
             flex-col
@@ -931,44 +936,45 @@ const UserProfilePage = ({
 
             p-6
           "
-        >
+              >
 
-          <p
-            className="
+                <p
+                  className="
               text-sm
               font-medium
 
               text-foreground
             "
-          >
-            {selectedMedia.name}
-          </p>
+                >
+                  {selectedMedia.name}
+                </p>
 
-          <audio
-            controls
-            autoPlay
-            src={selectedMedia.url}
-          />
+                <audio
+                  controls
+                  autoPlay
+                  src={selectedMedia.url}
+                />
 
-        </div>
+              </div>
 
-      )}
+            )}
 
-      {/* CLOSE */}
-      <button
-        type="button"
+            {/* CLOSE */}
+            <button
+              type="button"
 
-        onClick={() =>
-          setSelectedMedia(null)
-        }
+              onClick={() =>
+                setSelectedMedia(null)
+              }
 
-        className="
+              className="
           absolute
           right-3
           top-3
 
           flex
           h-10
+          cursor-pointer
           w-10
           items-center
           justify-center
@@ -987,17 +993,17 @@ const UserProfilePage = ({
 
           hover:bg-black/70
         "
-      >
+            >
 
-        ✕
+              ✕
 
-      </button>
+            </button>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
+      )}
 
     </>
   );

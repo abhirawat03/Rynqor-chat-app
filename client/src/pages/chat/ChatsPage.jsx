@@ -228,7 +228,7 @@ const ChatsPage = () => {
                 <NavLink
                   key={chat._id}
                   to={`/chat/${chat._id}`}
-                  className="block"
+                  className="block cursor-pointer"
                 >
 
                   {({

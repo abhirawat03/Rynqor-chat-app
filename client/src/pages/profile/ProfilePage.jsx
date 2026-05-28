@@ -34,7 +34,7 @@ const ProfilePage = () => {
   } = useUpdateProfileMutation();
 
   const {
-    mutate: updateAvatarMutation, 
+    mutate: updateAvatarMutation,
     isPending: isUpdatingAvatar,
   } = useUpdateAvatarMutation();
 
@@ -44,35 +44,35 @@ const ProfilePage = () => {
   } = useDeleteAvatarMutation();
 
   const {
-  mutate: changePasswordMutation,
-  isPending: isChangingPassword,
-} = useChangePasswordMutation();
+    mutate: changePasswordMutation,
+    isPending: isChangingPassword,
+  } = useChangePasswordMutation();
 
-const {
-  mutate: logoutMutation,
-  isPending: isLoggingOut,
-} = useLogoutMutation();
+  const {
+    mutate: logoutMutation,
+    isPending: isLoggingOut,
+  } = useLogoutMutation();
 
-const {
-  data: sessions = [],
-} = useSessionsQuery();
+  const {
+    data: sessions = [],
+  } = useSessionsQuery();
 
-const {
-  mutate: logoutSessionMutation,
-} =
-  useLogoutSessionMutation();
+  const {
+    mutate: logoutSessionMutation,
+  } =
+    useLogoutSessionMutation();
 
-const currentSession =
-  sessions.find(
-    (session) =>
-      session.isCurrent
-  );
+  const currentSession =
+    sessions.find(
+      (session) =>
+        session.isCurrent
+    );
 
-const otherSessions =
-  sessions.filter(
-    (session) =>
-      !session.isCurrent
-  );
+  const otherSessions =
+    sessions.filter(
+      (session) =>
+        !session.isCurrent
+    );
 
   const {
     themeMode,
@@ -80,22 +80,22 @@ const otherSessions =
   } = useTheme();
 
   const [
-  showPasswordModal,
-  setShowPasswordModal,
-] = useState(false);
+    showPasswordModal,
+    setShowPasswordModal,
+  ] = useState(false);
 
-const [
-  showSessionsModal,
-  setShowSessionsModal,
-] = useState(false);
+  const [
+    showSessionsModal,
+    setShowSessionsModal,
+  ] = useState(false);
 
-const [
-  passwordData,
-  setPasswordData,
-] = useState({
-  oldPassword: "",
-  newPassword: "",
-});
+  const [
+    passwordData,
+    setPasswordData,
+  ] = useState({
+    oldPassword: "",
+    newPassword: "",
+  });
   const [previewAvatar, setPreviewAvatar] =
     useState(null);
 
@@ -221,27 +221,27 @@ const [
 
   };
   const handleChangePassword =
-  () => {
+    () => {
 
-    changePasswordMutation(
-      passwordData,
-      {
-        onSuccess: () => {
+      changePasswordMutation(
+        passwordData,
+        {
+          onSuccess: () => {
 
-          setPasswordData({
-            oldPassword: "",
-            newPassword: "",
-          });
+            setPasswordData({
+              oldPassword: "",
+              newPassword: "",
+            });
 
-          setShowPasswordModal(
-            false
-          );
+            setShowPasswordModal(
+              false
+            );
 
-        },
-      }
-    );
+          },
+        }
+      );
 
-  };
+    };
 
   const handleDeleteAvatar = () => {
 
@@ -267,16 +267,16 @@ const [
   const isFormChanged =
 
     formData.username !==
-      (
-        currentUser?.username ||
-        ""
-      ) ||
+    (
+      currentUser?.username ||
+      ""
+    ) ||
 
     formData.bio !==
-      (
-        currentUser?.bio ||
-        ""
-      );
+    (
+      currentUser?.bio ||
+      ""
+    );
 
   return (
 
@@ -411,6 +411,7 @@ const [
 
                 className="
                   relative
+                  cursor-pointer
 
                   transition-transform
                   duration-200
@@ -485,8 +486,8 @@ const [
                   isDeletingAvatar
                 ) && (
 
-                  <div
-                    className="
+                    <div
+                      className="
                       absolute
                       inset-0
 
@@ -500,10 +501,10 @@ const [
 
                       backdrop-blur-[2px]
                     "
-                  >
+                    >
 
-                    <div
-                      className="
+                      <div
+                        className="
                         h-6
                         w-6
 
@@ -515,11 +516,11 @@ const [
                         border-white/30
                         border-t-white
                       "
-                    />
+                      />
 
-                  </div>
+                    </div>
 
-                )}
+                  )}
 
                 {/* CAMERA BUTTON */}
                 <label
@@ -549,16 +550,15 @@ const [
                     transition-all
                     duration-200
 
-                    ${
-                      isUpdatingAvatar ||
+                    ${isUpdatingAvatar ||
                       isDeletingAvatar
 
-                        ? `
+                      ? `
                             cursor-not-allowed
                             opacity-70
                           `
 
-                        : `
+                      : `
                             cursor-pointer
                             hover:scale-105
                             active:scale-95
@@ -647,6 +647,7 @@ const [
 
                   className="
                     mt-2
+                    cursor-pointer
 
                     text-sm
                     font-medium
@@ -861,6 +862,7 @@ const [
 
                 px-5
                 py-3
+                cursor-pointer
 
                 font-medium
                 text-white
@@ -974,6 +976,7 @@ const [
                     rounded-2xl
 
                     px-4
+                    cursor-pointer
                     py-2.5
 
                     text-sm
@@ -982,17 +985,16 @@ const [
                     transition-all
                     duration-200
 
-                    ${
-                      themeMode === mode
+                    ${themeMode === mode
 
-                        ? `
+                      ? `
                             bg-accent
                             text-white
 
                             shadow-sm
                           `
 
-                        : `
+                      : `
                             border
                             border-border
 
@@ -1061,28 +1063,29 @@ const [
           </p>
 
           <div
-  className="
+            className="
     mt-6
 
     flex
     flex-col
     gap-3
   "
->
-  {/* SESSIONS */}
-  <button
-  type="button"
+          >
+            {/* SESSIONS */}
+            <button
+              type="button"
 
-  onClick={() =>
-    setShowSessionsModal(
-      true
-    )
-  }
+              onClick={() =>
+                setShowSessionsModal(
+                  true
+                )
+              }
 
-  className="
+              className="
     flex
     items-center
     justify-between
+    cursor-pointer
 
     rounded-2xl
 
@@ -1099,70 +1102,71 @@ const [
 
     hover:bg-hover
   "
->
+            >
 
-  <div
-    className="
+              <div
+                className="
       text-left
     "
-  >
+              >
 
-    <p
-      className="
+                <p
+                  className="
         text-sm
         font-medium
       "
-    >
-      Manage Devices
-    </p>
+                >
+                  Manage Devices
+                </p>
 
-    <p
-      className="
+                <p
+                  className="
         mt-1
 
         text-xs
 
         text-muted
       "
-    >
-      {
-        sessions.length
-      } active sessions
-    </p>
+                >
+                  {
+                    sessions.length
+                  } active sessions
+                </p>
 
-  </div>
+              </div>
 
-  <IoDesktop
-    size={20}
-  />
+              <IoDesktop
+                size={20}
+              />
 
-</button>
+            </button>
 
-  {/* ACTIONS */}
-  <div
-    className="
+            {/* ACTIONS */}
+            <div
+              className="
       flex
       flex-col
       gap-3
 
       sm:flex-row
     "
-  >
+            >
 
-    <button
-      type="button"
+              <button
+                type="button"
 
-      onClick={() =>
-        setShowPasswordModal(
-          true
-        )
-      }
+                onClick={() =>
+                  setShowPasswordModal(
+                    true
+                  )
+                }
 
-      className="
+                className="
         flex
         items-center
         justify-center
         gap-2
+        cursor-pointer
 
         rounded-2xl
 
@@ -1179,29 +1183,30 @@ const [
 
         hover:bg-hover
       "
-    >
+              >
 
-      <IoLockClosed
-        size={18}
-      />
+                <IoLockClosed
+                  size={18}
+                />
 
-      Change Password
+                Change Password
 
-    </button>
+              </button>
 
-    <button
-      type="button"
+              <button
+                type="button"
 
-      onClick={() =>
-        logoutMutation()
-      }
+                onClick={() =>
+                  logoutMutation()
+                }
 
-      disabled={
-        isLoggingOut
-      }
+                disabled={
+                  isLoggingOut
+                }
 
-      className="
+                className="
         flex
+        cursor-pointer
         items-center
         justify-center
         gap-2
@@ -1218,23 +1223,23 @@ const [
         disabled:cursor-not-allowed
         disabled:opacity-70
       "
-    >
+              >
 
-      <IoLogOut
-        size={18}
-      />
+                <IoLogOut
+                  size={18}
+                />
 
-      {isLoggingOut
-        ? "Logging out..."
-        : "Logout"}
+                {isLoggingOut
+                  ? "Logging out..."
+                  : "Logout"}
 
-    </button>
+              </button>
 
-  </div>
+            </div>
 
-  
 
-</div>
+
+          </div>
 
         </div>
 
@@ -1312,6 +1317,7 @@ const [
                 absolute
                 right-3
                 top-3
+                cursor-pointer
 
                 flex
                 h-10
@@ -1347,8 +1353,8 @@ const [
 
       {showPasswordModal && (
 
-  <div
-    className="
+        <div
+          className="
       fixed
       inset-0
       z-50
@@ -1361,10 +1367,10 @@ const [
 
       p-4
     "
-  >
+        >
 
-    <div
-      className="
+          <div
+            className="
         w-full
         max-w-md
 
@@ -1374,46 +1380,46 @@ const [
 
         p-6
       "
-    >
+          >
 
-      <h2
-        className="
+            <h2
+              className="
           text-xl
           font-semibold
         "
-      >
-        Change Password
-      </h2>
+            >
+              Change Password
+            </h2>
 
-      <div
-        className="
+            <div
+              className="
           mt-5
 
           grid
           gap-4
         "
-      >
+            >
 
-        <input
-          id="current-password"
-          name="current-password"
-          type="password"
+              <input
+                id="current-password"
+                name="current-password"
+                type="password"
 
-          placeholder="Current password"
+                placeholder="Current password"
 
-          value={
-            passwordData.oldPassword
-          }
+                value={
+                  passwordData.oldPassword
+                }
 
-          onChange={(e) =>
-            setPasswordData({
-              ...passwordData,
-              oldPassword:
-                e.target.value,
-            })
-          }
+                onChange={(e) =>
+                  setPasswordData({
+                    ...passwordData,
+                    oldPassword:
+                      e.target.value,
+                  })
+                }
 
-          className="
+                className="
             w-full
 
             rounded-2xl
@@ -1428,28 +1434,28 @@ const [
 
             outline-none
           "
-        />
+              />
 
-        <input
-          id="new-password"
-          name="new-password"
-          type="password"
+              <input
+                id="new-password"
+                name="new-password"
+                type="password"
 
-          placeholder="New password"
+                placeholder="New password"
 
-          value={
-            passwordData.newPassword
-          }
+                value={
+                  passwordData.newPassword
+                }
 
-          onChange={(e) =>
-            setPasswordData({
-              ...passwordData,
-              newPassword:
-                e.target.value,
-            })
-          }
+                onChange={(e) =>
+                  setPasswordData({
+                    ...passwordData,
+                    newPassword:
+                      e.target.value,
+                  })
+                }
 
-          className="
+                className="
             w-full
 
             rounded-2xl
@@ -1464,29 +1470,30 @@ const [
 
             outline-none
           "
-        />
+              />
 
-      </div>
+            </div>
 
-      <div
-        className="
+            <div
+              className="
           mt-6
 
           flex
           justify-end
           gap-3
         "
-      >
+            >
 
-        <button
-          onClick={() =>
-            setShowPasswordModal(
-              false
-            )
-          }
+              <button
+                onClick={() =>
+                  setShowPasswordModal(
+                    false
+                  )
+                }
 
-          className="
+                className="
             rounded-2xl
+            cursor-pointer
 
             border
             border-border
@@ -1494,21 +1501,22 @@ const [
             px-4
             py-2
           "
-        >
-          Cancel
-        </button>
+              >
+                Cancel
+              </button>
 
-        <button
-          onClick={
-            handleChangePassword
-          }
+              <button
+                onClick={
+                  handleChangePassword
+                }
 
-          disabled={
-            isChangingPassword
-          }
+                disabled={
+                  isChangingPassword
+                }
 
-          className="
+                className="
             rounded-2xl
+            cursor-pointer
 
             bg-accent
 
@@ -1517,27 +1525,27 @@ const [
 
             text-white
           "
-        >
+              >
 
-          {isChangingPassword
-            ? "Changing..."
-            : "Save"}
+                {isChangingPassword
+                  ? "Changing..."
+                  : "Save"}
 
-        </button>
+              </button>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-)}
+      )}
 
-{
-  showSessionsModal && (
+      {
+        showSessionsModal && (
 
-    <div
-      className="
+          <div
+            className="
         fixed
         inset-0
         z-50
@@ -1550,10 +1558,10 @@ const [
 
         p-4
       "
-    >
+          >
 
-      <div
-  className="
+            <div
+              className="
     w-full
     max-w-2xl
 
@@ -1562,62 +1570,63 @@ const [
     bg-surface
     p-6
   "
->
+            >
 
-  <div
-    className="
+              <div
+                className="
       flex
       items-center
       justify-between
     "
-  >
+              >
 
-    <div>
+                <div>
 
-      <h2
-        className="
+                  <h2
+                    className="
           text-xl
           font-semibold
         "
-      >
-        Active Sessions
-      </h2>
+                  >
+                    Active Sessions
+                  </h2>
 
-      <p
-        className="
+                  <p
+                    className="
           mt-1
 
           text-sm
 
           text-muted
         "
-      >
-        Devices currently
-        logged into your
-        account
-      </p>
+                  >
+                    Devices currently
+                    logged into your
+                    account
+                  </p>
 
-    </div>
+                </div>
 
-    <button
-      onClick={() =>
-        setShowSessionsModal(
-          false
-        )
-      }
+                <button
+                  onClick={() =>
+                    setShowSessionsModal(
+                      false
+                    )
+                  }
 
-      className="
+                  className="
         text-xl
+        cursor-pointer
       "
-    >
-      ✕
-    </button>
+                >
+                  ✕
+                </button>
 
-  </div>
+              </div>
 
-  {/* SCROLLABLE CONTAINER */}
-  <div
-    className="
+              {/* SCROLLABLE CONTAINER */}
+              <div
+                className="
       mt-6
 
       max-h-[70vh]
@@ -1628,14 +1637,14 @@ const [
       space-y-6
       scrollbar-hide
     "
-  >
+              >
 
-    {currentSession && (
+                {currentSession && (
 
-      <div>
+                  <div>
 
-        <h3
-          className="
+                    <h3
+                      className="
             mb-3
 
             text-sm
@@ -1643,12 +1652,12 @@ const [
 
             text-muted
           "
-        >
-          Current Device
-        </h3>
+                    >
+                      Current Device
+                    </h3>
 
-        <div
-          className="
+                    <div
+                      className="
             flex
             items-center
             justify-between
@@ -1662,18 +1671,18 @@ const [
 
             p-4
           "
-        >
+                    >
 
-          <div
-            className="
+                      <div
+                        className="
               flex
               items-center
               gap-3
             "
-          >
+                      >
 
-            <div
-              className="
+                        <div
+                          className="
                 flex
                 h-11
                 w-11
@@ -1686,81 +1695,81 @@ const [
 
                 text-accent
               "
-            >
+                        >
 
-              {currentSession.device
-                ?.toLowerCase()
-                ?.includes(
-                  "iphone"
-                ) ||
+                          {currentSession.device
+                            ?.toLowerCase()
+                            ?.includes(
+                              "iphone"
+                            ) ||
 
-              currentSession.device
-                ?.toLowerCase()
-                ?.includes(
-                  "android"
-                )
+                            currentSession.device
+                              ?.toLowerCase()
+                              ?.includes(
+                                "android"
+                              )
 
-                ? (
-                  <IoPhonePortrait
-                    size={20}
-                  />
-                )
+                            ? (
+                              <IoPhonePortrait
+                                size={20}
+                              />
+                            )
 
-                : (
-                  <IoDesktop
-                    size={20}
-                  />
-                )}
+                            : (
+                              <IoDesktop
+                                size={20}
+                              />
+                            )}
 
-            </div>
+                        </div>
 
-            <div>
+                        <div>
 
-              <h5
-                className="
+                          <h5
+                            className="
                   text-sm
                   font-medium
                 "
-              >
-                {
-                  currentSession.device
-                }
-              </h5>
+                          >
+                            {
+                              currentSession.device
+                            }
+                          </h5>
 
-              <p
-                className="
+                          <p
+                            className="
                   mt-1
 
                   text-xs
 
                   text-muted
                 "
-              >
-                {
-                  currentSession.location
-                }
-              </p>
+                          >
+                            {
+                              currentSession.location
+                            }
+                          </p>
 
-              <p
-                className="
+                          <p
+                            className="
                   mt-1
 
                   text-xs
 
                   text-muted
                 "
-              >
-                {new Date(
-                  currentSession.lastUsedAt
-                ).toLocaleString()}
-              </p>
+                          >
+                            {new Date(
+                              currentSession.lastUsedAt
+                            ).toLocaleString()}
+                          </p>
 
-            </div>
+                        </div>
 
-          </div>
+                      </div>
 
-          <div
-            className="
+                      <div
+                        className="
               rounded-full
 
               bg-green-500/10
@@ -1773,22 +1782,22 @@ const [
 
               text-green-500
             "
-          >
-            Current
-          </div>
+                      >
+                        Current
+                      </div>
 
-        </div>
+                    </div>
 
-      </div>
+                  </div>
 
-    )}
+                )}
 
-    {otherSessions.length > 0 && (
+                {otherSessions.length > 0 && (
 
-      <div>
+                  <div>
 
-        <h3
-          className="
+                    <h3
+                      className="
             mb-3
 
             text-sm
@@ -1796,24 +1805,24 @@ const [
 
             text-muted
           "
-        >
-          Other Devices
-        </h3>
+                    >
+                      Other Devices
+                    </h3>
 
-        <div
-          className="
+                    <div
+                      className="
             grid
             gap-3
           "
-        >
+                    >
 
-          {otherSessions.map(
-            (session) => (
+                      {otherSessions.map(
+                        (session) => (
 
-              <div
-                key={session._id}
+                          <div
+                            key={session._id}
 
-                className="
+                            className="
                   flex
                   items-center
                   justify-between
@@ -1827,18 +1836,18 @@ const [
 
                   p-4
                 "
-              >
+                          >
 
-                <div
-                  className="
+                            <div
+                              className="
                     flex
                     items-center
                     gap-3
                   "
-                >
+                            >
 
-                  <div
-                    className="
+                              <div
+                                className="
                       flex
                       h-11
                       w-11
@@ -1851,90 +1860,91 @@ const [
 
                       text-accent
                     "
-                  >
+                              >
 
-                    {session.device
-                      ?.toLowerCase()
-                      ?.includes(
-                        "iphone"
-                      ) ||
+                                {session.device
+                                  ?.toLowerCase()
+                                  ?.includes(
+                                    "iphone"
+                                  ) ||
 
-                    session.device
-                      ?.toLowerCase()
-                      ?.includes(
-                        "android"
-                      )
+                                  session.device
+                                    ?.toLowerCase()
+                                    ?.includes(
+                                      "android"
+                                    )
 
-                      ? (
-                        <IoPhonePortrait
-                          size={20}
-                        />
-                      )
+                                  ? (
+                                    <IoPhonePortrait
+                                      size={20}
+                                    />
+                                  )
 
-                      : (
-                        <IoDesktop
-                          size={20}
-                        />
-                      )}
+                                  : (
+                                    <IoDesktop
+                                      size={20}
+                                    />
+                                  )}
 
-                  </div>
+                              </div>
 
-                  <div>
+                              <div>
 
-                    <h5
-                      className="
+                                <h5
+                                  className="
                         text-sm
                         font-medium
                       "
-                    >
-                      {
-                        session.device
-                      }
-                    </h5>
+                                >
+                                  {
+                                    session.device
+                                  }
+                                </h5>
 
-                    <p
-                      className="
+                                <p
+                                  className="
                         mt-1
 
                         text-xs
 
                         text-muted
                       "
-                    >
-                      {
-                        session.location
-                      }
-                    </p>
+                                >
+                                  {
+                                    session.location
+                                  }
+                                </p>
 
-                    <p
-                      className="
+                                <p
+                                  className="
                         mt-1
 
                         text-xs
 
                         text-muted
                       "
-                    >
-                      {new Date(
-                        session.createdAt
-                      ).toLocaleString()}
-                    </p>
+                                >
+                                  {new Date(
+                                    session.createdAt
+                                  ).toLocaleString()}
+                                </p>
 
-                  </div>
+                              </div>
 
-                </div>
+                            </div>
 
-                <button
-                  onClick={() =>
-                    logoutSessionMutation(
-                      session._id
-                    )
-                  }
+                            <button
+                              onClick={() =>
+                                logoutSessionMutation(
+                                  session._id
+                                )
+                              }
 
-                  className="
+                              className="
                     text-sm
 
                     font-medium
+                    cursor-pointer
 
                     text-red-500
 
@@ -1943,29 +1953,29 @@ const [
 
                     hover:opacity-80
                   "
-                >
-                  Log out
-                </button>
+                            >
+                              Log out
+                            </button>
+
+                          </div>
+
+                        )
+                      )}
+
+                    </div>
+
+                  </div>
+
+                )}
 
               </div>
 
-            )
-          )}
+            </div>
 
-        </div>
+          </div>
 
-      </div>
-
-    )}
-
-  </div>
-
-</div>
-
-    </div>
-
-  )
-}
+        )
+      }
 
     </div>
 
