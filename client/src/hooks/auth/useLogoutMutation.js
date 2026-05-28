@@ -14,6 +14,14 @@ const useLogoutMutation = () => {
       // redirect
       window.location.href = "/auth";
     },
+    onError: () => {
+
+      queryClient.clear();
+
+      window.location.href =
+        "/auth";
+
+    }
   });
 };
 

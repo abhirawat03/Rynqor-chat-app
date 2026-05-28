@@ -29,8 +29,12 @@ Api.interceptors.response.use(
 
     if (
       originalRequest?.url?.includes(
-        "/auth/refresh-token"
-      )
+    "/auth/refresh-token"
+  ) ||
+
+  originalRequest?.url?.includes(
+    "/auth/logout"
+  )
     ) {
 
       return Promise.reject(
@@ -90,8 +94,15 @@ Api.interceptors.response.use(
         );
 
         // session truly expired
-        window.location.href =
-          "/auth";
+        if (
+  window.location.pathname !==
+  "/auth"
+) {
+
+  window.location.href =
+    "/auth";
+
+};
 
         return Promise.reject(
           refreshError

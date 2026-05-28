@@ -2,9 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { getCurrentUser } from "../../services/authService";
 
 export const useCurrentUserQuery = () => {
+  const isAuthPage =
+
+    window.location.pathname ===
+    "/auth";
   return useQuery({
     queryKey: ["currentUser"],
     queryFn: getCurrentUser,
+
+    enabled: !isAuthPage,
 
     retry: false,
 
@@ -14,6 +20,6 @@ export const useCurrentUserQuery = () => {
 
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    refetchOnMount: true,
+    refetchOnMount: false,
   });
 }
