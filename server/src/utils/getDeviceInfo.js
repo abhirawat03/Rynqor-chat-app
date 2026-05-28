@@ -1,47 +1,44 @@
-import { UAParser }
-from "ua-parser-js";
+import { UAParser } from "ua-parser-js";
+import geoip from "geoip-lite";
 
-import geoip
-from "geoip-lite";
+export const getDeviceInfo = (req) => {
 
-export const getDeviceInfo =
-(req) => {
+    const parser = new UAParser(
+        req.headers["user-agent"]
+    );
 
-    const parser =
-        new UAParser(
-            req.headers[
-                "user-agent"
-            ]
-        );
+    const result = parser.getResult();
 
-    const result =
-        parser.getResult();
-
-    const ip =
+    // Get IP properly
+    let ip =
+        req.headers["x-forwarded-for"] ||
+        req.socket.remoteAddress ||
         req.ip ||
-        req.headers[
-            "x-forwarded-for"
-        ] ||
         "";
 
-    const geo =
-        geoip.lookup(ip);
+    // If multiple IPs exist, take first one
+    if (ip.includes(",")) {
+        ip = ip.split(",")[0].trim();
+    }
+
+    // Convert IPv6 localhost style
+    if (ip.startsWith("::ffff:")) {
+        ip = ip.replace("::ffff:", "");
+    }
+
+    const geo = geoip.lookup(ip);
 
     return {
-
         device:
             `${result.browser.name || "Unknown"} on ${result.os.name || "Unknown"}`,
 
         userAgent:
-            req.headers[
-                "user-agent"
-            ],
+            req.headers["user-agent"],
 
         ipAddress: ip,
 
-        location:
-            geo
-                ? `${geo.city || "Unknown"}, ${geo.country}`
-                : "Unknown Location",
+        location: geo
+            ? `${geo.city || "Unknown"}, ${geo.country}`
+            : "Unknown Location",
     };
 };
