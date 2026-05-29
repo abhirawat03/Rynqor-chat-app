@@ -542,7 +542,8 @@ const UserProfilePage = ({
                             alt={
                               item.name || "media"
                             }
-
+                            loading="lazy"
+                            decoding="async"
                             className="
                               aspect-square
                               h-full
@@ -587,6 +588,7 @@ const UserProfilePage = ({
 
                           <video
                             src={item.url}
+                            preload="metadata"
 
                             className="
         aspect-square

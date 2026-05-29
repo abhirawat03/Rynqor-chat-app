@@ -119,7 +119,8 @@ const MessageMedia = ({
         <img
           src={item.url}
           alt={item.name}
-
+          loading="lazy"
+          decoding="async"
           onClick={() =>
             handlePreview(
               "image"
@@ -182,6 +183,7 @@ const MessageMedia = ({
       >
 
         <video
+          preload="metadata"
           className={`
             ${mediaWidth}
 

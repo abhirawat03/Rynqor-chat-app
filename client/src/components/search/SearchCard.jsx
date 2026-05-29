@@ -84,6 +84,8 @@ const SearchCard = ({
           <img
             src={avatar.url}
             alt={fullName}
+            loading="lazy"
+            decoding="async"
             className="
               h-full
               w-full
