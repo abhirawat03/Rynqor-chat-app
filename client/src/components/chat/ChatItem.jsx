@@ -178,9 +178,14 @@ const ChatItem = ({
                         <img
                             src={avatar?.url}
                             alt={name}
+                            loading="lazy"
+                            decoding="async"
                             className="
                 h-full
                 w-full
+                border-2
+                border-border
+                rounded-full
                 object-cover
               "
                         />

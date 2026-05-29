@@ -73,11 +73,14 @@ const Navigation = () => {
             }
 
             className={`
-              h-6
-              w-6
+              h-7
+              w-7
 
               rounded-full
               object-cover
+
+              border-2
+              border-border
 
               transition-all
               duration-200

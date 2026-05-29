@@ -124,6 +124,9 @@ const ChatHeader = ({
             className="
               h-full
               w-full
+              border-2
+              border-border
+              rounded-full
               object-cover
             "
           />
