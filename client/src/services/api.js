@@ -1,13 +1,25 @@
 import axios from "axios";
 
 const Api = axios.create({
-
-  baseURL:
-    `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
-
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api/v1`,
   withCredentials: true,
-
 });
+
+let refreshPromise = null;
+
+const redirectToLogin = () => {
+
+  if (
+    !window.location.pathname.startsWith(
+      "/auth"
+    )
+  ) {
+
+    window.location.href = "/auth";
+
+  }
+
+};
 
 Api.interceptors.response.use(
 
@@ -18,20 +30,14 @@ Api.interceptors.response.use(
     const originalRequest =
       error.config;
 
-    console.log(
-      "Interceptor caught:",
-      error.response?.data
-    );
+    const code =
+      error.response?.data?.code;
 
-    // ---------------------------------
-    // PREVENT REFRESH LOOP
-    // ---------------------------------
-
+    // Skip refresh endpoint itself
     if (
       originalRequest?.url?.includes(
         "/auth/refresh-token"
       ) ||
-
       originalRequest?.url?.includes(
         "/auth/logout"
       )
@@ -43,66 +49,73 @@ Api.interceptors.response.use(
 
     }
 
-    const code =
-      error.response?.data?.code;
-
-    // ---------------------------------
-    // REFRESH ACCESS TOKEN
-    // ---------------------------------
-
-    if (
+    const shouldRefresh =
 
       error.response?.status === 401 &&
 
       !originalRequest._retry &&
 
       (
-        code === "TOKEN_EXPIRED" ||
+        code ===
+        "ACCESS_TOKEN_EXPIRED" ||
 
-        code === "TOKEN_MISSING"
-      )
+        code ===
+        "ACCESS_TOKEN_MISSING"
+      );
 
-    ) {
+    if (shouldRefresh) {
 
-      originalRequest._retry = true;
+      originalRequest._retry =
+        true;
 
       try {
 
-        console.log(
-          "Refreshing token..."
-        );
+        if (!refreshPromise) {
 
-        // refresh token request
-        await Api.post(
-          "/auth/refresh-token"
-        );
+          refreshPromise =
+            Api.post(
+              "/auth/refresh-token"
+            )
+              .finally(() => {
 
-        console.log(
-          "Retrying request..."
-        );
+                refreshPromise =
+                  null;
 
-        // retry original request
+              });
+
+        }
+
+        await refreshPromise;
+
         return Api(
           originalRequest
         );
 
       } catch (refreshError) {
 
-        console.error(
-          "Refresh failed:",
-          refreshError
-        );
+        const refreshCode =
+          refreshError.response
+            ?.data?.code;
 
-        // session truly expired
         if (
-          window.location.pathname !==
-          "/auth"
+
+          refreshCode ===
+          "REFRESH_TOKEN_MISSING" ||
+
+          refreshCode ===
+          "REFRESH_TOKEN_INVALID" ||
+
+          refreshCode ===
+          "REFRESH_TOKEN_EXPIRED" ||
+
+          refreshCode ===
+          "REFRESH_TOKEN_REVOKED"
+
         ) {
 
-          window.location.href =
-            "/auth";
+          redirectToLogin();
 
-        };
+        }
 
         return Promise.reject(
           refreshError
@@ -112,11 +125,23 @@ Api.interceptors.response.use(
 
     }
 
+    if (
+
+      code ===
+      "ACCESS_TOKEN_INVALID"
+
+    ) {
+
+      redirectToLogin();
+
+    }
+
     return Promise.reject(
       error
     );
 
   }
+
 );
 
 export default Api;

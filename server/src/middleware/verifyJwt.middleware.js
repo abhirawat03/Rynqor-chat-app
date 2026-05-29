@@ -1,13 +1,7 @@
-import {
-  ApiError
-} from "../utils/ApiError.js";
+import { ApiError } from "../utils/ApiError.js";
+import { verifyAccessToken } from "../utils/verifyToken.js";
 
-import {
-  verifyAccessToken
-} from "../utils/verifyToken.js";
-
-const verifyJwt =
-async (
+const verifyJwt = async (
   req,
   res,
   next
@@ -16,41 +10,36 @@ async (
   try {
 
     const token =
-
-      req.cookies.accessToken ||
-
+      req.cookies?.accessToken ||
       req.header("Authorization")
         ?.replace("Bearer ", "");
 
-    // -----------------------------
-    // TOKEN MISSING
-    // -----------------------------
+    // ---------------------------------
+    // ACCESS TOKEN MISSING
+    // ---------------------------------
 
     if (!token) {
 
       return next(
         new ApiError(
           401,
-          "Unauthorized",
-          "TOKEN_MISSING"
+          "Access token missing",
+          "ACCESS_TOKEN_MISSING"
         )
       );
 
     }
 
-    // -----------------------------
-    // VERIFY TOKEN
-    // -----------------------------
+    // ---------------------------------
+    // VERIFY ACCESS TOKEN
+    // ---------------------------------
 
     const decoded =
-      verifyAccessToken(
-        token
-      );
+      verifyAccessToken(token);
 
-    req.user =
-      decoded;
+    req.user = decoded;
 
-    next();
+    return next();
 
   } catch (err) {
 
@@ -59,9 +48,9 @@ async (
       err
     );
 
-    // -----------------------------
-    // TOKEN EXPIRED
-    // -----------------------------
+    // ---------------------------------
+    // ACCESS TOKEN EXPIRED
+    // ---------------------------------
 
     if (
       err.name ===
@@ -72,15 +61,15 @@ async (
         new ApiError(
           401,
           "Access token expired",
-          "TOKEN_EXPIRED"
+          "ACCESS_TOKEN_EXPIRED"
         )
       );
 
     }
 
-    // -----------------------------
-    // INVALID TOKEN
-    // -----------------------------
+    // ---------------------------------
+    // ACCESS TOKEN INVALID
+    // ---------------------------------
 
     if (
       err.name ===
@@ -90,22 +79,22 @@ async (
       return next(
         new ApiError(
           401,
-          "Invalid token",
-          "TOKEN_INVALID"
+          "Invalid access token",
+          "ACCESS_TOKEN_INVALID"
         )
       );
 
     }
 
-    // -----------------------------
-    // FALLBACK
-    // -----------------------------
+    // ---------------------------------
+    // AUTH FAILED
+    // ---------------------------------
 
     return next(
       new ApiError(
         401,
         err.message ||
-        "Authentication failed",
+          "Authentication failed",
         "AUTH_FAILED"
       )
     );
@@ -114,6 +103,4 @@ async (
 
 };
 
-export {
-  verifyJwt
-};
+export { verifyJwt };

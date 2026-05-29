@@ -7,8 +7,9 @@ import {
   useCurrentUserQuery,
 } from "../hooks/auth/useCurrentUserQuery.js";
 
+
 const PublicRoute =
-  () => {
+() => {
 
     const {
       data: currentUser,

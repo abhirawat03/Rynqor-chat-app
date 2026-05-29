@@ -210,11 +210,12 @@ const refreshAccessTokenService =
 async (incomingRefreshToken) => {
 
     if (!incomingRefreshToken) {
-        throw new ApiError(
-            401,
-            "Unauthorized request"
-        );
-    }
+    throw new ApiError(
+        401,
+        "Refresh token missing",
+        "REFRESH_TOKEN_MISSING"
+    );
+}
 
     const decoded =
         verifyRefreshToken(
@@ -222,21 +223,23 @@ async (incomingRefreshToken) => {
         );
 
     if (!decoded?._id) {
-        throw new ApiError(
-            401,
-            "Invalid refresh token"
-        );
-    }
+    throw new ApiError(
+        401,
+        "Invalid refresh token",
+        "REFRESH_TOKEN_INVALID"
+    );
+}
 
     const user =
         await User.findById(decoded._id);
 
     if (!user) {
-        throw new ApiError(
-            401,
-            "Invalid refresh token"
-        );
-    }
+    throw new ApiError(
+        401,
+        "User not found",
+        "REFRESH_TOKEN_INVALID"
+    );
+}
 
     const hashedIncomingToken =
         hashToken(incomingRefreshToken);
@@ -248,21 +251,23 @@ async (incomingRefreshToken) => {
         });
 
     if (!storedToken) {
-        throw new ApiError(
-            401,
-            "Refresh token expired or invalid"
-        );
-    }
+    throw new ApiError(
+        401,
+        "Refresh token revoked",
+        "REFRESH_TOKEN_REVOKED"
+    );
+}
 
     if (storedToken.expiresAt < new Date()) {
 
-        await storedToken.deleteOne();
+    await storedToken.deleteOne();
 
-        throw new ApiError(
-            401,
-            "Refresh token expired"
-        );
-    }
+    throw new ApiError(
+        401,
+        "Refresh token expired",
+        "REFRESH_TOKEN_EXPIRED"
+    );
+}
 
     const accessToken =
         generateAccessToken(user._id);
