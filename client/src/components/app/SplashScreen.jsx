@@ -53,6 +53,9 @@ const SplashScreen = () => {
                     <img
                         src="/favicon.png"
                         alt="Rynqor"
+                        width="112"
+                        height="112"
+                        fetchPriority="high"
                         className="
               relative
               z-10

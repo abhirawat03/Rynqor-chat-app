@@ -169,7 +169,7 @@ const Navigation = () => {
                 flex-col
                 items-center
 
-                text-xs
+                text-sm
 
                 transition-colors
                 duration-200
@@ -293,7 +293,7 @@ const Navigation = () => {
 
                 p-3
 
-                text-xs
+                text-sm
 
                 transition-all
                 duration-200
