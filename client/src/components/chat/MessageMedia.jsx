@@ -1,4 +1,5 @@
-const MessageMedia = ({
+import { memo } from "react";
+const MessageMedia = memo(({
   item,
   mediaWidth,
   setPreview,
@@ -551,6 +552,6 @@ const MessageMedia = ({
 
   );
 
-};
+});
 
 export default MessageMedia;

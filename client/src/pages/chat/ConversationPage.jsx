@@ -4,7 +4,13 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import { useRef, useEffect } from "react";
+import {
+  useRef,
+  useEffect,
+  useState,
+  lazy,
+  Suspense,
+} from "react";
 
 import ChatHeader from "../../components/chat/ChatHeader.jsx";
 import MessageInput from "../../components/chat/MessageInput.jsx";
@@ -16,22 +22,27 @@ import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
 
 import { useConversationByIdQuery } from "../../hooks/conversations/useConversationByIdQuery.js";
 
-import { useChatScroll } from "../../hooks/chat/useChatScroll.js";
 import { useReadReceipts } from "../../hooks/chat/useReadReceipts.js";
 import { useChatMessages } from "../../hooks/chat/useChatMessages.js";
-import { useState } from "react";
-import UserProfilePage from "../profile/UserProfilePage.jsx";
+
+const UserProfilePage = lazy(
+  () =>
+    import(
+      "../profile/UserProfilePage.jsx"
+    )
+);
 
 const ConversationPage = () => {
   const navigate = useNavigate();
   const { conversationId } =
     useParams();
   const [showProfile, setShowProfile] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
-  useEffect(() => {
-    setShowProfile(false);
-  }, [conversationId]);
-  
+  const virtuosoRef = useRef(null);
+  const loadingMoreRef = useRef(false);
+  const initialScrollDone = useRef(false);
+
   const {
     getSocket,
     presence,
@@ -39,8 +50,8 @@ const ConversationPage = () => {
   } = useSocket();
 
   const {
-    data:user,
-    isLoading:loading,
+    data: user,
+    isLoading: loading,
   } = useCurrentUserQuery();
 
   const {
@@ -52,8 +63,7 @@ const ConversationPage = () => {
       conversationId
     );
 
-  const currentUserId =
-    user?._id;
+  const currentUserId = user?._id;
 
   const {
     chatMessages,
@@ -74,11 +84,6 @@ const ConversationPage = () => {
     currentUserId,
   });
 
-  const containerRef =
-    useRef(null);
-
-  // OTHER USER
-
   const otherUser =
     conversation?.participants?.find(
       (u) =>
@@ -98,70 +103,98 @@ const ConversationPage = () => {
       conversationId
     ]?.has(otherUser._id);
 
-  const readReceipts =
-    useReadReceipts({
+  useReadReceipts({
 
-      conversationId,
+    conversationId,
 
-      chatMessages,
+    chatMessages,
 
-      currentUserId,
+    currentUserId,
 
-      containerRef,
+    getSocket,
 
-      getSocket,
-    });
-
-  useChatScroll({
-
-    containerRef,
-
-    fetchNextPage,
-
-    hasNextPage,
-
-    isFetchingNextPage,
-
-    chatMessagesLength:
-      chatMessages.length,
-
-    isTyping,
-
-    emitReadReceipt:
-      readReceipts.emitReadReceipt,
+    isAtBottom,
   });
+
+
+  useEffect(() => {
+    setShowProfile(false);
+  }, [conversationId]);
 
   // AUTH LOADING
   useEffect(() => {
+    const handleEsc = (e) => {
 
-  const handleEsc = (e) => {
+      if (e.key === "Escape") {
+        document.activeElement?.blur();
+        navigate("/");
+      }
 
-    if (e.key === "Escape") {
-      document.activeElement?.blur();
-      navigate("/");
+    };
 
-      // OR:
-      // navigate("/");
-
-    }
-
-  };
-
-  window.addEventListener(
-    "keydown",
-    handleEsc
-  );
-
-  return () => {
-
-    window.removeEventListener(
+    window.addEventListener(
       "keydown",
       handleEsc
     );
 
-  };
+    return () => {
 
-}, [navigate]);
+      window.removeEventListener(
+        "keydown",
+        handleEsc
+      );
+
+    };
+
+  }, [navigate]);
+
+  useEffect(() => {
+
+    if (
+      !chatMessages.length ||
+      initialScrollDone.current
+    ) {
+      return;
+    }
+
+    initialScrollDone.current = true;
+
+    const timer = setTimeout(() => {
+
+      virtuosoRef.current?.scrollToIndex({
+        index:
+          chatMessages.length - 1,
+        align: "end",
+      });
+
+    }, 50);
+
+    return () =>
+      clearTimeout(timer);
+
+  }, [chatMessages.length]);
+
+  const handleTopReached =
+    async () => {
+
+      if (
+        loadingMoreRef.current ||
+        !hasNextPage ||
+        isFetchingNextPage
+      ) {
+        return;
+      }
+
+      loadingMoreRef.current = true;
+
+      try {
+        await fetchNextPage();
+      } finally {
+        loadingMoreRef.current = false;
+      }
+    };
+
+
 
   if (loading) {
 
@@ -247,11 +280,9 @@ const ConversationPage = () => {
 
   }
 
-  // UI
-
   return (
     <div
-  className="
+      className="
     relative
 
     flex
@@ -259,9 +290,9 @@ const ConversationPage = () => {
 
     overflow-hidden
   "
->
-    <div
-  className={`
+    >
+      <div
+        className={`
     flex
     flex-1
     min-h-0
@@ -274,71 +305,75 @@ const ConversationPage = () => {
     transition-[max-width]
 duration-300
 
-    ${
-  showProfile
-    ? "xl:max-w-[calc(100%-420px)]"
-    : ""
-}
+    ${showProfile
+            ? "xl:max-w-[calc(100%-420px)]"
+            : ""
+          }
   `}
->
+      >
 
-      {/* HEADER */}
-      <ChatHeader
-        name={
-          conversation?.name
-        }
-        avatar={
-          conversation?.avatar
-        }
-        isOnline={
-          isOnline
-        }
-        isSelf={
-          conversation?.type ===
-          "self"
-        }
-        profileId={
-  conversation?.type === "self"
-    ? currentUserId
-    : userId
-}
-        onOpenProfile={() =>
-          setShowProfile(true)
-        }
-      />
+        {/* HEADER */}
+        <ChatHeader
+          name={
+            conversation?.name
+          }
+          avatar={
+            conversation?.avatar
+          }
+          isOnline={
+            isOnline
+          }
+          isSelf={
+            conversation?.type ===
+            "self"
+          }
+          profileId={
+            conversation?.type === "self"
+              ? currentUserId
+              : userId
+          }
+          onOpenProfile={() =>
+            setShowProfile(true)
+          }
+        />
 
-      {/* MESSAGES */}
-      <MessageList
+        {/* MESSAGES */}
+        <MessageList
 
-        containerRef={
-          containerRef
-        }
+          virtuosoRef={
+            virtuosoRef
+          }
 
-        chatMessages={
-          chatMessages
-        }
+          chatMessages={
+            chatMessages
+          }
 
-        currentUserId={
-          currentUserId
-        }
+          currentUserId={
+            currentUserId
+          }
 
-        isTyping={
-          isTyping
-        }
-      />
+          isTyping={
+            isTyping
+          }
 
-      {/* INPUT */}
-      <MessageInput
-        onSend={
-          sendMessage
-        }
-      />
+          onTopReached={
+            handleTopReached
+          }
+          onBottomStateChange={setIsAtBottom}
+        />
 
-    </div>
-    {showProfile && (
+        {/* INPUT */}
+        <MessageInput
+          onSend={
+            sendMessage
+          }
+        />
 
-  <div
-    className="
+      </div>
+      {showProfile && (
+
+        <div
+          className="
       absolute
       inset-0
       z-50
@@ -351,15 +386,15 @@ duration-300
 xl:z-auto
 xl:bg-transparent
     "
-  >
+        >
 
-    {/* OVERLAY */}
-    <div
-      onClick={() =>
-        setShowProfile(false)
-      }
+          {/* OVERLAY */}
+          <div
+            onClick={() =>
+              setShowProfile(false)
+            }
 
-      className="
+            className="
         hidden
 
         bg-black/30
@@ -369,28 +404,47 @@ xl:bg-transparent
         xl:block
 xl:flex-1
       "
-    />
+          />
 
-    {/* PANEL */}
-    <UserProfilePage
-      userId={conversation?.type ===
-    "self"
-      ? currentUserId
-      : userId}
-      isOnline={
-          isOnline
-        }
-      conversationId={
-          conversationId
-        }
-      onClose={() =>
-        setShowProfile(false)
-      }
-    />
+          {/* PANEL */}
+          <Suspense
+            fallback={
+              <div
+                className="
+        flex
+        w-full
+        items-center
+        justify-center
 
-  </div>
+        bg-surface
 
-)}
+        xl:w-[420px]
+      "
+              >
+                Loading profile...
+              </div>
+            }
+          >
+            <UserProfilePage
+              userId={
+                conversation?.type ===
+                  "self"
+                  ? currentUserId
+                  : userId
+              }
+              isOnline={isOnline}
+              conversationId={
+                conversationId
+              }
+              onClose={() =>
+                setShowProfile(false)
+              }
+            />
+          </Suspense>
+
+        </div>
+
+      )}
     </div>
   );
 };

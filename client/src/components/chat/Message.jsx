@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import MessageMedia from "./MessageMedia";
 
-const Message = ({
+const Message = memo(({
   message,
   isOwn,
   syncState,
@@ -142,12 +142,11 @@ const Message = ({
 
               {media.map(
                 (
-                  item,
-                  index
+                  item
                 ) => (
 
                   <MessageMedia
-                    key={index}
+                    key={item._id}
                     item={item}
                     mediaWidth={
                       mediaWidth
@@ -384,6 +383,6 @@ const Message = ({
 
     </>
   );
-};
+});
 
 export default Message;

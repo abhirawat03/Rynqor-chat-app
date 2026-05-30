@@ -1,76 +1,8 @@
-// import { StrictMode } from 'react'
-// import { createRoot } from 'react-dom/client'
-// import './index.css'
-// import App from './App.jsx'
-// import { BrowserRouter, createBrowserRouter } from "react-router-dom";
-// import ChatLayout from './layouts/AppLayout.jsx';
-// import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-// import SocketProvider from './services/socket/SocketProvider.jsx';
-// import { ThemeProvider } from './context/ThemeContext.jsx';
-// import { Toaster } from "react-hot-toast";
-
-// // APPLY THEME BEFORE REACT LOADS
-// (() => {
-
-//   const savedTheme =
-//     localStorage.getItem(
-//       "themeMode"
-//     ) || "system";
-
-//   const systemDark =
-//     window.matchMedia(
-//       "(prefers-color-scheme: dark)"
-//     ).matches;
-
-//   const isDark =
-//     savedTheme === "dark" ||
-//     (
-//       savedTheme === "system" &&
-//       systemDark
-//     );
-
-//   document.documentElement.classList.toggle(
-//     "dark",
-//     isDark
-//   );
-
-//   document.documentElement.style.colorScheme =
-//     isDark
-//       ? "dark"
-//       : "light";
-
-// })();
-
-// const queryClient = new QueryClient();
-
-// const router = createBrowserRouter([
-//   {
-//     path: '/',
-//     element:<App/>,
-//     children:[
-//       {
-//         path:"",
-//         element:<ChatLayout/>
-//       }
-//     ]
-//   }
-// ])
-
-// createRoot(document.getElementById('root')).render(
-//   <StrictMode>
-//   <QueryClientProvider client={queryClient}>
-//     <BrowserRouter>
-//       <SocketProvider>   {/* 👈 wrap here */}
-//         <ThemeProvider>
-//           <App />
-//           <Toaster/>
-//         </ThemeProvider>
-//       </SocketProvider>
-//     </BrowserRouter>
-//   </QueryClientProvider>
-//   </StrictMode>
-// )
-import { StrictMode } from "react";
+import {
+  StrictMode,
+  lazy,
+  Suspense,
+} from "react";
 
 import { createRoot } from "react-dom/client";
 
@@ -100,14 +32,19 @@ import AuthLayout from "./layouts/AuthLayout.jsx";
 
 /* PAGES */
 import Login from "./pages/auth/Login.jsx";
-
 import Signup from "./pages/auth/Signup.jsx";
 
-import ProfilePage from "./pages/profile/ProfilePage.jsx";
+const ProfilePage = lazy(
+  () => import("./pages/profile/ProfilePage.jsx")
+);
 
-import ConversationPage from "./pages/chat/ConversationPage.jsx";
+const ConversationPage = lazy(
+  () => import("./pages/chat/ConversationPage.jsx")
+);
 
-import SearchPage from "./pages/search/SearchPage.jsx";
+const SearchPage = lazy(
+  () => import("./pages/search/SearchPage.jsx")
+);
 
 /* ROUTES */
 import PublicRoute from "./routes/PublicRoute.jsx";
@@ -149,6 +86,29 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 
 const queryClient =
   new QueryClient();
+
+const PageLoader = () => (
+  <div
+    className="
+      flex
+      min-h-screen
+      items-center
+      justify-center
+    "
+  >
+    Loading...
+  </div>
+);
+
+const LazyPage = ({
+  children,
+}) => (
+  <Suspense
+    fallback={<PageLoader />}
+  >
+    {children}
+  </Suspense>
+);
 
 const router =
   createBrowserRouter([
@@ -197,8 +157,11 @@ const router =
                 {
                   path: "chat/:conversationId",
 
-                  element:
-                    <ConversationPage />,
+                  element: (
+                    <LazyPage>
+                      <ConversationPage />
+                    </LazyPage>
+                  ),
                 },
 
               ],
@@ -207,15 +170,21 @@ const router =
             {
               path: "search",
 
-              element:
-                <SearchPage />,
+              element: (
+                <LazyPage>
+                  <SearchPage />
+                </LazyPage>
+              ),
             },
 
             {
               path: "profile",
 
-              element:
-                <ProfilePage />,
+              element: (
+                <LazyPage>
+                  <ProfilePage />
+                </LazyPage>
+              ),
             },
 
           ],

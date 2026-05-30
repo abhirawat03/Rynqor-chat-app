@@ -1,92 +1,91 @@
+import { Virtuoso } from "react-virtuoso";
 import Message from "./Message";
-
-import TypingIndicator
-  from "./TypingIndicator";
+import TypingIndicator from "./TypingIndicator";
 
 const MessageList = ({
-
-  containerRef,
-
+  virtuosoRef,
   chatMessages,
-
   currentUserId,
-
   isTyping,
+  onTopReached,
+  onBottomStateChange,
 }) => {
-
   return (
     <div
-      ref={containerRef}
       className="
-        scrollbar-hide
-
         flex-1
         min-h-0
-
-        overflow-y-auto
-        overflow-x-hidden
-
-        px-3
-        pt-3
-        pb-2
 
         bg-background
 
         transition-colors
         duration-300
-
-        md:pb-6
       "
     >
+      <Virtuoso
+        ref={virtuosoRef}
+        data={chatMessages}
+        className="h-full"
+        followOutput={(isAtBottom) =>
+          isAtBottom
+            ? "smooth"
+            : false
+        }
+        startReached={
+          onTopReached
+        }
+        atBottomStateChange={
+    onBottomStateChange
+  }
+        overscan={300}
+        itemContent={(
+          index,
+          msg
+        ) => (
+          <div
+            className="
+              mx-auto
+              w-full
+              max-w-5xl
 
-      {/* CHAT WRAPPER */}
-      <div
-        className="
-          mx-auto
+              px-3
 
-          flex
-          min-h-full
-          w-full
-          max-w-5xl
-          flex-1
-          flex-col
-          justify-end
-
-          gap-2
-        "
-      >
-
-        {/* MESSAGES */}
-        {chatMessages.map(
-          (msg) => (
-
+              first:pt-3
+            "
+          >
             <Message
-              key={msg._id}
-
               message={msg}
-
               isOwn={
                 (
                   msg.senderId?._id ||
                   msg.senderId
-                ) === currentUserId
+                ) ===
+                currentUserId
               }
-
               syncState={
                 msg.syncState
               }
             />
-
-          )
+          </div>
         )}
+        components={{
+          Footer: () =>
+            isTyping ? (
+              <div
+                className="
+                  mx-auto
+                  w-full
+                  max-w-5xl
 
-        {/* TYPING */}
-        {isTyping && (
-          <TypingIndicator />
-        )}
-
-      </div>
-
+                  px-3
+                  py-2
+                "
+              >
+                <TypingIndicator />
+              </div>
+            ) : null,
+        }}
+      />
     </div>
   );
 };

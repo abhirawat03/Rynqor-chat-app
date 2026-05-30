@@ -1,4 +1,5 @@
-const ChatItem = ({
+import { memo } from "react";
+const ChatItem = memo(({
     name,
     lastMessage,
     time,
@@ -297,6 +298,6 @@ const ChatItem = ({
 
         </div>
     );
-};
+});
 
 export default ChatItem;

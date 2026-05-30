@@ -5,8 +5,8 @@ export const useReadReceipts = ({
     conversationId,
     chatMessages,
     currentUserId,
-    containerRef,
     getSocket,
+    isAtBottom,
 }) => {
 const lastMarkedRef = useRef(null);
 
@@ -34,23 +34,8 @@ const emitReadReceipt = useCallback(() => {
             return;
         }
 
-        const container =
-            containerRef.current;
-
-        if (!container) {
-            return;
-        }
-
-        const distanceFromBottom =
-            container.scrollHeight -
-            container.scrollTop -
-            container.clientHeight;
-
-        const isNearBottom =
-            distanceFromBottom < 100;
-
-        if (!isNearBottom) {
-            return;
+        if (!isAtBottom) {
+             return;
         }
 
         const unreadIncoming =
@@ -100,9 +85,9 @@ const emitReadReceipt = useCallback(() => {
             conversationId,
             chatMessages,
             currentUserId,
-            containerRef,
             getSocket,
-        ]);;
+            isAtBottom
+        ]);
 
     useEffect(() => {
     
