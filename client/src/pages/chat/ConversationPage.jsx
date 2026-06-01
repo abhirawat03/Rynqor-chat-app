@@ -24,6 +24,8 @@ import { useConversationByIdQuery } from "../../hooks/conversations/useConversat
 
 import { useReadReceipts } from "../../hooks/chat/useReadReceipts.js";
 import { useChatMessages } from "../../hooks/chat/useChatMessages.js";
+import NewMessagesButton from "../../components/chat/NewMessagesButton.jsx";
+import { useChatScroll } from "../../hooks/chat/useChatScroll.js";
 
 const UserProfilePage = lazy(
   () =>
@@ -34,14 +36,10 @@ const UserProfilePage = lazy(
 
 const ConversationPage = () => {
   const navigate = useNavigate();
-  const { conversationId } =
-    useParams();
-  const [showProfile, setShowProfile] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(true);
+  const { conversationId } = useParams();
 
-  const virtuosoRef = useRef(null);
+  const [showProfile, setShowProfile] = useState(false);
   const loadingMoreRef = useRef(false);
-  const initialScrollDone = useRef(false);
 
   const {
     getSocket,
@@ -67,134 +65,100 @@ const ConversationPage = () => {
 
   const {
     chatMessages,
-
     sendMessage,
-
     messagesLoading,
-
     fetchNextPage,
-
     hasNextPage,
-
     isFetchingNextPage,
   } = useChatMessages({
-
     conversationId,
-
     currentUserId,
   });
 
-  const otherUser =
-    conversation?.participants?.find(
-      (u) =>
-        u._id !== currentUserId
-    );
+  const {
+  virtuosoRef,
+  isAtBottom,
+  setIsAtBottom,
+  unreadCount,
+  setUnreadCount,
+} = useChatScroll({
+  chatMessages,
+  currentUserId,
+  conversationId,
+  messagesLoading,
+});
 
-  const userId =
-    otherUser?._id?.toString();
+const otherUser =
+  conversation?.participants?.find(
+    (u) =>
+      u._id !== currentUserId
+  );
 
-  const isOnline =
-    presence?.[userId]
-      ?.online || false;
+const userId = otherUser?._id?.toString();
 
-  const isTyping =
-    otherUser?._id &&
-    typingUsers[
-      conversationId
-    ]?.has(otherUser._id);
+const isOnline = presence?.[userId]?.online || false;
 
-  useReadReceipts({
+const isTyping =
+  otherUser?._id &&
+  typingUsers[
+    conversationId
+  ]?.has(otherUser._id);
 
-    conversationId,
+useReadReceipts({
+  conversationId,
+  chatMessages,
+  currentUserId,
+  getSocket,
+  isAtBottom,
+});
 
-    chatMessages,
-
-    currentUserId,
-
-    getSocket,
-
-    isAtBottom,
-  });
-
-
-  useEffect(() => {
-    setShowProfile(false);
-  }, [conversationId]);
+useEffect(() => {
+  setShowProfile(false);
+  setUnreadCount(0);
+}, [conversationId]);
 
   // AUTH LOADING
-  useEffect(() => {
-    const handleEsc = (e) => {
+useEffect(() => {
+  const handleEsc = (e) => {
+    if (e.key === "Escape") {
+      document.activeElement?.blur();
+      navigate("/");
+    }
+  };
 
-      if (e.key === "Escape") {
-        document.activeElement?.blur();
-        navigate("/");
-      }
+  window.addEventListener(
+    "keydown",
+    handleEsc
+  );
 
-    };
-
-    window.addEventListener(
+  return () => {
+    window.removeEventListener(
       "keydown",
       handleEsc
     );
+  };
 
-    return () => {
+}, [navigate]);
 
-      window.removeEventListener(
-        "keydown",
-        handleEsc
-      );
-
-    };
-
-  }, [navigate]);
-
-  useEffect(() => {
+const handleTopReached =
+  async () => {
 
     if (
-      !chatMessages.length ||
-      initialScrollDone.current
+      loadingMoreRef.current ||
+      !hasNextPage ||
+      isFetchingNextPage
     ) {
       return;
     }
 
-    initialScrollDone.current = true;
+    loadingMoreRef.current = true;
 
-    const timer = setTimeout(() => {
-
-      virtuosoRef.current?.scrollToIndex({
-        index:
-          chatMessages.length - 1,
-        align: "end",
-      });
-
-    }, 50);
-
-    return () =>
-      clearTimeout(timer);
-
-  }, [chatMessages.length]);
-
-  const handleTopReached =
-    async () => {
-
-      if (
-        loadingMoreRef.current ||
-        !hasNextPage ||
-        isFetchingNextPage
-      ) {
-        return;
-      }
-
-      loadingMoreRef.current = true;
-
-      try {
-        await fetchNextPage();
-      } finally {
-        loadingMoreRef.current = false;
-      }
-    };
-
-
+    try {
+      await fetchNextPage();
+    } finally {
+      loadingMoreRef.current = false;
+    }
+  };
 
   if (loading) {
 
@@ -339,27 +303,28 @@ duration-300
 
         {/* MESSAGES */}
         <MessageList
-
-          virtuosoRef={
-            virtuosoRef
-          }
-
-          chatMessages={
-            chatMessages
-          }
-
-          currentUserId={
-            currentUserId
-          }
-
-          isTyping={
-            isTyping
-          }
-
-          onTopReached={
-            handleTopReached
-          }
+          conversationId={conversationId}
+          virtuosoRef={virtuosoRef}
+          chatMessages={chatMessages}
+          currentUserId={currentUserId}
+          isTyping={isTyping}
+          onTopReached={handleTopReached}
           onBottomStateChange={setIsAtBottom}
+          isAtBottom={isAtBottom}
+        />
+
+        <NewMessagesButton
+          count={unreadCount}
+          onClick={() => {
+            setUnreadCount(0);
+            virtuosoRef.current?.scrollToIndex({
+              index:
+                chatMessages.length - 1,
+              align: "end",
+              behavior: "smooth",
+            });
+
+          }}
         />
 
         {/* INPUT */}

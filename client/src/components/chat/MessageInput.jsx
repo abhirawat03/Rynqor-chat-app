@@ -268,9 +268,10 @@ setTimeout(() => {
       // optimistic UI
       const tempMessageId =
         onSend(
-          trimmed,
+          trimmed,  
           localMedia
         );
+        // onMessageSent?.();
 
       emitStopTyping(
         conversationId

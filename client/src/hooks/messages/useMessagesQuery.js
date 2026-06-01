@@ -23,6 +23,6 @@ export const useMessagesQuery = (conversationId) => {
                 );
         },
 
-        staleTime:1000 * 30,
+        staleTime:0,
     })
 }
