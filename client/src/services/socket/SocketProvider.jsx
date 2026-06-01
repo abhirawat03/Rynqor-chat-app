@@ -9,8 +9,61 @@ import {
 
 import { SocketProviderContext } from "./SocketContext.jsx";
 import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
+import {
+    updateConversationLastMessage,
+} from "./helpers/conversationHelpers";
+
+import {
+    createMessageHandlers,
+} from "./handlers/messageHandlers";
+
+import {
+    createTypingHandlers,
+} from "./handlers/typingHandlers";
+
+import {
+    createPresenceHandlers,
+} from "./handlers/presenceHandlers";
 
 const SocketProvider = ({ children }) => {
+
+    const socketRef = useRef(null);
+
+    const [messages, setMessages] = useState({});
+    const [conversations, setConversations] = useState([]);
+
+    const [typingUsers, setTypingUsers] = useState({});
+
+    const [presence, setPresence] = useState({});
+
+    const typingTimeouts = useRef({});
+
+    const {
+        onNewMessage,
+        onMessageSent,
+        onMessageFailed,
+        onMessagesRead,
+    } = createMessageHandlers({
+        setMessages,
+        setConversations,
+        currentUserIdRef,
+    });
+
+    const {
+        onTyping,
+        onStopTyping,
+    } = createTypingHandlers({
+        setTypingUsers,
+        typingTimeouts,
+    });
+
+    const {
+        onOnlineUsers,
+        onUserOnline,
+        onUserOffline,
+    } = createPresenceHandlers({
+        setPresence,
+    });
 
     const { data: user } = useCurrentUserQuery();
 
@@ -18,18 +71,8 @@ const SocketProvider = ({ children }) => {
 
     const currentUserIdRef = useRef(null);
 
-    const socketRef = useRef(null);
 
-    const [messages, setMessages] = useState({});
-    const [conversations, setConversations] = useState([]);
 
-    const [typingUsers, setTypingUsers] =
-        useState({});
-
-    const [presence, setPresence] =
-        useState({});
-
-    const typingTimeouts = useRef({});
 
     // ---------------------------------------------------
     // HELPERS
@@ -71,65 +114,7 @@ const SocketProvider = ({ children }) => {
             }
         );
     };
-    const sortConversations = (list) => {
 
-        return [...list].sort(
-            (a, b) =>
-                new Date(b.updatedAt) -
-                new Date(a.updatedAt)
-        );
-    };
-
-    const updateConversationLastMessage = (
-        conversationId,
-        msg
-    ) => {
-
-        setConversations((prev) => {
-
-            let exists = false;
-
-            const updated = prev.map(
-                (conv) => {
-
-                    if (
-                        conv._id.toString() ===
-                        conversationId.toString()
-                    ) {
-
-                        exists = true;
-
-                        return {
-                            ...conv,
-
-                            lastMessage: msg,
-
-                            updatedAt:
-                                msg.createdAt,
-                        };
-                    }
-
-                    return conv;
-                }
-            );
-
-            if (!exists) {
-
-                updated.unshift({
-                    _id: conversationId,
-
-                    lastMessage: msg,
-
-                    updatedAt:
-                        msg.createdAt,
-                });
-            }
-
-            return sortConversations(
-                updated
-            );
-        });
-    };
 
     // ---------------------------------------------------
     // SOCKET SETUP
@@ -163,372 +148,18 @@ const SocketProvider = ({ children }) => {
             if (import.meta.env.MODE !== "production") console.log("❌ disconnected");
         };
 
-        // ---------------------------------------------------
-        // NEW MESSAGE
-        // ---------------------------------------------------
-
-        const onNewMessage = ({
-            message: msg,
-            conversation,
-        }) => {
-
-            setMessages((prev) => {
-
-                const list =
-                    prev[msg.conversationId] || [];
-
-                const exists = list.some(
-                    (m) => m._id === msg._id
-                );
-
-                if (exists) {
-                    return prev;
-                }
-
-                return {
-                    ...prev,
-
-                    [msg.conversationId]: [
-                        ...list,
-                        msg,
-                    ],
-                };
-            });
-
-            setConversations((prev) => {
-
-                const exists = prev.some(
-                    (conv) =>
-                        conv._id.toString() ===
-                        conversation._id.toString()
-                );
-
-                let updated;
-
-                if (exists) {
-
-                    updated = prev.map(
-                        (conv) =>
-
-                            conv._id.toString() ===
-                                conversation._id.toString()
-
-                                ? {
-                                    ...conv,
-
-                                    lastMessage:
-                                        msg,
-
-                                    updatedAt:
-                                        msg.createdAt,
-                                }
-
-                                : conv
-                    );
-
-                } else {
-
-                    updated = [
-                        {
-                            ...conversation,
-
-                            lastMessage: msg,
-
-                            updatedAt:
-                                msg.createdAt,
-                        },
-
-                        ...prev,
-                    ];
-                }
-
-                return sortConversations(
-                    updated
-                );
-            });
-        };
-
-        // ---------------------------------------------------
-        // MESSAGE SENT
-        // ---------------------------------------------------
-
-        const onMessageSent = (msg) => {
-
-            setMessages((prev) => {
-
-                const list =
-                    prev[msg.conversationId] || [];
-
-                const exists = list.some(
-                    (m) =>
-                        m.clientTempId ===
-                        msg.clientTempId
-                );
-
-                const updated = exists
-
-                    ? list.map((m) =>
-
-                        m.clientTempId ===
-                            msg.clientTempId
-
-                            ? {
-                                ...msg,
-
-                                syncState:
-                                    undefined,
-                            }
-
-                            : m
-                    )
-
-                    : [
-                        ...list,
-                        msg,
-                    ];
-
-                return {
-                    ...prev,
-
-                    [msg.conversationId]:
-                        updated,
-                };
-            });
-
-            updateConversationLastMessage(
-                msg.conversationId,
-                msg
-            );
-        };
-
-        // ---------------------------------------------------
-        // MESSAGE FAILED
-        // ---------------------------------------------------
-
-        const onMessageFailed = ({
-            conversationId,
-            clientTempId,
-        }) => {
-
-            setMessages((prev) => {
-
-                const list =
-                    prev[conversationId] || [];
-
-                return {
-                    ...prev,
-
-                    [conversationId]:
-                        list.map((msg) =>
-
-                            msg.clientTempId ===
-                                clientTempId
-
-                                ? {
-                                    ...msg,
-
-                                    syncState:
-                                        "failed",
-                                }
-
-                                : msg
-                        ),
-                };
-            });
-        };
-
-        // ---------------------------------------------------
-        // READ RECEIPTS
-        // ---------------------------------------------------
-
-        const onMessagesRead = ({
-            conversationId,
-            readBy,
-            lastReadAt,
-        }) => {
-
-            if (
-                readBy ===
-                currentUserIdRef.current
-            ) {
-                return;
-            }
-
-            setMessages((prev) => {
-
-                const list =
-                    prev[conversationId] || [];
-
-                return {
-                    ...prev,
-
-                    [conversationId]:
-                        list.map((msg) => {
-
-                            const senderId =
-                                msg.senderId?._id ||
-                                msg.senderId;
-
-                            // only MY messages
-                            if (
-                                senderId ===
-                                currentUserIdRef.current &&
-
-                                new Date(
-                                    msg.createdAt
-                                ) <=
-                                new Date(
-                                    lastReadAt
-                                )
-                            ) {
-
-                                return {
-                                    ...msg,
-
-                                    status:
-                                        "read",
-
-                                    readAt:
-                                        lastReadAt,
-                                };
-                            }
-
-                            return msg;
-                        }),
-                };
-            });
-        };
 
         // ---------------------------------------------------
         // TYPING
         // ---------------------------------------------------
 
-        const onTyping = ({
-            userId,
-            conversationId,
-        }) => {
 
-            setTypingUsers((prev) => {
-
-                const next = { ...prev };
-
-                if (!next[conversationId]) {
-                    next[conversationId] = new Set();
-                }
-
-                next[conversationId].add(userId);
-
-                return next;
-            });
-
-            if (
-                typingTimeouts.current[
-                userId
-                ]
-            ) {
-
-                clearTimeout(
-                    typingTimeouts.current[
-                    userId
-                    ]
-                );
-            }
-
-            typingTimeouts.current[
-                userId
-            ] = setTimeout(() => {
-
-                setTypingUsers((prev) => {
-
-                    const next = {
-                        ...prev,
-                    };
-
-                    next[
-                        conversationId
-                    ]?.delete(userId);
-
-                    return next;
-                });
-
-            }, 3000);
-        };
-
-        const onStopTyping = ({
-            userId,
-            conversationId,
-        }) => {
-
-            setTypingUsers((prev) => {
-
-                const next = { ...prev };
-
-                next[conversationId]?.delete(userId);
-
-                return next;
-            });
-
-            if (
-                typingTimeouts.current[
-                userId
-                ]
-            ) {
-
-                clearTimeout(
-                    typingTimeouts.current[
-                    userId
-                    ]
-                );
-            }
-        };
 
         // ---------------------------------------------------
         // PRESENCE
         // ---------------------------------------------------
 
-        const onOnlineUsers = (
-            userIds
-        ) => {
 
-            const updated = {};
-
-            userIds.forEach((id) => {
-
-                updated[id] = {
-                    online: true,
-                };
-            });
-
-            setPresence(updated);
-        };
-
-        const onUserOnline = ({
-            userId,
-        }) => {
-
-            setPresence((prev) => ({
-                ...prev,
-
-                [userId]: {
-                    online: true,
-                },
-            }));
-        };
-
-        const onUserOffline = ({
-            userId,
-            lastSeen,
-        }) => {
-
-            setPresence((prev) => ({
-                ...prev,
-
-                [userId]: {
-                    online: false,
-                    lastSeen,
-                },
-            }));
-        };
 
         // ---------------------------------------------------
         // REGISTER LISTENERS
@@ -677,10 +308,11 @@ const SocketProvider = ({ children }) => {
             ],
         }));
 
-        updateConversationLastMessage(
+        updateConversationLastMessage({
+            setConversations,
             conversationId,
-            msg
-        );
+            msg,
+        });
     };
 
     const replaceMessageMedia = (

@@ -98,11 +98,12 @@ const userId = otherUser?._id?.toString();
 
 const isOnline = presence?.[userId]?.online || false;
 
-const isTyping =
+const isTyping = Boolean(
   otherUser?._id &&
   typingUsers[
     conversationId
-  ]?.has(otherUser._id);
+  ]?.has(otherUser._id)
+);
 
 useReadReceipts({
   conversationId,
@@ -115,7 +116,7 @@ useReadReceipts({
 useEffect(() => {
   setShowProfile(false);
   setUnreadCount(0);
-}, [conversationId]);
+}, [conversationId, setUnreadCount]);
 
   // AUTH LOADING
 useEffect(() => {

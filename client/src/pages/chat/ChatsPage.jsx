@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+// import { useEffect, useRef } from "react";
 
 import { NavLink } from "react-router-dom";
 
@@ -47,14 +48,18 @@ const ChatsPage = () => {
 
   }, [data]);
 
+  useEffect(() => {
+  if (data) {
+    setInitialConversations(data);
+  }
+}, [data, setInitialConversations]);
+
   const {
     data:user,
     isLoading:loading,
   } = useCurrentUserQuery();
 
-  const currentUserId = String(
-    user?._id || ""
-  );
+  const currentUserId = user?._id?.toString() || "";
 
   // LOADING
 
@@ -219,10 +224,11 @@ const ChatsPage = () => {
                 presence?.[userId]
                   ?.online || false;
 
-              const isTyping =
+              const isTyping = Boolean(
                 typingUsers?.[
                   chat._id
-                ]?.has(userId);
+                ]?.has(userId)
+              );
 
               return (
                 <NavLink

@@ -54,7 +54,6 @@ const MessageList = ({
       className="
         flex-1
         min-h-0
-        pb-4
 
         bg-background
 
@@ -76,13 +75,9 @@ const MessageList = ({
         startReached={
           onTopReached
         }
-        // atBottomStateChange={
-        //   onBottomStateChange
-        // }
-        atBottomStateChange={(bottom) => {
-  console.log("BOTTOM:", bottom);
-  onBottomStateChange(bottom);
-}}
+        atBottomStateChange={
+          onBottomStateChange
+        }
         overscan={300}
         itemContent={(
           index,
@@ -150,7 +145,6 @@ const MessageList = ({
             <TypingIndicator />
           </div>
         )}
-        {/* <div style={{ height: 80 }} /> */}
       </>
     ),
   }}
