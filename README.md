@@ -1,45 +1,422 @@
+# Rynqor — Real-time Chat Application
 
-# Rynqor — Real-time Chat App
+## Overview
 
-Overview
---------
-Rynqor is a MERN-style real-time chat application. The repository contains a React frontend and an Express backend with Socket.IO for realtime messaging. The app includes authentication, conversations, message persistence, realtime delivery, presence, typing indicators, read receipts, and media uploads via Cloudinary.
+Rynqor is a full-stack real-time chat application built with the MERN stack, Socket.IO, and React Query. It supports instant messaging, conversation management, user presence, typing indicators, read receipts, media sharing, and optimistic UI updates for a smooth chat experience.
 
-Key features (implemented)
----------------------------
-- Authentication: signup and login endpoints using JWT access and refresh tokens.
-- Conversations: persistent conversation records with participants and last-message metadata.
-- Messaging: persisted messages in MongoDB; messages relayed realtime with Socket.IO; optimistic local messages supported on the client.
-- Presence: server tracks online users and emits `online_users`, `user_online`, and `user_offline` events.
-- Typing indicators: `typing` and `stop_typing` events are emitted and broadcast to conversation participants.
-- Read receipts: clients emit `mark_read`; server updates message `status` and emits `messages_read`.
-- Media uploads: server supports uploads via Cloudinary (credentials are required for upload to work).
+The application uses MongoDB for persistence, Socket.IO for realtime communication, and Cloudinary for media storage.
 
-Architecture & important files
------------------------------
-- Frontend (client)
-	- Entry: [client/src/main.jsx](client/src/main.jsx)
-	- Socket connection and handlers: [client/src/services/socket/socket.js](client/src/services/socket/socket.js) and [client/src/services/socket/SocketProvider.jsx](client/src/services/socket/SocketProvider.jsx)
+---
 
-- Backend (server)
-	- Server bootstrap: [server/src/index.js](server/src/index.js)
-	- Express app and routes: [server/src/app.js](server/src/app.js)
-	- Socket setup: [server/src/socket/index.js](server/src/socket/index.js)
-	- Socket handlers: [server/src/socket/handlers.js](server/src/socket/handlers.js)
-	- Config: [server/src/config/config.js](server/src/config/config.js)
-	- DB connection: [server/src/config/db.js](server/src/config/db.js)
+## Features
 
-Tech stack
-----------
-- Frontend: React 19, Vite, TailwindCSS, @tanstack/react-query, socket.io-client
-- Backend: Node (ESM) + Express 5, socket.io, Mongoose, jsonwebtoken, multer, cloudinary
-- Dev tools: ESLint, Vite
+### Authentication
 
-Quick start (how to run locally)
---------------------------------
-Prerequisites: Node.js (18+), npm, MongoDB available.
+* User registration and login
+* JWT access token authentication
+* Refresh token rotation
+* Protected API routes
+* Session management
 
-Install dependencies
+### Real-Time Messaging
+
+* Instant message delivery with Socket.IO
+* Optimistic message sending
+* Delivery acknowledgements
+* Failed message handling
+* Persistent message history
+
+### Conversations
+
+* One-to-one conversations
+* Automatic conversation creation
+* Last message tracking
+* Conversation sorting by activity
+* Conversation metadata synchronization
+
+### Presence System
+
+* Online/offline user tracking
+* Live presence updates
+* Initial online user synchronization
+* Reconnect state synchronization
+
+### Typing Indicators
+
+* Realtime typing status
+* Automatic typing timeout cleanup
+* Conversation-specific typing events
+
+### Read Receipts
+
+* Message read tracking
+* Realtime read receipt updates
+* Read status synchronization across participants
+
+### Media Support
+
+* Image uploads
+* Video uploads
+* Audio uploads
+* File attachments
+* Cloudinary integration
+
+### Frontend Features
+
+* React Query caching
+* Socket state management
+* Optimistic UI updates
+* Infinite message hydration support
+* Responsive chat interface
+* Lazy-loaded media
+
+---
+
+## Architecture
+
+### Frontend
+
+#### Core Technologies
+
+* React 19
+* Vite
+* TailwindCSS
+* React Router
+* TanStack React Query
+* Socket.IO Client
+
+#### Important Files
+
+```txt
+client/src/
+│
+├── main.jsx
+│
+├── services/
+│   └── socket/
+│       ├── socket.js
+│       ├── SocketProvider.jsx
+│       ├── SocketContext.jsx
+│       ├── useSocket.js
+│       ├── handlers/
+│       │   ├── messageHandlers.js
+│       │   ├── typingHandlers.js
+│       │   └── presenceHandlers.js
+│       └── helpers/
+│           └── conversationHelpers.js
+│
+├── hooks/
+│   ├── auth/
+│   ├── conversations/
+│   └── messages/
+│
+├── pages/
+│   ├── chats/
+│   └── chat/
+│
+└── components/
+```
+
+---
+
+### Backend
+
+#### Core Technologies
+
+* Node.js
+* Express 5
+* MongoDB
+* Mongoose
+* Socket.IO
+* JWT
+* Cloudinary
+* Multer
+
+#### Important Files
+
+```txt
+server/src/
+│
+├── index.js
+├── app.js
+│
+├── socket/
+│   ├── index.js
+│   └── handlers.js
+│
+├── controllers/
+├── services/
+├── models/
+├── routes/
+├── middleware/
+│
+├── config/
+│   ├── config.js
+│   └── db.js
+│
+└── utils/
+```
+
+---
+
+## Realtime Flow
+
+### Sending Messages
+
+```txt
+Client
+   │
+   ├─ Optimistic message added
+   │
+   ├─ send_message
+   ▼
+Socket Server
+   │
+   ├─ Save Message
+   ├─ Update Conversation.lastMessage
+   └─ Update Conversation.updatedAt
+   │
+   ├─ message_sent → sender
+   └─ new_message → recipients
+```
+
+### Read Receipts
+
+```txt
+mark_read
+    │
+    ▼
+Server updates messages
+    │
+    ▼
+messages_read
+    │
+    ▼
+All participants updated
+```
+
+### Typing Indicators
+
+```txt
+typing
+    │
+    ▼
+Server
+    │
+    ▼
+Other participants
+
+stop_typing
+    │
+    ▼
+Server
+    │
+    ▼
+Other participants
+```
+
+---
+
+## Socket Events
+
+### Client → Server
+
+| Event             | Purpose                |
+| ----------------- | ---------------------- |
+| join_conversation | Join conversation room |
+| send_message      | Send a message         |
+| typing            | User started typing    |
+| stop_typing       | User stopped typing    |
+| mark_read         | Mark messages as read  |
+| sync_state        | Request presence sync  |
+
+---
+
+### Server → Client
+
+| Event          | Purpose                |
+| -------------- | ---------------------- |
+| message_sent   | Sender acknowledgement |
+| new_message    | Incoming message       |
+| message_failed | Delivery failure       |
+| messages_read  | Read receipt update    |
+| typing         | User typing            |
+| stop_typing    | User stopped typing    |
+| online_users   | Initial presence sync  |
+| user_online    | User came online       |
+| user_offline   | User went offline      |
+
+---
+
+## Database Models
+
+### User
+
+```js
+{
+  username: String,
+  fullName: String,
+  email: String,
+  password: String,
+  avatar: {
+    url: String,
+    publicId: String
+  },
+  bio: String,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### Notes
+
+* Passwords are hashed using bcrypt before storage.
+* Email and username are unique.
+* Password field is excluded from queries by default.
+
+---
+
+### RefreshToken
+
+```js
+{
+  user: ObjectId,
+  token: String,
+  device: String,
+  location: String,
+  ipAddress: String,
+  userAgent: String,
+  lastUsedAt: Date,
+  expiresAt: Date,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### Notes
+
+* Supports multi-device authentication.
+* Automatically expires using MongoDB TTL indexing.
+* Stores session metadata for security and session management.
+
+---
+
+### Conversation
+
+```js
+{
+  participants: [ObjectId],
+  type: "direct" | "self",
+  lastMessage: ObjectId,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### Notes
+
+* `direct` represents one-to-one conversations.
+* `self` represents personal note/self-chat conversations.
+* `lastMessage` references the latest Message document.
+* Indexed by participants for faster conversation lookups.
+
+---
+
+### Message
+
+```js
+{
+  conversationId: ObjectId,
+  senderId: ObjectId,
+
+  text: String,
+
+  messageType:
+    "text" |
+    "media" |
+    "mixed",
+
+  media: [
+    {
+      url: String,
+      publicId: String,
+
+      type:
+        "image" |
+        "video" |
+        "audio" |
+        "file",
+
+      name: String,
+      size: Number
+    }
+  ],
+
+  status:
+    "sent" |
+    "read",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+#### Notes
+
+* `text` messages contain only text.
+* `media` messages contain only attachments.
+* `mixed` messages contain both text and attachments.
+* Indexed by `conversationId` and `createdAt` for efficient message retrieval and pagination.
+
+---
+
+### Relationships
+
+```txt
+User
+ ├── RefreshToken[]
+ ├── Conversation[]
+ └── Message[]
+
+Conversation
+ ├── participants -> User[]
+ └── lastMessage -> Message
+
+Message
+ ├── senderId -> User
+ └── conversationId -> Conversation
+
+RefreshToken
+ └── user -> User
+```
+
+
+---
+
+## Environment Variables
+
+```env
+PORT=8000
+
+MONGODB_URL=mongodb_url
+DB_NAME=
+
+ACCESS_TOKEN_SECRET=your_secret
+ACCESS_TOKEN_EXPIRY=15m
+
+REFRESH_TOKEN_SECRET=your_secret
+REFRESH_TOKEN_EXPIRY=7d
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+---
+
+## Local Development
+
+### Install Dependencies
 
 ```bash
 cd server
@@ -49,61 +426,54 @@ cd ../client
 npm install
 ```
 
-Environment (example `server/.env`)
-
-```env
-PORT=8000
-MONGODB_URL=mongodb_url
-DB_NAME=rynqor
-
-# Cloudinary (if used)
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
-
-# JWT
-ACCESS_TOKEN_SECRET=some_long_secret
-ACCESS_TOKEN_EXPIRY=15m
-REFRESH_TOKEN_SECRET=another_long_secret
-REFRESH_TOKEN_EXPIRY=7d
-```
-
-Run server and client
+### Run Backend
 
 ```bash
-# Start server (from server/)
-npm run dev
-
-# Start client (from client/)
+cd server
 npm run dev
 ```
 
-API overview (existing endpoints)
----------------------------------
-- Base: `http://localhost:<PORT>/api/v1`
-- Auth: `/api/v1/auth` — signup, login, refresh, logout
-- Users: `/api/v1/users` — profile, search, sessions
-- Conversations: `/api/v1/conversations` — list, create, participant operations
-- Messages: `/api/v1/messages` — fetch messages, pagination
+### Run Frontend
 
-Realtime socket events (implemented)
------------------------------------
-- `online_users` — server → client: initial list of online user IDs
-- `user_online` / `user_offline` — server → client: user presence changes
-- `join_conversation` — client → server: join a conversation room (server validates membership)
-- `send_message` — client → server: payload with `conversationId`, `text`, `media[]`, `clientTempId`
-- `message_sent` — server → sender: ack with saved message
-- `new_message` — server → room: new message for other participants
-- `message_failed` — server → sender: persistent/send failure
-- `mark_read` / `messages_read` — read receipts
-- `typing` / `stop_typing` — typing indicators
+```bash
+cd client
+npm run dev
+```
 
-Configuration facts
--------------------
-- CORS: the server currently allows origin `http://localhost:5173` (configured in `server/src/app.js`).
-- Socket client URL: the client uses `http://localhost:8000` by default (see `client/src/services/socket/socket.js`).
-- Port: the server reads `PORT` from `server/src/config/config.js`.
+---
 
+## Default Development URLs
 
+Frontend:
 
+```txt
+http://localhost:5173
+```
 
+Backend:
+
+```txt
+http://localhost:8000
+```
+
+API Base:
+
+```txt
+http://localhost:8000/api/v1
+```
+
+---
+
+## Current Capabilities
+
+* JWT Authentication
+* Realtime Messaging
+* Optimistic UI
+* Presence Tracking
+* Typing Indicators
+* Read Receipts
+* Media Sharing
+* React Query Integration
+* Conversation Persistence
+* Socket Reconnection Handling
+* Cloudinary Upload Support
