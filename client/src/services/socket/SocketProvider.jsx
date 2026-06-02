@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import {
+    useEffect,
+    useRef,
+    useState,
+    useCallback,
+    useMemo,
+} from "react";
+
 import toast from "react-hot-toast";
 
 import {
@@ -7,8 +14,14 @@ import {
     disconnectSocket,
 } from "./socket";
 
-import { SocketProviderContext } from "./SocketContext.jsx";
-import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
+import {
+    SocketProviderContext,
+} from "./SocketContext.jsx";
+
+import {
+    useCurrentUserQuery,
+} from "../../hooks/auth/useCurrentUserQuery.js";
+
 import {
     updateConversationLastMessage,
 } from "./helpers/conversationHelpers";
@@ -25,118 +38,246 @@ import {
     createPresenceHandlers,
 } from "./handlers/presenceHandlers";
 
-const SocketProvider = ({ children }) => {
+const SocketProvider = ({
+    children,
+}) => {
 
-    const { data: user } = useCurrentUserQuery();
-    const currentUserId = user?._id;
-    const socketRef = useRef(null);
-    const typingTimeouts = useRef({});
-    const currentUserIdRef = useRef(null);
+    const {
+        data: user,
+    } = useCurrentUserQuery();
 
-    const [messages, setMessages] = useState({});
-    const [conversations, setConversations] = useState([]);
-    const [typingUsers, setTypingUsers] = useState({});
-    const [presence, setPresence] = useState({});
+    const currentUserId =
+        user?._id;
+
+    const socketRef =
+        useRef(null);
+
+    const typingTimeouts =
+        useRef({});
+
+    const currentUserIdRef =
+        useRef(null);
+
+    const [messages, setMessages] =
+        useState({});
+
+    const [
+        conversations,
+        setConversations,
+    ] = useState([]);
+
+useEffect(() => {
+    console.log(
+        "CONVERSATIONS STATE",
+        conversations.map(c => ({
+            id: c._id,
+            text: c.lastMessage?.text,
+        }))
+    );
+}, [conversations]);
+    const [
+        typingUsers,
+        setTypingUsers,
+    ] = useState({});
+
+    const [
+        presence,
+        setPresence,
+    ] = useState({});
 
     // ---------------------------------------------------
-    // HELPERS
+    // SOCKET HELPERS
     // ---------------------------------------------------
-    const emitTyping = (
-        conversationId
-    ) => {
 
-        const socket = socketRef.current;
+    const emitTyping =
+        useCallback(
+            (
+                conversationId
+            ) => {
 
-        if (!socket?.connected) {
-            return;
-        }
+                const socket =
+                    socketRef.current;
 
-        socket.emit(
-            "typing",
-            {
-                conversationId,
-            }
+                if (
+                    !socket?.connected
+                ) {
+                    return;
+                }
+
+                socket.emit(
+                    "typing",
+                    {
+                        conversationId,
+                    }
+                );
+            },
+            []
         );
-    };
 
-    const emitStopTyping = (
-        conversationId
-    ) => {
+    const emitStopTyping =
+        useCallback(
+            (
+                conversationId
+            ) => {
 
-        const socket =
-            socketRef.current;
+                const socket =
+                    socketRef.current;
 
-        if (!socket?.connected) {
-            return;
-        }
+                if (
+                    !socket?.connected
+                ) {
+                    return;
+                }
 
-        socket.emit(
-            "stop_typing",
-            {
-                conversationId,
-            }
+                socket.emit(
+                    "stop_typing",
+                    {
+                        conversationId,
+                    }
+                );
+            },
+            []
         );
-    };
-
 
     // ---------------------------------------------------
     // SOCKET SETUP
     // ---------------------------------------------------
+useEffect(() => {
+    console.log(
+        "SOCKET PROVIDER MOUNTED"
+    );
+
+    return () => {
+        console.log(
+            "SOCKET PROVIDER UNMOUNTED"
+        );
+    };
+}, []);
 
     useEffect(() => {
 
-        if (!currentUserId) {
+        if (
+            !currentUserId
+        ) {
             return;
         }
 
-        currentUserIdRef.current = currentUserId;
+        currentUserIdRef.current =
+            currentUserId;
 
         const {
             onNewMessage,
             onMessageSent,
             onMessageFailed,
             onMessagesRead,
-        } = createMessageHandlers({
-            setMessages,
-            setConversations,
-            currentUserIdRef,
-        });
+        } =
+            createMessageHandlers({
+                setMessages,
+                setConversations,
+                currentUserIdRef,
+            });
 
         const {
             onTyping,
             onStopTyping,
-        } = createTypingHandlers({
-            setTypingUsers,
-            typingTimeouts,
-        });
+        } =
+            createTypingHandlers({
+                setTypingUsers,
+                typingTimeouts,
+            });
 
         const {
             onOnlineUsers,
             onUserOnline,
             onUserOffline,
-        } = createPresenceHandlers({
-            setPresence,
-        });
+        } =
+            createPresenceHandlers({
+                setPresence,
+            });
 
-        const socket = createSocket();
+        const socket =
+            createSocket();
 
-        socketRef.current = socket;
+        socketRef.current =
+            socket;
 
         connectSocket();
 
-        // ---------------------------------------------------
-        // CONNECT
-        // ---------------------------------------------------
+        const onConnect =
+            () => {
 
-        const onConnect = () => {
-            if (import.meta.env.MODE !== "production") console.log("✅ connected:", socket.id);
-        };
+                toast.dismiss(
+                    "socket-disconnected"
+                );
 
-        const onDisconnect = () => {
-            toast.error("Disconnected from server");
-            if (import.meta.env.MODE !== "production") console.log("❌ disconnected");
-        };
+                if (
+                    import.meta.env
+                        .MODE !==
+                    "production"
+                ) {
 
+                    console.log(
+                        "✅ connected",
+                        socket.id
+                    );
+                }
+
+                socket.emit(
+                    "sync_state"
+                );
+            };
+
+        const onDisconnect =
+            () => {
+
+                toast.error(
+                    "Disconnected from server",
+                    {
+                        id: "socket-disconnected",
+                    }
+                );
+
+                if (
+                    import.meta.env
+                        .MODE !==
+                    "production"
+                ) {
+
+                    console.log(
+                        "❌ disconnected"
+                    );
+                }
+            };
+
+        const onConnectError =
+            (
+                error
+            ) => {
+
+                console.error(
+                    "Socket error:",
+                    error.message
+                );
+            };
+
+        const onVisibilityChange =
+            () => {
+
+                if (
+                    document.visibilityState ===
+                    "visible"
+                ) {
+
+                    socket.emit(
+                        "sync_state"
+                    );
+                }
+            };
+
+        document.addEventListener(
+            "visibilitychange",
+            onVisibilityChange
+        );
 
         socket.on(
             "connect",
@@ -146,6 +287,11 @@ const SocketProvider = ({ children }) => {
         socket.on(
             "disconnect",
             onDisconnect
+        );
+
+        socket.on(
+            "connect_error",
+            onConnectError
         );
 
         socket.on(
@@ -193,11 +339,21 @@ const SocketProvider = ({ children }) => {
             onUserOffline
         );
 
-        // ---------------------------------------------------
-        // CLEANUP
-        // ---------------------------------------------------
-
         return () => {
+
+            document.removeEventListener(
+                "visibilitychange",
+                onVisibilityChange
+            );
+
+            Object.values(
+                typingTimeouts.current
+            ).forEach(
+                clearTimeout
+            );
+
+            typingTimeouts.current =
+                {};
 
             socket.off(
                 "connect",
@@ -207,6 +363,11 @@ const SocketProvider = ({ children }) => {
             socket.off(
                 "disconnect",
                 onDisconnect
+            );
+
+            socket.off(
+                "connect_error",
+                onConnectError
             );
 
             socket.off(
@@ -257,165 +418,248 @@ const SocketProvider = ({ children }) => {
             disconnectSocket();
         };
 
-    }, [currentUserId]);
+    }, [
+        currentUserId,
+    ]);
 
     // ---------------------------------------------------
     // OPTIMISTIC MESSAGE
     // ---------------------------------------------------
 
-    const addLocalMessage = (
-        conversationId,
-        msg
-    ) => {
+    const addLocalMessage =
+        useCallback(
+            (
+                conversationId,
+                msg
+            ) => {
 
-        setMessages((prev) => ({
+                setMessages(
+                    (
+                        prev
+                    ) => ({
 
-            ...prev,
+                        ...prev,
 
-            [conversationId]: [
-                ...(prev[
-                    conversationId
-                ] || []),
+                        [conversationId]:
+                            [
+                                ...(prev[
+                                    conversationId
+                                ] ||
+                                    []),
 
-                msg,
-            ],
-        }));
+                                msg,
+                            ],
+                    })
+                );
 
-        updateConversationLastMessage({
-            setConversations,
-            conversationId,
-            msg
-        });
-        console.log("LOCAL UPDATE");
-    };
+                updateConversationLastMessage(
+                    {
+                        setConversations,
+                        conversationId,
+                        msg,
+                    }
+                );
 
-    const replaceMessageMedia = (
-        conversationId,
-        messageId,
-        media
-    ) => {
+                console.log(
+    "LOCAL MESSAGE",
+    msg._id,
+    msg.clientTempId
+);
+            },
+            []
+            
+        );
 
-        setMessages((prev) => {
+    const replaceMessageMedia =
+        useCallback(
+            (
+                conversationId,
+                messageId,
+                media
+            ) => {
 
-            const list =
-                prev[conversationId] || [];
+                setMessages(
+                    (
+                        prev
+                    ) => {
 
-            return {
-
-                ...prev,
-
-                [conversationId]:
-                    list.map((msg) => {
-
-                        if (
-                            msg._id !== messageId
-                        ) {
-
-                            return msg;
-
-                        }
+                        const list =
+                            prev[
+                                conversationId
+                            ] ||
+                            [];
 
                         return {
 
-                            ...msg,
+                            ...prev,
 
-                            media:
-                                media.map(
-                                    (item) => ({
+                            [conversationId]:
+                                list.map(
+                                    (
+                                        msg
+                                    ) => {
 
-                                        ...item,
+                                        if (
+                                            msg._id !==
+                                            messageId
+                                        ) {
 
-                                        uploading: false,
+                                            return msg;
+                                        }
 
-                                    })
+                                        return {
+
+                                            ...msg,
+
+                                            media:
+                                                media.map(
+                                                    (
+                                                        item
+                                                    ) => ({
+                                                        ...item,
+
+                                                        uploading:
+                                                            false,
+                                                    })
+                                                ),
+                                        };
+                                    }
                                 ),
-
                         };
+                    }
+                );
+            },
+            []
+        );
 
-                    }),
-
-            };
-
-        });
-
-    };
     // ---------------------------------------------------
     // HYDRATE MESSAGES
     // ---------------------------------------------------
 
-    const setConversationMessages = (
-        conversationId,
-        incomingMessages
-    ) => {
+    const setConversationMessages =
+        useCallback(
+            (
+                conversationId,
+                incomingMessages
+            ) => {
 
-        setMessages((prev) => {
-
-            const existing =
-                prev[conversationId] || [];
-
-            const merged = [
-                ...incomingMessages,
-                ...existing,
-            ];
-
-            const unique =
-                merged.filter(
+                setMessages(
                     (
-                        msg,
-                        index,
-                        self
-                    ) =>
+                        prev
+                    ) => {
 
-                        index ===
-                        self.findIndex(
-                            (m) =>
+                        const existing =
+                            prev[
+                                conversationId
+                            ] ||
+                            [];
 
-                                m._id ===
-                                msg._id ||
+                        const merged =
+                            [
+                                ...incomingMessages,
+                                ...existing,
+                            ];
 
-                                (
-                                    m.clientTempId &&
-                                    m.clientTempId ===
-                                    msg.clientTempId
-                                )
-                        )
+                        const map =
+                            new Map();
+
+                        merged.forEach(
+                            (
+                                msg
+                            ) => {
+
+                                const key =
+                                    msg.clientTempId ||
+                                    msg._id;
+
+                                if (
+                                    !map.has(
+                                        key
+                                    )
+                                ) {
+
+                                    map.set(
+                                        key,
+                                        msg
+                                    );
+                                }
+                            }
+                        );
+
+                        const unique =
+                            Array.from(
+                                map.values()
+                            );
+
+                        unique.sort(
+                            (
+                                a,
+                                b
+                            ) => {
+
+                                const aTime =
+                                    new Date(
+                                        a.createdAt ||
+                                            0
+                                    ).getTime();
+
+                                const bTime =
+                                    new Date(
+                                        b.createdAt ||
+                                            0
+                                    ).getTime();
+
+                                return (
+                                    aTime -
+                                    bTime
+                                );
+                            }
+                        );
+
+                        return {
+
+                            ...prev,
+
+                            [conversationId]:
+                                unique,
+                        };
+                    }
                 );
+            },
+            []
+        );
 
-            unique.sort(
-                (a, b) =>
-                    new Date(
-                        a.createdAt
-                    ) -
-                    new Date(
-                        b.createdAt
-                    )
-            );
+    // ---------------------------------------------------
+    // CONTEXT VALUE
+    // ---------------------------------------------------
+        const setInitialConversations = useCallback(
+    (incoming) => {
 
-            return {
-                ...prev,
+        setConversations(prev => {
 
-                [conversationId]:
-                    unique,
-            };
+            if (prev.length > 0) {
+                return prev;
+            }
+
+            return incoming;
         });
-    };
 
-    // ---------------------------------------------------
-    // PROVIDER
-    // ---------------------------------------------------
-
-    return (
-        <SocketProviderContext
-            value={{
-
-                getSocket: () =>
-                    socketRef.current,
+    },
+    []
+);
+    const value =
+        useMemo(
+            () => ({
+                getSocket:
+                    () =>
+                        socketRef.current,
 
                 messages,
                 conversations,
 
                 typingUsers,
                 presence,
+
                 emitTyping,
                 emitStopTyping,
 
@@ -424,9 +668,27 @@ const SocketProvider = ({ children }) => {
 
                 setConversationMessages,
 
-                setInitialConversations:
-                    setConversations,
-            }}
+                setInitialConversations,
+            }),
+            [
+                messages,
+                conversations,
+                typingUsers,
+                presence,
+
+                emitTyping,
+                emitStopTyping,
+
+                addLocalMessage,
+                replaceMessageMedia,
+
+                setConversationMessages,
+            ]
+        );
+
+    return (
+        <SocketProviderContext
+            value={value}
         >
             {children}
         </SocketProviderContext>

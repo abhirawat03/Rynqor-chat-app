@@ -8,54 +8,68 @@ export const sortConversations = (list) => {
     };
 
 export const updateConversationLastMessage = ({
-        setConversations,
+    setConversations,
+    conversationId,
+    msg,
+}) => {
+    console.log(
+    "UPDATE_CONVERSATION",
+    {
         conversationId,
-        msg
-    }) => {
+        text: msg.text,
+        id: msg._id,
+        clientTempId: msg.clientTempId,
+    }
+);
 
-        setConversations((prev) => {
+    const timestamp =
+        msg.createdAt ||
+        new Date().toISOString();
 
-            let exists = false;
+    setConversations(prev => {
 
-            const updated = prev.map(
-                (conv) => {
-
-                    if (
-                        conv._id.toString() ===
-                        conversationId.toString()
-                    ) {
-
-                        exists = true;
-
-                        return {
-                            ...conv,
-
-                            lastMessage: msg,
-
-                            updatedAt:
-                                msg.createdAt,
-                        };
-                    }
-
-                    return conv;
-                }
+        const index =
+            prev.findIndex(
+                conv =>
+                    String(conv._id) ===
+                    String(conversationId)
             );
 
-            if (!exists) {
+        if (index === -1) {
 
-                updated.unshift({
+            return [
+                {
                     _id: conversationId,
-
                     lastMessage: msg,
+                    updatedAt: timestamp,
+                },
+                ...prev,
+            ];
+        }
 
-                    updatedAt:
-                        msg.createdAt,
-                });
-            }
+        const conversation =
+            prev[index];
 
-            return sortConversations(
-                updated
-            );
-        });
-        console.log("CONVERSATION UPDATE");
-    };
+        const updatedConversation = {
+            ...conversation,
+            lastMessage: msg,
+            updatedAt: timestamp,
+        };
+
+        return [
+            updatedConversation,
+            ...prev.filter(
+                (_, i) => i !== index
+            ),
+        ];
+    });
+
+    if (
+        import.meta.env.MODE !==
+        "production"
+    ) {
+        console.log(
+            "CONVERSATION UPDATE"
+        );
+    }
+};

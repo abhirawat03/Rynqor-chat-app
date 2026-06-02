@@ -5,6 +5,6 @@ export const useConversationsQuery = () => {
     return useQuery({
         queryKey:["conversations"],
         queryFn:getConversations,
-        refetchOnWindowFocus: false ,
+        refetchOnWindowFocus: false,
     })
 }

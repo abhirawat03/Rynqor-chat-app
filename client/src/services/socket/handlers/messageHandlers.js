@@ -1,117 +1,108 @@
 import {
-  sortConversations,
-  updateConversationLastMessage,
+    updateConversationLastMessage,
 } from "../helpers/conversationHelpers.js";
-export const createMessageHandlers =
-({
-  setMessages,
-  setConversations,
-  currentUserIdRef,
+
+export const createMessageHandlers = ({
+    setMessages,
+    setConversations,
+    currentUserIdRef,
 }) => {
-        // ---------------------------------------------------
-        // NEW MESSAGE
-        // ---------------------------------------------------
 
-        const onNewMessage = ({
-            message: msg,
-            conversation,
-        }) => {
+    // ---------------------------------------------------
+    // NEW MESSAGE
+    // ---------------------------------------------------
 
-            setMessages((prev) => {
+    const onNewMessage = ({
+        message: msg,
+        conversation,
+    }) => {
+        console.log(
+        "NEW_MESSAGE FULL",
+        JSON.stringify(msg, null, 2)
+    );
 
-                const list =
-                    prev[msg.conversationId] || [];
 
-                const exists = list.some(
-                    (m) => m._id === msg._id
-                );
+        setMessages((prev) => {
 
-                if (exists) {
-                    return prev;
-                }
+            const list =
+                prev[msg.conversationId] || [];
 
-                return {
-                    ...prev,
+            const exists = list.some(
+                (m) =>
+                    m._id === msg._id ||
 
-                    [msg.conversationId]: [
-                        ...list,
-                        msg,
-                    ],
-                };
-            });
+                    (
+                        m.clientTempId &&
+                        msg.clientTempId &&
+                        m.clientTempId ===
+                        msg.clientTempId
+                    )
+            );
 
-            setConversations((prev) => {
+            if (exists) {
+                return prev;
+            }
 
-                const exists = prev.some(
-                    (conv) =>
-                        conv._id.toString() ===
-                        conversation._id.toString()
-                );
+            return {
 
-                let updated;
+                ...prev,
 
-                if (exists) {
+                [msg.conversationId]: [
+                    ...list,
+                    msg,
+                ],
+            };
+        });
 
-                    updated = prev.map(
-                        (conv) =>
+        updateConversationLastMessage({
+            setConversations,
+            conversationId:
+                conversation?._id ||
+                msg.conversationId,
+            msg,
+        });
 
-                            conv._id.toString() ===
-                                conversation._id.toString()
+        if (
+            import.meta.env.MODE !==
+            "production"
+        ) {
 
-                                ? {
-                                    ...conv,
+            console.log(
+                "NEW MESSAGE EVENT"
+            );
 
-                                    lastMessage:
-                                        msg,
-
-                                    updatedAt:
-                                        msg.createdAt,
-                                }
-
-                                : conv
-                    );
-
-                } else {
-
-                    updated = [
-                        {
-                            ...conversation,
-
-                            lastMessage: msg,
-
-                            updatedAt:
-                                msg.createdAt,
-                        },
-
-                        ...prev,
-                    ];
-                }
-
-                return sortConversations(
-                    updated
-                );
-            });
-            console.log("NEW MESSAGE EVENT");
-        };
-
-        // ---------------------------------------------------
-        // MESSAGE SENT
-        // ---------------------------------------------------
-
-        const onMessageSent = (msg) => {
-
-            setMessages((prev) => {
-
-                const list =
-                    prev[msg.conversationId] || [];
-
-                const hasOptimisticMessage = list.some(
-  (m) =>
-    m.clientTempId ===
+            console.log(
+    "NEW_MESSAGE",
+    msg._id,
     msg.clientTempId
 );
+        }
+    };
 
-                const updated = hasOptimisticMessage
+    // ---------------------------------------------------
+    // MESSAGE SENT
+    // ---------------------------------------------------
+
+    const onMessageSent = (msg) => {
+console.log(
+        "MESSAGE_SENT FULL",
+        JSON.stringify(msg, null, 2)
+    );
+        setMessages((prev) => {
+
+            const list =
+                prev[msg.conversationId] || [];
+
+            const hasOptimisticMessage =
+                list.some(
+                    (m) =>
+                        m.clientTempId &&
+                        m.clientTempId ===
+                        msg.clientTempId
+                );
+
+            const updated =
+                hasOptimisticMessage
 
                     ? list.map((m) =>
 
@@ -128,128 +119,216 @@ export const createMessageHandlers =
                             : m
                     )
 
-                    : [
-                        ...list,
-                        msg,
-                    ];
+                    : (() => {
 
-                return {
-                    ...prev,
+                        const exists =
+                            list.some(
+                                (m) =>
+                                    m._id ===
+                                    msg._id
+                            );
 
-                    [msg.conversationId]:
-                        updated,
-                };
-            });
+                        if (exists) {
+                            return list;
+                        }
 
-//             updateConversationLastMessage({
-//     setConversations,
-//     conversationId: msg.conversationId,
-//     msg,
-// });
-console.log("MESSAGE SENT EVENT");
-        };
+                        return [
+                            ...list,
+                            msg,
+                        ];
 
-        // ---------------------------------------------------
-        // MESSAGE FAILED
-        // ---------------------------------------------------
+                    })();
 
-        const onMessageFailed = ({
-            conversationId,
-            clientTempId,
-        }) => {
+            return {
 
-            setMessages((prev) => {
+                ...prev,
 
-                const list =
-                    prev[conversationId] || [];
+                [msg.conversationId]:
+                    updated,
+            };
+        });
 
-                return {
-                    ...prev,
+        updateConversationLastMessage({
+            setConversations,
+            conversationId:
+                msg.conversationId,
+            msg,
+        });
 
-                    [conversationId]:
-                        list.map((msg) =>
+        if (
+            import.meta.env.MODE !==
+            "production"
+        ) {
+console.log(
+    "MESSAGE SENT",
+    msg._id,
+    msg.clientTempId
+);
+            console.log(
+                "MESSAGE SENT EVENT"
+            );
+            console.log({
+            serverId: msg._id,
+            clientTempId: msg.clientTempId,
+        });
+        }
+    };
 
-                            msg.clientTempId ===
-                                clientTempId
 
-                                ? {
-                                    ...msg,
+    // ---------------------------------------------------
+    // MESSAGE FAILED
+    // ---------------------------------------------------
 
-                                    syncState:
-                                        "failed",
-                                }
+    const onMessageFailed = ({
+        conversationId,
+        clientTempId,
+    }) => {
 
-                                : msg
-                        ),
-                };
-            });
-        };
+        setMessages((prev) => {
 
-        // ---------------------------------------------------
-        // READ RECEIPTS
-        // ---------------------------------------------------
+            const list =
+                prev[conversationId] || [];
 
-        const onMessagesRead = ({
-            conversationId,
-            readBy,
-            lastReadAt,
-        }) => {
+            return {
 
-            if (
-                readBy ===
-                currentUserIdRef.current
-            ) {
-                return;
-            }
+                ...prev,
 
-            setMessages((prev) => {
+                [conversationId]:
+                    list.map((msg) =>
 
-                const list =
-                    prev[conversationId] || [];
+                        msg.clientTempId ===
+                            clientTempId
 
-                return {
-                    ...prev,
+                            ? {
+                                ...msg,
 
-                    [conversationId]:
-                        list.map((msg) => {
-
-                            const senderId =
-                                msg.senderId?._id ||
-                                msg.senderId;
-
-                            // only MY messages
-                            if (
-                                senderId ===
-                                currentUserIdRef.current &&
-
-                                new Date(
-                                    msg.createdAt
-                                ) <=
-                                new Date(
-                                    lastReadAt
-                                )
-                            ) {
-
-                                return {
-                                    ...msg,
-
-                                    status:
-                                        "read",
-
-                                    readAt:
-                                        lastReadAt,
-                                };
+                                syncState:
+                                    "failed",
                             }
 
-                            return msg;
-                        }),
-                };
-            });
-        };
-         return {
-    onNewMessage,
-    onMessageSent,
-    onMessageFailed,
-    onMessagesRead,
-  };
-    }
+                            : msg
+                    ),
+            };
+        });
+
+        if (
+            import.meta.env.MODE !==
+            "production"
+        ) {
+
+            console.log(
+                "MESSAGE FAILED EVENT"
+            );
+        }
+    };
+
+    // ---------------------------------------------------
+    // READ RECEIPTS
+    // ---------------------------------------------------
+
+    const onMessagesRead = ({
+        conversationId,
+        readBy,
+        lastReadAt,
+    }) => {
+
+        if (
+            String(readBy) ===
+            String(
+                currentUserIdRef.current
+            )
+        ) {
+            return;
+        }
+
+        const lastReadTime =
+            new Date(
+                lastReadAt
+            ).getTime();
+
+        setMessages((prev) => {
+
+            const list =
+                prev[conversationId] || [];
+
+            let changed = false;
+
+            const updated =
+                list.map((msg) => {
+
+                    const senderId =
+                        msg.senderId?._id ||
+                        msg.senderId;
+
+                    const isMyMessage =
+                        String(senderId) ===
+                        String(
+                            currentUserIdRef.current
+                        );
+
+                    const isRead =
+                        msg.createdAt &&
+                        new Date(
+                            msg.createdAt
+                        ).getTime() <=
+                        lastReadTime;
+
+                    if (
+                        isMyMessage &&
+                        isRead &&
+                        msg.status !==
+                        "read"
+                    ) {
+
+                        changed = true;
+
+                        return {
+
+                            ...msg,
+
+                            status:
+                                "read",
+
+                            readAt:
+                                lastReadAt,
+                        };
+                    }
+
+                    return msg;
+                });
+
+            if (!changed) {
+                return prev;
+            }
+
+            return {
+
+                ...prev,
+
+                [conversationId]:
+                    updated,
+            };
+        });
+
+        if (
+            import.meta.env.MODE !==
+            "production"
+        ) {
+
+            console.log(
+                "READ RECEIPT EVENT"
+            );
+        }
+    };
+
+    return {
+
+        onNewMessage,
+
+        onMessageSent,
+
+        onMessageFailed,
+
+        onMessagesRead,
+    };
+};
