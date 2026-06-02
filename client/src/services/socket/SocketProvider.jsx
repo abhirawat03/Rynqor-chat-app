@@ -27,52 +27,16 @@ import {
 
 const SocketProvider = ({ children }) => {
 
+    const { data: user } = useCurrentUserQuery();
+    const currentUserId = user?._id;
     const socketRef = useRef(null);
+    const typingTimeouts = useRef({});
+    const currentUserIdRef = useRef(null);
 
     const [messages, setMessages] = useState({});
     const [conversations, setConversations] = useState([]);
-
     const [typingUsers, setTypingUsers] = useState({});
-
     const [presence, setPresence] = useState({});
-
-    const typingTimeouts = useRef({});
-
-    const {
-        onNewMessage,
-        onMessageSent,
-        onMessageFailed,
-        onMessagesRead,
-    } = createMessageHandlers({
-        setMessages,
-        setConversations,
-        currentUserIdRef,
-    });
-
-    const {
-        onTyping,
-        onStopTyping,
-    } = createTypingHandlers({
-        setTypingUsers,
-        typingTimeouts,
-    });
-
-    const {
-        onOnlineUsers,
-        onUserOnline,
-        onUserOffline,
-    } = createPresenceHandlers({
-        setPresence,
-    });
-
-    const { data: user } = useCurrentUserQuery();
-
-    const currentUserId = user?._id;
-
-    const currentUserIdRef = useRef(null);
-
-
-
 
     // ---------------------------------------------------
     // HELPERS
@@ -81,8 +45,7 @@ const SocketProvider = ({ children }) => {
         conversationId
     ) => {
 
-        const socket =
-            socketRef.current;
+        const socket = socketRef.current;
 
         if (!socket?.connected) {
             return;
@@ -126,8 +89,34 @@ const SocketProvider = ({ children }) => {
             return;
         }
 
-        currentUserIdRef.current =
-            currentUserId;
+        currentUserIdRef.current = currentUserId;
+
+        const {
+            onNewMessage,
+            onMessageSent,
+            onMessageFailed,
+            onMessagesRead,
+        } = createMessageHandlers({
+            setMessages,
+            setConversations,
+            currentUserIdRef,
+        });
+
+        const {
+            onTyping,
+            onStopTyping,
+        } = createTypingHandlers({
+            setTypingUsers,
+            typingTimeouts,
+        });
+
+        const {
+            onOnlineUsers,
+            onUserOnline,
+            onUserOffline,
+        } = createPresenceHandlers({
+            setPresence,
+        });
 
         const socket = createSocket();
 
@@ -148,22 +137,6 @@ const SocketProvider = ({ children }) => {
             if (import.meta.env.MODE !== "production") console.log("❌ disconnected");
         };
 
-
-        // ---------------------------------------------------
-        // TYPING
-        // ---------------------------------------------------
-
-
-
-        // ---------------------------------------------------
-        // PRESENCE
-        // ---------------------------------------------------
-
-
-
-        // ---------------------------------------------------
-        // REGISTER LISTENERS
-        // ---------------------------------------------------
 
         socket.on(
             "connect",
@@ -311,8 +284,9 @@ const SocketProvider = ({ children }) => {
         updateConversationLastMessage({
             setConversations,
             conversationId,
-            msg,
+            msg
         });
+        console.log("LOCAL UPDATE");
     };
 
     const replaceMessageMedia = (

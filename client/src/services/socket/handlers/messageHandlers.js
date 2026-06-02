@@ -91,6 +91,7 @@ export const createMessageHandlers =
                     updated
                 );
             });
+            console.log("NEW MESSAGE EVENT");
         };
 
         // ---------------------------------------------------
@@ -140,11 +141,12 @@ export const createMessageHandlers =
                 };
             });
 
-            updateConversationLastMessage({
-    setConversations,
-    conversationId: msg.conversationId,
-    msg,
-});
+//             updateConversationLastMessage({
+//     setConversations,
+//     conversationId: msg.conversationId,
+//     msg,
+// });
+console.log("MESSAGE SENT EVENT");
         };
 
         // ---------------------------------------------------

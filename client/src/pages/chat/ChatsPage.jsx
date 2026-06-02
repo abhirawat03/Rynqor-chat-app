@@ -48,11 +48,17 @@ const ChatsPage = () => {
 
   }, [data]);
 
-  useEffect(() => {
-  if (data) {
-    setInitialConversations(data);
-  }
-}, [data, setInitialConversations]);
+//   useEffect(() => {
+//     console.log(
+//     "SET INITIAL CONVERSATIONS",
+//     data
+//   );
+//   if (data) {
+//     setInitialConversations(data);
+//   }
+// }, [data, setInitialConversations]);
+
+
 
   const {
     data:user,

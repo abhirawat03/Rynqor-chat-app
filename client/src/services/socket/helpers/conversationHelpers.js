@@ -7,11 +7,11 @@ export const sortConversations = (list) => {
         );
     };
 
-export const updateConversationLastMessage = (
+export const updateConversationLastMessage = ({
         setConversations,
         conversationId,
         msg
-    ) => {
+    }) => {
 
         setConversations((prev) => {
 
@@ -57,4 +57,5 @@ export const updateConversationLastMessage = (
                 updated
             );
         });
+        console.log("CONVERSATION UPDATE");
     };
