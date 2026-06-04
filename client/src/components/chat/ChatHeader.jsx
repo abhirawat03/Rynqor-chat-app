@@ -16,28 +16,7 @@ const ChatHeader = ({
 
   return (
     <div
-      className="
-        shrink-0
-
-        flex
-        items-center
-        gap-3
-
-        border-b
-        border-border
-
-        bg-surface/90
-
-        px-3
-        py-3
-
-        text-foreground
-
-        backdrop-blur-xl
-
-        transition-colors
-        duration-300
-      "
+      className="flex items-center gap-3 px-3 py-3 transition-colors duration-300 border-b shrink-0 border-border bg-surface/90 text-foreground backdrop-blur-xl"
     >
 
       {/* BACK BUTTON */}
@@ -81,39 +60,11 @@ const ChatHeader = ({
 
   }}
 
-  className="
-    flex
-    cursor-pointer
-    min-w-0
-    flex-1
-    items-center
-    gap-3
-
-    text-left
-  "
+  className="flex items-center flex-1 min-w-0 gap-3 text-left cursor-pointer "
 >
       {/* AVATAR */}
       <div
-        className="
-          relative
-
-          flex
-          h-11
-          w-11
-          shrink-0
-          items-center
-          justify-center
-
-          overflow-hidden
-          rounded-full
-
-          bg-surface-secondary
-
-          text-sm
-          font-bold
-
-          text-foreground
-        "
+        className="relative flex items-center justify-center overflow-hidden text-sm font-bold rounded-full h-11 w-11 shrink-0 bg-surface-secondary text-foreground"
       >
 
         {avatar ? (
@@ -121,14 +72,7 @@ const ChatHeader = ({
           <img
             src={avatar?.url}
             alt={name}
-            className="
-              h-full
-              w-full
-              border-2
-              border-border
-              rounded-full
-              object-cover
-            "
+            className="object-cover w-full h-full border-2 rounded-full border-border"
           />
 
         ) : (
@@ -146,24 +90,7 @@ const ChatHeader = ({
           isOnline && (
 
             <div
-              className="
-                absolute
-                bottom-0
-                right-0
-
-                flex
-                h-4
-                w-4
-                items-center
-                justify-center
-
-                rounded-full
-
-                border-2
-                border-surface
-
-                bg-green-500
-              "
+              className="absolute bottom-0 right-0 flex items-center justify-center w-4 h-4 bg-green-500 border-2 rounded-full border-surface"
             >
 
               <FaCircle
@@ -181,22 +108,12 @@ const ChatHeader = ({
 
       {/* USER INFO */}
       <div
-        className="
-          min-w-0
-          flex-1
-        "
+        className="flex-1 min-w-0 "
       >
 
         {/* NAME */}
         <p
-          className="
-            truncate
-
-            text-sm
-            font-semibold
-
-            text-foreground
-          "
+          className="text-sm font-semibold truncate text-foreground"
         >
           {name || "Unknown"}
         </p>

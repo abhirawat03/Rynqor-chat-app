@@ -51,15 +51,7 @@ const MessageList = ({
 
   return (
     <div
-      className="
-        flex-1
-        min-h-0
-
-        bg-background
-
-        transition-colors
-        duration-300
-      "
+      className="flex-1 min-h-0 transition-colors duration-300 bg-background"
     >
       <Virtuoso
         key={conversationId}
@@ -109,16 +101,7 @@ const MessageList = ({
               )}
 
               <div
-                className="
-          mx-auto
-          w-full
-          max-w-5xl
-
-          px-3
-          pb-1
-
-          first:pt-3
-        "
+                className="w-full max-w-5xl px-3 pb-1 mx-auto first:pt-3"
               >
                 <Message
                   message={msg}
@@ -141,7 +124,7 @@ const MessageList = ({
     Footer: () => (
       <>
         {isTyping && (
-          <div className="mx-auto w-full max-w-5xl px-3 py-2">
+          <div className="w-full max-w-5xl px-3 py-2 mx-auto">
             <TypingIndicator />
           </div>
         )}

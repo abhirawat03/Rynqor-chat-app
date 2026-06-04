@@ -14,17 +14,7 @@ function AppLayout() {
 
   return (
     <div
-      className="
-        flex
-        h-screen
-        overflow-hidden
-
-        bg-background
-        text-foreground
-
-        transition-colors
-        duration-300
-      "
+      className="flex h-screen overflow-hidden transition-colors duration-300 bg-background text-foreground"
     >
 
       {/* DESKTOP SIDEBAR */}
@@ -42,12 +32,7 @@ function AppLayout() {
 
       {/* RIGHT SIDE */}
       <div
-        className="
-          flex
-          flex-1
-          flex-col
-          overflow-hidden
-        "
+        className="flex flex-col flex-1 overflow-hidden "
       >
 
         {/* HEADER */}
@@ -67,19 +52,11 @@ function AppLayout() {
 
         {/* MAIN */}
         <main
-          className="
-            flex-1
-            min-h-0
-            overflow-hidden
-          "
+          className="flex-1 min-h-0 overflow-hidden "
         >
 
           <div
-            className="
-              flex
-              h-full
-              flex-col
-            "
+            className="flex flex-col h-full "
           >
             <Outlet />
           </div>

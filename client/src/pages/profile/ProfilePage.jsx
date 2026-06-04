@@ -281,63 +281,24 @@ const ProfilePage = () => {
   return (
 
     <div
-      className="
-        scrollbar-hide
-
-        flex-1
-
-        overflow-y-auto
-
-        bg-background
-
-        pb-16
-
-        text-foreground
-
-        transition-colors
-        duration-300
-
-        md:pb-0
-      "
+      className="flex-1 pb-16 overflow-y-auto transition-colors duration-300 scrollbar-hide bg-background text-foreground md:pb-0"
     >
 
       <div
-        className="
-          mx-auto
-
-          flex
-          w-full
-          max-w-3xl
-          flex-col
-          gap-6
-
-          p-4
-
-          md:p-6
-        "
+        className="flex flex-col w-full max-w-3xl gap-6 p-4 mx-auto md:p-6"
       >
 
         {/* HEADER */}
         <div className="hidden md:block">
 
           <h1
-            className="
-              text-3xl
-              font-bold
-              tracking-tight
-            "
+            className="text-3xl font-bold tracking-tight "
           >
             Profile
           </h1>
 
           <p
-            className="
-              mt-1
-
-              text-sm
-
-              text-muted
-            "
+            className="mt-1 text-sm text-muted"
           >
             Manage your account
             settings
@@ -347,41 +308,16 @@ const ProfilePage = () => {
 
         {/* PROFILE CARD */}
         <div
-          className="
-            rounded-3xl
-
-            border
-            border-border
-
-            bg-surface
-
-            p-6
-
-            shadow-sm
-
-            transition-all
-            duration-300
-          "
+          className="p-6 transition-all duration-300 border shadow-sm rounded-3xl border-border bg-surface"
         >
 
           <div
-            className="
-              flex
-              flex-col
-              items-center
-              gap-5
-
-              sm:flex-row
-            "
+            className="flex flex-col items-center gap-5 sm:flex-row"
           >
 
             {/* AVATAR */}
             <div
-              className="
-                flex
-                flex-col
-                items-center
-              "
+              className="flex flex-col items-center "
             >
 
               <button
@@ -435,43 +371,13 @@ const ProfilePage = () => {
 
                     alt="profile"
 
-                    className="
-                      h-24
-                      w-24
-
-                      rounded-full
-
-                      object-cover
-
-                      ring-4
-                      ring-surface-secondary
-
-                      transition-all
-                      duration-300
-                    "
+                    className="object-cover w-24 h-24 transition-all duration-300 rounded-full ring-4 ring-surface-secondary"
                   />
 
                 ) : (
 
                   <div
-                    className="
-                      flex
-                      h-24
-                      w-24
-                      items-center
-                      justify-center
-
-                      rounded-full
-
-                      bg-surface-secondary
-
-                      text-3xl
-                      font-semibold
-                      text-white
-
-                      ring-4
-                      ring-surface-secondary
-                    "
+                    className="flex items-center justify-center w-24 h-24 text-3xl font-semibold text-white rounded-full bg-surface-secondary ring-4 ring-surface-secondary"
                   >
 
                     {firstLetter}
@@ -504,18 +410,7 @@ const ProfilePage = () => {
                     >
 
                       <div
-                        className="
-                        h-6
-                        w-6
-
-                        animate-spin
-
-                        rounded-full
-
-                        border-2
-                        border-white/30
-                        border-t-white
-                      "
+                        className="w-6 h-6 border-2 rounded-full animate-spin border-white/30 border-t-white"
                       />
 
                     </div>
@@ -598,20 +493,11 @@ const ProfilePage = () => {
 
             {/* INFO */}
             <div
-              className="
-                flex-1
-
-                text-center
-
-                sm:text-left
-              "
+              className="flex-1 text-center sm:text-left"
             >
 
               <h2
-                className="
-                  text-2xl
-                  font-semibold
-                "
+                className="text-2xl font-semibold "
               >
                 {
                   currentUser?.fullName
@@ -619,11 +505,7 @@ const ProfilePage = () => {
               </h2>
 
               <p
-                className="
-                  text-sm
-
-                  text-muted
-                "
+                className="text-sm text-muted"
               >
                 @
                 {
@@ -645,23 +527,7 @@ const ProfilePage = () => {
                     isUpdatingAvatar
                   }
 
-                  className="
-                    mt-2
-                    cursor-pointer
-
-                    text-sm
-                    font-medium
-
-                    text-accent
-
-                    transition-all
-                    duration-200
-
-                    hover:opacity-80
-
-                    disabled:cursor-not-allowed
-                    disabled:opacity-50
-                  "
+                  className="mt-2 text-sm font-medium transition-all duration-200 cursor-pointer text-accent hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
                 >
 
                   {isDeletingAvatar
@@ -673,14 +539,7 @@ const ProfilePage = () => {
               )}
 
               <p
-                className="
-                  mt-3
-
-                  text-sm
-                  leading-relaxed
-
-                  text-foreground/80
-                "
+                className="mt-3 text-sm leading-relaxed text-foreground/80"
               >
                 {currentUser?.bio || "No bio yet"}
               </p>
@@ -691,12 +550,7 @@ const ProfilePage = () => {
 
           {/* FORM */}
           <div
-            className="
-              mt-8
-
-              grid
-              gap-5
-            "
+            className="grid gap-5 mt-8 "
           >
 
             {/* USERNAME */}
@@ -705,15 +559,7 @@ const ProfilePage = () => {
               <label
                 htmlFor="username"
 
-                className="
-                  mb-2
-                  block
-
-                  text-sm
-                  font-medium
-
-                  text-muted
-                "
+                className="block mb-2 text-sm font-medium text-muted"
               >
                 Username
               </label>
@@ -740,30 +586,7 @@ const ProfilePage = () => {
 
                 placeholder="Username"
 
-                className="
-                  w-full
-
-                  rounded-2xl
-
-                  border
-                  border-border
-
-                  bg-background
-
-                  px-4
-                  py-3
-
-                  text-foreground
-
-                  outline-none
-
-                  transition-all
-                  duration-200
-
-                  focus:border-accent
-                  focus:ring-4
-                  focus:ring-accent/10
-                "
+                className="w-full px-4 py-3 transition-all duration-200 border outline-none rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10"
               />
 
             </div>
@@ -774,15 +597,7 @@ const ProfilePage = () => {
               <label
                 htmlFor="bio"
 
-                className="
-                  mb-2
-                  block
-
-                  text-sm
-                  font-medium
-
-                  text-muted
-                "
+                className="block mb-2 text-sm font-medium text-muted"
               >
                 Bio
               </label>
@@ -810,32 +625,7 @@ const ProfilePage = () => {
 
                 placeholder="Write something..."
 
-                className="
-                  w-full
-
-                  resize-none
-
-                  rounded-2xl
-
-                  border
-                  border-border
-
-                  bg-background
-
-                  px-4
-                  py-3
-
-                  text-foreground
-
-                  outline-none
-
-                  transition-all
-                  duration-200
-
-                  focus:border-accent
-                  focus:ring-4
-                  focus:ring-accent/10
-                "
+                className="w-full px-4 py-3 transition-all duration-200 border outline-none resize-none rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10"
               />
 
             </div>
@@ -894,51 +684,23 @@ const ProfilePage = () => {
 
         {/* APPEARANCE */}
         <div
-          className="
-            rounded-3xl
-
-            border
-            border-border
-
-            bg-surface
-
-            p-6
-
-            shadow-sm
-          "
+          className="p-6 border shadow-sm rounded-3xl border-border bg-surface"
         >
 
           <div
-            className="
-              flex
-              flex-col
-              gap-5
-
-              sm:flex-row
-              sm:items-center
-              sm:justify-between
-            "
+            className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
           >
 
             <div>
 
               <h3
-                className="
-                  text-lg
-                  font-semibold
-                "
+                className="text-lg font-semibold "
               >
                 Appearance
               </h3>
 
               <p
-                className="
-                  mt-1
-
-                  text-sm
-
-                  text-muted
-                "
+                className="mt-1 text-sm text-muted"
               >
                 Customize app
                 appearance
@@ -948,11 +710,7 @@ const ProfilePage = () => {
 
             {/* THEME BUTTONS */}
             <div
-              className="
-                flex
-                flex-wrap
-                gap-2
-              "
+              className="flex flex-wrap gap-2 "
             >
 
               {[
@@ -1026,50 +784,24 @@ const ProfilePage = () => {
 
         {/* SECURITY */}
         <div
-          className="
-            rounded-3xl
-
-            border
-            border-border
-
-            bg-surface
-
-            p-6
-
-            shadow-sm
-          "
+          className="p-6 border shadow-sm rounded-3xl border-border bg-surface"
         >
 
           <h3
-            className="
-              text-lg
-              font-semibold
-            "
+            className="text-lg font-semibold "
           >
             Security
           </h3>
 
           <p
-            className="
-              mt-1
-
-              text-sm
-
-              text-muted
-            "
+            className="mt-1 text-sm text-muted"
           >
             Manage your account
             security
           </p>
 
           <div
-            className="
-    mt-6
-
-    flex
-    flex-col
-    gap-3
-  "
+            className="flex flex-col gap-3 mt-6 "
           >
             {/* SESSIONS */}
             <button
@@ -1081,52 +813,21 @@ const ProfilePage = () => {
                 )
               }
 
-              className="
-    flex
-    items-center
-    justify-between
-    cursor-pointer
-
-    rounded-2xl
-
-    border
-    border-border
-
-    bg-background
-
-    px-5
-    py-4
-
-    transition-all
-    duration-200
-
-    hover:bg-hover
-  "
+              className="flex items-center justify-between px-5 py-4 transition-all duration-200 border cursor-pointer rounded-2xl border-border bg-background hover:bg-hover"
             >
 
               <div
-                className="
-      text-left
-    "
+                className="text-left "
               >
 
                 <p
-                  className="
-        text-sm
-        font-medium
-      "
+                  className="text-sm font-medium "
                 >
                   Manage Devices
                 </p>
 
                 <p
-                  className="
-        mt-1
-
-        text-xs
-
-        text-muted
-      "
+                  className="mt-1 text-xs text-muted"
                 >
                   {
                     sessions.length
@@ -1143,13 +844,7 @@ const ProfilePage = () => {
 
             {/* ACTIONS */}
             <div
-              className="
-      flex
-      flex-col
-      gap-3
-
-      sm:flex-row
-    "
+              className="flex flex-col gap-3 sm:flex-row"
             >
 
               <button
@@ -1161,28 +856,7 @@ const ProfilePage = () => {
                   )
                 }
 
-                className="
-        flex
-        items-center
-        justify-center
-        gap-2
-        cursor-pointer
-
-        rounded-2xl
-
-        border
-        border-border
-
-        bg-background
-
-        px-5
-        py-3
-
-        transition-all
-        duration-200
-
-        hover:bg-hover
-      "
+                className="flex items-center justify-center gap-2 px-5 py-3 transition-all duration-200 border cursor-pointer rounded-2xl border-border bg-background hover:bg-hover"
               >
 
                 <IoLockClosed
@@ -1204,25 +878,7 @@ const ProfilePage = () => {
                   isLoggingOut
                 }
 
-                className="
-        flex
-        cursor-pointer
-        items-center
-        justify-center
-        gap-2
-        rounded-2xl
-        px-5
-        py-3
-        transition-all
-        duration-200
-        hover:bg-hover
-        border 
-        border-border
-        bg-background
-        text-foreground
-        disabled:cursor-not-allowed
-        disabled:opacity-70
-      "
+                className="flex items-center justify-center gap-2 px-5 py-3 transition-all duration-200 border cursor-pointer rounded-2xl hover:bg-hover border-border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-70"
               >
 
                 <IoLogOut
@@ -1255,21 +911,7 @@ const ProfilePage = () => {
             )
           }
 
-          className="
-            fixed
-            inset-0
-            z-50
-
-            flex
-            items-center
-            justify-center
-
-            bg-black/85
-
-            p-4
-
-            backdrop-blur-sm
-          "
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm"
         >
 
           <div
@@ -1277,15 +919,7 @@ const ProfilePage = () => {
               e.stopPropagation()
             }
 
-            className="
-              relative
-
-              overflow-hidden
-
-              rounded-3xl
-
-              shadow-2xl
-            "
+            className="relative overflow-hidden shadow-2xl rounded-3xl"
           >
 
             <img
@@ -1313,32 +947,7 @@ const ProfilePage = () => {
                 )
               }
 
-              className="
-                absolute
-                right-3
-                top-3
-                cursor-pointer
-
-                flex
-                h-10
-                w-10
-                items-center
-                justify-center
-
-                rounded-full
-
-                bg-black/50
-
-                text-xl
-                text-white
-
-                backdrop-blur-md
-
-                transition-all
-                duration-200
-
-                hover:bg-black/70
-              "
+              className="absolute flex items-center justify-center w-10 h-10 text-xl text-white transition-all duration-200 rounded-full cursor-pointer right-3 top-3 bg-black/50 backdrop-blur-md hover:bg-black/70"
             >
 
               ✕
@@ -1354,50 +963,21 @@ const ProfilePage = () => {
       {showPasswordModal && (
 
         <div
-          className="
-      fixed
-      inset-0
-      z-50
-
-      flex
-      items-center
-      justify-center
-
-      bg-black/70
-
-      p-4
-    "
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
         >
 
           <div
-            className="
-        w-full
-        max-w-md
-
-        rounded-3xl
-
-        bg-surface
-
-        p-6
-      "
+            className="w-full max-w-md p-6 rounded-3xl bg-surface"
           >
 
             <h2
-              className="
-          text-xl
-          font-semibold
-        "
+              className="text-xl font-semibold "
             >
               Change Password
             </h2>
 
             <div
-              className="
-          mt-5
-
-          grid
-          gap-4
-        "
+              className="grid gap-4 mt-5 "
             >
 
               <input
@@ -1419,21 +999,7 @@ const ProfilePage = () => {
                   })
                 }
 
-                className="
-            w-full
-
-            rounded-2xl
-
-            border
-            border-border
-
-            bg-background
-
-            px-4
-            py-3
-
-            outline-none
-          "
+                className="w-full px-4 py-3 border outline-none rounded-2xl border-border bg-background"
               />
 
               <input
@@ -1455,33 +1021,13 @@ const ProfilePage = () => {
                   })
                 }
 
-                className="
-            w-full
-
-            rounded-2xl
-
-            border
-            border-border
-
-            bg-background
-
-            px-4
-            py-3
-
-            outline-none
-          "
+                className="w-full px-4 py-3 border outline-none rounded-2xl border-border bg-background"
               />
 
             </div>
 
             <div
-              className="
-          mt-6
-
-          flex
-          justify-end
-          gap-3
-        "
+              className="flex justify-end gap-3 mt-6 "
             >
 
               <button
@@ -1491,16 +1037,7 @@ const ProfilePage = () => {
                   )
                 }
 
-                className="
-            rounded-2xl
-            cursor-pointer
-
-            border
-            border-border
-
-            px-4
-            py-2
-          "
+                className="px-4 py-2 border cursor-pointer rounded-2xl border-border"
               >
                 Cancel
               </button>
@@ -1514,17 +1051,7 @@ const ProfilePage = () => {
                   isChangingPassword
                 }
 
-                className="
-            rounded-2xl
-            cursor-pointer
-
-            bg-accent
-
-            px-4
-            py-2
-
-            text-white
-          "
+                className="px-4 py-2 text-white cursor-pointer rounded-2xl bg-accent"
               >
 
                 {isChangingPassword
@@ -1545,60 +1072,27 @@ const ProfilePage = () => {
         showSessionsModal && (
 
           <div
-            className="
-        fixed
-        inset-0
-        z-50
-
-        flex
-        items-center
-        justify-center
-
-        bg-black/70
-
-        p-4
-      "
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
           >
 
             <div
-              className="
-    w-full
-    max-w-2xl
-
-    rounded-3xl
-
-    bg-surface
-    p-6
-  "
+              className="w-full max-w-2xl p-6 rounded-3xl bg-surface"
             >
 
               <div
-                className="
-      flex
-      items-center
-      justify-between
-    "
+                className="flex items-center justify-between "
               >
 
                 <div>
 
                   <h2
-                    className="
-          text-xl
-          font-semibold
-        "
+                    className="text-xl font-semibold "
                   >
                     Active Sessions
                   </h2>
 
                   <p
-                    className="
-          mt-1
-
-          text-sm
-
-          text-muted
-        "
+                    className="mt-1 text-sm text-muted"
                   >
                     Devices currently
                     logged into your
@@ -1614,10 +1108,7 @@ const ProfilePage = () => {
                     )
                   }
 
-                  className="
-        text-xl
-        cursor-pointer
-      "
+                  className="text-xl cursor-pointer "
                 >
                   ✕
                 </button>
@@ -1644,57 +1135,21 @@ const ProfilePage = () => {
                   <div>
 
                     <h3
-                      className="
-            mb-3
-
-            text-sm
-            font-semibold
-
-            text-muted
-          "
+                      className="mb-3 text-sm font-semibold text-muted"
                     >
                       Current Device
                     </h3>
 
                     <div
-                      className="
-            flex
-            items-center
-            justify-between
-
-            rounded-2xl
-
-            border
-            border-accent/20
-
-            bg-accent/5
-
-            p-4
-          "
+                      className="flex items-center justify-between p-4 border rounded-2xl border-accent/20 bg-accent/5"
                     >
 
                       <div
-                        className="
-              flex
-              items-center
-              gap-3
-            "
+                        className="flex items-center gap-3 "
                       >
 
                         <div
-                          className="
-                flex
-                h-11
-                w-11
-                items-center
-                justify-center
-
-                rounded-2xl
-
-                bg-accent/10
-
-                text-accent
-              "
+                          className="flex items-center justify-center h-11 w-11 rounded-2xl bg-accent/10 text-accent"
                         >
 
                           {currentSession.device
@@ -1726,10 +1181,7 @@ const ProfilePage = () => {
                         <div>
 
                           <h5
-                            className="
-                  text-sm
-                  font-medium
-                "
+                            className="text-sm font-medium "
                           >
                             {
                               currentSession.device
@@ -1737,13 +1189,7 @@ const ProfilePage = () => {
                           </h5>
 
                           <p
-                            className="
-                  mt-1
-
-                  text-xs
-
-                  text-muted
-                "
+                            className="mt-1 text-xs text-muted"
                           >
                             {
                               currentSession.location
@@ -1751,13 +1197,7 @@ const ProfilePage = () => {
                           </p>
 
                           <p
-                            className="
-                  mt-1
-
-                  text-xs
-
-                  text-muted
-                "
+                            className="mt-1 text-xs text-muted"
                           >
                             {new Date(
                               currentSession.lastUsedAt
@@ -1769,19 +1209,7 @@ const ProfilePage = () => {
                       </div>
 
                       <div
-                        className="
-              rounded-full
-
-              bg-green-500/10
-
-              px-3
-              py-1
-
-              text-xs
-              font-medium
-
-              text-green-500
-            "
+                        className="px-3 py-1 text-xs font-medium text-green-500 rounded-full bg-green-500/10"
                       >
                         Current
                       </div>
@@ -1797,23 +1225,13 @@ const ProfilePage = () => {
                   <div>
 
                     <h3
-                      className="
-            mb-3
-
-            text-sm
-            font-semibold
-
-            text-muted
-          "
+                      className="mb-3 text-sm font-semibold text-muted"
                     >
                       Other Devices
                     </h3>
 
                     <div
-                      className="
-            grid
-            gap-3
-          "
+                      className="grid gap-3 "
                     >
 
                       {otherSessions.map(
@@ -1822,44 +1240,15 @@ const ProfilePage = () => {
                           <div
                             key={session._id}
 
-                            className="
-                  flex
-                  items-center
-                  justify-between
-
-                  rounded-2xl
-
-                  border
-                  border-border
-
-                  bg-background
-
-                  p-4
-                "
+                            className="flex items-center justify-between p-4 border rounded-2xl border-border bg-background"
                           >
 
                             <div
-                              className="
-                    flex
-                    items-center
-                    gap-3
-                  "
+                              className="flex items-center gap-3 "
                             >
 
                               <div
-                                className="
-                      flex
-                      h-11
-                      w-11
-                      items-center
-                      justify-center
-
-                      rounded-2xl
-
-                      bg-accent/10
-
-                      text-accent
-                    "
+                                className="flex items-center justify-center h-11 w-11 rounded-2xl bg-accent/10 text-accent"
                               >
 
                                 {session.device
@@ -1891,10 +1280,7 @@ const ProfilePage = () => {
                               <div>
 
                                 <h5
-                                  className="
-                        text-sm
-                        font-medium
-                      "
+                                  className="text-sm font-medium "
                                 >
                                   {
                                     session.device
@@ -1902,13 +1288,7 @@ const ProfilePage = () => {
                                 </h5>
 
                                 <p
-                                  className="
-                        mt-1
-
-                        text-xs
-
-                        text-muted
-                      "
+                                  className="mt-1 text-xs text-muted"
                                 >
                                   {
                                     session.location
@@ -1916,13 +1296,7 @@ const ProfilePage = () => {
                                 </p>
 
                                 <p
-                                  className="
-                        mt-1
-
-                        text-xs
-
-                        text-muted
-                      "
+                                  className="mt-1 text-xs text-muted"
                                 >
                                   {new Date(
                                     session.createdAt
@@ -1940,19 +1314,7 @@ const ProfilePage = () => {
                                 )
                               }
 
-                              className="
-                    text-sm
-
-                    font-medium
-                    cursor-pointer
-
-                    text-red-500
-
-                    transition-opacity
-                    duration-200
-
-                    hover:opacity-80
-                  "
+                              className="text-sm font-medium text-red-500 transition-opacity duration-200 cursor-pointer hover:opacity-80"
                             >
                               Log out
                             </button>

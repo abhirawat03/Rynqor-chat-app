@@ -3,24 +3,7 @@ import React from "react";
 const AppHeader = () => {
     return (
         <header
-            className="
-        shrink-0
-
-        border-b
-        border-border
-
-        bg-surface
-
-        p-4
-
-        text-lg
-        font-semibold
-
-        text-foreground
-
-        transition-colors
-        duration-300
-      "
+            className="p-4 text-lg font-semibold transition-colors duration-300 border-b shrink-0 border-border bg-surface text-foreground"
         >
             Rynqor
         </header>

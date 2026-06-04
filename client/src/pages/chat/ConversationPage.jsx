@@ -165,14 +165,7 @@ const handleTopReached =
 
     return (
       <div
-        className="
-          flex
-          flex-1
-          items-center
-          justify-center
-
-          duration-300
-        "
+        className="flex items-center justify-center flex-1 duration-300 "
       >
         Loading...
       </div>
@@ -202,16 +195,7 @@ const handleTopReached =
 
     return (
       <div
-        className="
-          flex
-          flex-1
-          items-center
-          justify-center
-
-
-          transition-colors
-          duration-300
-        "
+        className="flex items-center justify-center flex-1 transition-colors duration-300 "
       >
         Loading chat...
       </div>
@@ -225,19 +209,7 @@ const handleTopReached =
 
     return (
       <div
-        className="
-          flex
-          flex-1
-          items-center
-          justify-center
-
-          bg-background
-
-          text-red-500
-
-          transition-colors
-          duration-300
-        "
+        className="flex items-center justify-center flex-1 text-red-500 transition-colors duration-300 bg-background"
       >
         Failed to load chat
       </div>
@@ -247,14 +219,7 @@ const handleTopReached =
 
   return (
     <div
-      className="
-    relative
-
-    flex
-    flex-1
-
-    overflow-hidden
-  "
+      className="relative flex flex-1 overflow-hidden "
     >
       <div
         className={`
@@ -339,19 +304,7 @@ duration-300
       {showProfile && (
 
         <div
-          className="
-      absolute
-      inset-0
-      z-50
-
-      flex
-
-      bg-background
-
-      xl:static
-xl:z-auto
-xl:bg-transparent
-    "
+          className="absolute inset-0 z-50 flex bg-background xl:static xl:z-auto xl:bg-transparent"
         >
 
           {/* OVERLAY */}
@@ -360,16 +313,7 @@ xl:bg-transparent
               setShowProfile(false)
             }
 
-            className="
-        hidden
-
-        bg-black/30
-
-        backdrop-blur-sm
-
-        xl:block
-xl:flex-1
-      "
+            className="hidden bg-black/30 backdrop-blur-sm xl:block xl:flex-1"
           />
 
           {/* PANEL */}

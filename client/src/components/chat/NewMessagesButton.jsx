@@ -9,35 +9,11 @@ const NewMessagesButton = ({
 
     return (
         <div
-            className="
-        absolute
-        bottom-24
-        left-1/2
-        z-20
-
-        -translate-x-1/2
-      "
+            className="absolute z-20 -translate-x-1/2 bottom-24 left-1/2"
         >
             <button
                 onClick={onClick}
-                className="
-          rounded-full
-
-          bg-surface-secondary
-          px-4
-          py-2
-
-          text-sm
-          font-medium
-          text-primary-foreground
-
-          shadow-lg
-
-          transition-all
-          duration-200
-
-          hover:scale-105
-        "
+                className="px-4 py-2 text-sm font-medium transition-all duration-200 rounded-full shadow-lg bg-surface-secondary text-primary-foreground hover:scale-105"
             >
                 ↓ {count} new messages
             </button>

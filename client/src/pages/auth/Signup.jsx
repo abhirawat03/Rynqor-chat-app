@@ -173,21 +173,7 @@ const Signup = () => {
             {error && (
 
                 <div
-                    className="
-            rounded-2xl
-
-            border
-            border-red-500/20
-
-            bg-red-500/10
-
-            px-4
-            py-3
-
-            text-sm
-
-            text-red-500
-          "
+                    className="px-4 py-3 text-sm text-red-500 border rounded-2xl border-red-500/20 bg-red-500/10"
                 >
                     {error}
                 </div>
@@ -196,35 +182,17 @@ const Signup = () => {
 
             {/* HEADER */}
             <div
-                className="
-          text-center
-        "
+                className="text-center "
             >
 
                 <h1
-                    className="
-            text-3xl
-            font-bold
-            tracking-tight
-
-            text-foreground
-
-            sm:text-4xl
-          "
+                    className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
                 >
                     Create account
                 </h1>
 
                 <p
-                    className="
-            mt-2
-
-            text-sm
-
-            text-muted
-
-            sm:text-base
-          "
+                    className="mt-2 text-sm text-muted sm:text-base"
                 >
                     Start chatting with people instantly
                 </p>
@@ -233,9 +201,7 @@ const Signup = () => {
 
             {/* FULL NAME */}
             <div
-                className="
-          relative
-        "
+                className="relative "
             >
 
                 <input
@@ -260,66 +226,12 @@ const Signup = () => {
 
                     placeholder=" "
 
-                    className="
-            peer
-
-            w-full
-
-            rounded-2xl
-
-            border
-            border-border
-
-            bg-background
-
-            px-4
-            pb-3
-            pt-6
-
-            text-sm
-
-            text-foreground
-
-            outline-none
-
-            transition-all
-            duration-200
-
-            focus:border-accent
-            focus:ring-4
-            focus:ring-accent/10
-
-            disabled:opacity-60
-
-            sm:text-base
-          "
+                    className="w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60 sm:text-base"
                 />
 
                 <label
                     htmlFor="fullName"
-                    className="
-            pointer-events-none
-
-            absolute
-            left-4
-            top-1/2
-
-            -translate-y-1/2
-
-            text-sm
-
-            text-muted
-
-            transition-all
-            duration-200
-
-            peer-focus:top-4
-            peer-focus:text-xs
-            peer-focus:text-accent
-
-            peer-not-placeholder-shown:top-4
-            peer-not-placeholder-shown:text-xs
-          "
+                    className="absolute text-sm transition-all duration-200 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-muted peer-focus:top-4 peer-focus:text-xs peer-focus:text-accent peer-not-placeholder-shown:top-4 peer-not-placeholder-shown:text-xs"
                 >
                     Full name
                 </label>
@@ -328,9 +240,7 @@ const Signup = () => {
 
             {/* USERNAME */}
             <div
-                className="
-          relative
-        "
+                className="relative "
             >
 
                 <input
@@ -355,66 +265,12 @@ const Signup = () => {
 
                     placeholder=" "
 
-                    className="
-            peer
-
-            w-full
-
-            rounded-2xl
-
-            border
-            border-border
-
-            bg-background
-
-            px-4
-            pb-3
-            pt-6
-
-            text-sm
-
-            text-foreground
-
-            outline-none
-
-            transition-all
-            duration-200
-
-            focus:border-accent
-            focus:ring-4
-            focus:ring-accent/10
-
-            disabled:opacity-60
-
-            sm:text-base
-          "
+                    className="w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60 sm:text-base"
                 />
 
                 <label
                     htmlFor="username"
-                    className="
-            pointer-events-none
-
-            absolute
-            left-4
-            top-1/2
-
-            -translate-y-1/2
-
-            text-sm
-
-            text-muted
-
-            transition-all
-            duration-200
-
-            peer-focus:top-4
-            peer-focus:text-xs
-            peer-focus:text-accent
-
-            peer-not-placeholder-shown:top-4
-            peer-not-placeholder-shown:text-xs
-          "
+                    className="absolute text-sm transition-all duration-200 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-muted peer-focus:top-4 peer-focus:text-xs peer-focus:text-accent peer-not-placeholder-shown:top-4 peer-not-placeholder-shown:text-xs"
                 >
                     Username
                 </label>
@@ -423,9 +279,7 @@ const Signup = () => {
 
             {/* EMAIL */}
             <div
-                className="
-          relative
-        "
+                className="relative "
             >
 
                 <input
@@ -450,66 +304,12 @@ const Signup = () => {
 
                     placeholder=" "
 
-                    className="
-            peer
-
-            w-full
-
-            rounded-2xl
-
-            border
-            border-border
-
-            bg-background
-
-            px-4
-            pb-3
-            pt-6
-
-            text-sm
-
-            text-foreground
-
-            outline-none
-
-            transition-all
-            duration-200
-
-            focus:border-accent
-            focus:ring-4
-            focus:ring-accent/10
-
-            disabled:opacity-60
-
-            sm:text-base
-          "
+                    className="w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60 sm:text-base"
                 />
 
                 <label
                     htmlFor="email"
-                    className="
-            pointer-events-none
-
-            absolute
-            left-4
-            top-1/2
-
-            -translate-y-1/2
-
-            text-sm
-
-            text-muted
-
-            transition-all
-            duration-200
-
-            peer-focus:top-4
-            peer-focus:text-xs
-            peer-focus:text-accent
-
-            peer-not-placeholder-shown:top-4
-            peer-not-placeholder-shown:text-xs
-          "
+                    className="absolute text-sm transition-all duration-200 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-muted peer-focus:top-4 peer-focus:text-xs peer-focus:text-accent peer-not-placeholder-shown:top-4 peer-not-placeholder-shown:text-xs"
                 >
                     Email
                 </label>
@@ -518,9 +318,7 @@ const Signup = () => {
 
             {/* PASSWORD */}
             <div
-                className="
-          relative
-        "
+                className="relative "
             >
 
                 <input
@@ -545,66 +343,12 @@ const Signup = () => {
 
                     placeholder=" "
 
-                    className="
-            peer
-
-            w-full
-
-            rounded-2xl
-
-            border
-            border-border
-
-            bg-background
-
-            px-4
-            pb-3
-            pt-6
-
-            text-sm
-
-            text-foreground
-
-            outline-none
-
-            transition-all
-            duration-200
-
-            focus:border-accent
-            focus:ring-4
-            focus:ring-accent/10
-
-            disabled:opacity-60
-
-            sm:text-base
-          "
+                    className="w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60 sm:text-base"
                 />
 
                 <label
                     htmlFor="password"
-                    className="
-            pointer-events-none
-
-            absolute
-            left-4
-            top-1/2
-
-            -translate-y-1/2
-
-            text-sm
-
-            text-muted
-
-            transition-all
-            duration-200
-
-            peer-focus:top-4
-            peer-focus:text-xs
-            peer-focus:text-accent
-
-            peer-not-placeholder-shown:top-4
-            peer-not-placeholder-shown:text-xs
-          "
+                    className="absolute text-sm transition-all duration-200 -translate-y-1/2 pointer-events-none left-4 top-1/2 text-muted peer-focus:top-4 peer-focus:text-xs peer-focus:text-accent peer-not-placeholder-shown:top-4 peer-not-placeholder-shown:text-xs"
                 >
                     Password
                 </label>
@@ -659,36 +403,17 @@ const Signup = () => {
 
             {/* FOOTER */}
             <div
-                className="
-          text-center
-        "
+                className="text-center "
             >
 
                 <p
-                    className="
-            text-sm
-
-            text-muted
-
-            sm:text-base
-          "
+                    className="text-sm text-muted sm:text-base"
                 >
                     Already have an account?
 
                     <Link
                         to="/auth"
-                        className="
-              ml-1
-
-              font-medium
-
-              text-accent
-
-              transition-opacity
-              duration-200
-
-              hover:opacity-80
-            "
+                        className="ml-1 font-medium transition-opacity duration-200 text-accent hover:opacity-80"
                     >
                         Sign in
                     </Link>

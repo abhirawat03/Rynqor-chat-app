@@ -275,31 +275,14 @@ const Message = memo(({
       {preview && (
 
         <div
-          className="
-            fixed
-            inset-0
-            z-50
-
-            flex
-            items-center
-            justify-center
-
-            bg-black/90
-
-            p-4
-
-            backdrop-blur-md
-          "
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
           onClick={() =>
             setPreview(null)
           }
         >
 
           <div
-            className="
-              max-h-full
-              max-w-4xl
-            "
+            className="max-w-4xl max-h-full "
             onClick={(e) =>
               e.stopPropagation()
             }
@@ -351,13 +334,7 @@ const Message = memo(({
               "audio" && (
 
                 <div
-                  className="
-                    rounded-2xl
-
-                    bg-surface
-
-                    p-6
-                  "
+                  className="p-6 rounded-2xl bg-surface"
                 >
 
                   <audio
@@ -366,9 +343,7 @@ const Message = memo(({
                     src={
                       preview.url
                     }
-                    className="
-                      w-full
-                    "
+                    className="w-full "
                   />
 
                 </div>

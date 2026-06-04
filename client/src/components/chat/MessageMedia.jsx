@@ -48,48 +48,17 @@ const MessageMedia = memo(({
     isUploading && (
 
       <div
-        className="
-          absolute
-          inset-0
-          z-20
-
-          flex
-          flex-col
-          items-center
-          justify-center
-
-          bg-black/65
-
-          backdrop-blur-sm
-        "
+        className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/65 backdrop-blur-sm"
       >
 
         {/* SPINNER */}
         <div
-          className="
-            h-8
-            w-8
-
-            animate-spin
-
-            rounded-full
-
-            border-2
-            border-white/20
-            border-t-white
-          "
+          className="w-8 h-8 border-2 rounded-full animate-spin border-white/20 border-t-white"
         />
 
         {/* TEXT */}
         <p
-          className="
-            mt-3
-
-            text-xs
-            font-medium
-
-            text-white
-          "
+          className="mt-3 text-xs font-medium text-white "
         >
           Uploading...
         </p>
@@ -109,12 +78,7 @@ const MessageMedia = memo(({
     return (
 
       <div
-        className="
-          relative
-
-          overflow-hidden
-          rounded-2xl
-        "
+        className="relative overflow-hidden rounded-2xl"
       >
 
         <img
@@ -171,16 +135,7 @@ const MessageMedia = memo(({
           )
         }
 
-        className="
-          group
-
-          relative
-
-          cursor-pointer
-
-          overflow-hidden
-          rounded-2xl
-        "
+        className="relative overflow-hidden cursor-pointer group rounded-2xl"
       >
 
         <video
@@ -200,47 +155,11 @@ const MessageMedia = memo(({
 
         {/* PLAY ICON */}
         <div
-          className="
-            absolute
-            inset-0
-
-            flex
-            items-center
-            justify-center
-
-            bg-black/20
-
-            transition-colors
-            duration-300
-
-            group-hover:bg-black/30
-          "
+          className="absolute inset-0 flex items-center justify-center transition-colors duration-300 bg-black/20 group-hover:bg-black/30"
         >
 
           <div
-            className="
-              flex
-              h-12
-              w-12
-              items-center
-              justify-center
-
-              rounded-full
-
-              bg-white/90
-
-              text-lg
-              text-black
-
-              shadow-lg
-
-              backdrop-blur-sm
-
-              transition-transform
-              duration-300
-
-              group-hover:scale-105
-            "
+            className="flex items-center justify-center w-12 h-12 text-lg text-black transition-transform duration-300 rounded-full shadow-lg bg-white/90 backdrop-blur-sm group-hover:scale-105"
           >
             ▶
           </div>
@@ -266,9 +185,7 @@ const MessageMedia = memo(({
     return (
 
       <div
-        className="
-          relative
-        "
+        className="relative "
       >
 
         <div
@@ -278,93 +195,34 @@ const MessageMedia = memo(({
             )
           }
 
-          className="
-            flex
-            items-center
-            gap-3
-
-            cursor-pointer
-
-            rounded-2xl
-
-            border
-            border-border
-
-            bg-surface
-
-            p-3
-
-            transition-all
-            duration-200
-
-            hover:bg-hover
-          "
+          className="flex items-center gap-3 p-3 transition-all duration-200 border cursor-pointer rounded-2xl border-border bg-surface hover:bg-hover"
         >
 
           {/* ICON */}
           <div
-            className="
-              flex
-              h-11
-              w-11
-              shrink-0
-              items-center
-              justify-center
-
-              rounded-full
-
-              bg-accent
-
-              text-white
-            "
+            className="flex items-center justify-center text-white rounded-full h-11 w-11 shrink-0 bg-accent"
           >
             🎵
           </div>
 
           {/* CONTENT */}
           <div
-            className="
-              min-w-0
-              flex-1
-            "
+            className="flex-1 min-w-0 "
           >
 
             <p
-              className="
-                truncate
-
-                text-sm
-                font-medium
-
-                text-foreground
-              "
+              className="text-sm font-medium truncate text-foreground"
             >
               {item.name || "Audio"}
             </p>
 
             {/* WAVE */}
             <div
-              className="
-                mt-2
-
-                h-1
-
-                overflow-hidden
-                rounded-full
-
-                bg-hover
-              "
+              className="h-1 mt-2 overflow-hidden rounded-full bg-hover"
             >
 
               <div
-                className="
-                  h-full
-                  w-1/3
-
-                  rounded-full
-
-                  bg-accent
-                "
+                className="w-1/3 h-full rounded-full bg-accent"
               />
 
             </div>
@@ -433,67 +291,29 @@ const MessageMedia = memo(({
 
       {/* TOP */}
       <div
-        className="
-          flex
-          items-center
-          gap-3
-
-          p-4
-        "
+        className="flex items-center gap-3 p-4 "
       >
 
         {/* EXTENSION */}
         <div
-          className="
-            flex
-            h-11
-            w-11
-            shrink-0
-            items-center
-            justify-center
-
-            rounded-xl
-
-            bg-accent
-
-            text-xs
-            font-semibold
-
-            text-white
-          "
+          className="flex items-center justify-center text-xs font-semibold text-white h-11 w-11 shrink-0 rounded-xl bg-accent"
         >
           {extension || "FILE"}
         </div>
 
         {/* INFO */}
         <div
-          className="
-            min-w-0
-            flex-1
-          "
+          className="flex-1 min-w-0 "
         >
 
           <p
-            className="
-              truncate
-
-              text-sm
-              font-semibold
-
-              text-foreground
-            "
+            className="text-sm font-semibold truncate text-foreground"
           >
             {item.name}
           </p>
 
           <p
-            className="
-              mt-1
-
-              text-xs
-
-              text-muted
-            "
+            className="mt-1 text-xs text-muted"
           >
             Tap to open
           </p>
@@ -504,42 +324,17 @@ const MessageMedia = memo(({
 
       {/* BOTTOM */}
       <div
-        className="
-          flex
-          items-center
-          justify-between
-
-          border-t
-          border-border
-
-          bg-background/60
-
-          px-4
-          py-2
-        "
+        className="flex items-center justify-between px-4 py-2 border-t border-border bg-background/60"
       >
 
         <span
-          className="
-            text-xs
-
-            text-muted
-          "
+          className="text-xs text-muted"
         >
           Document
         </span>
 
         <div
-          className="
-            text-sm
-
-            text-foreground
-
-            transition-transform
-            duration-200
-
-            group-hover:translate-x-1
-          "
+          className="text-sm transition-transform duration-200 text-foreground group-hover:translate-x-1"
         >
           ↗
         </div>

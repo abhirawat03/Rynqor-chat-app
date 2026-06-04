@@ -59,24 +59,7 @@ const SearchCard = ({
 
       {/* AVATAR */}
       <div
-        className="
-          flex
-          h-12
-          w-12
-          shrink-0
-          items-center
-          justify-center
-
-          overflow-hidden
-          rounded-full
-
-          bg-surface-secondary
-
-          text-lg
-          font-semibold
-
-          text-foreground
-        "
+        className="flex items-center justify-center w-12 h-12 overflow-hidden text-lg font-semibold rounded-full shrink-0 bg-surface-secondary text-foreground"
       >
 
         {avatar ? (
@@ -86,11 +69,7 @@ const SearchCard = ({
             alt={fullName}
             loading="lazy"
             decoding="async"
-            className="
-              h-full
-              w-full
-              object-cover
-            "
+            className="object-cover w-full h-full "
           />
 
         ) : (
@@ -103,47 +82,25 @@ const SearchCard = ({
 
       {/* INFO */}
       <div
-        className="
-          min-w-0
-    flex-1
-        "
+        className="flex-1 min-w-0 "
       >
 
         {/* NAME */}
         <p
-          className="
-            truncate
-
-            text-sm
-            font-semibold
-
-            text-foreground
-          "
+          className="text-sm font-semibold truncate text-foreground"
         >
           {fullName}
         </p>
 
         {/* USERNAME */}
         <p
-          className="
-            truncate
-
-            text-sm
-
-            text-muted
-          "
+          className="text-sm truncate text-muted"
         >
           @{username}
         </p>
         {bio && (
           <p
-            className="
-              mt-1
-              line-clamp-2
-
-              text-xs
-              text-muted
-            "
+            className="mt-1 text-xs line-clamp-2 text-muted"
           >
             {bio}
           </p>

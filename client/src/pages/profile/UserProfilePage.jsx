@@ -52,17 +52,7 @@ const UserProfilePage = ({
 
     return (
       <div
-        className="
-          flex
-          h-full
-          w-full
-          items-center
-          justify-center
-
-          bg-surface
-
-          text-muted
-        "
+        className="flex items-center justify-center w-full h-full bg-surface text-muted"
       >
         Loading profile...
       </div>
@@ -75,17 +65,7 @@ const UserProfilePage = ({
 
     return (
       <div
-        className="
-          flex
-          h-full
-          w-full
-          items-center
-          justify-center
-
-          bg-surface
-
-          text-red-500
-        "
+        className="flex items-center justify-center w-full h-full text-red-500 bg-surface"
       >
         User not found
       </div>
@@ -121,36 +101,13 @@ const UserProfilePage = ({
 
         {/* HEADER */}
         <div
-          className="
-            sticky
-            top-0
-            z-10
-
-            flex
-            items-center
-            justify-between
-
-            border-b
-            border-border
-
-            bg-surface/90
-
-            px-4
-            py-4
-
-            backdrop-blur-xl
-          "
+          className="sticky top-0 z-10 flex items-center justify-between px-4 py-4 border-b border-border bg-surface/90 backdrop-blur-xl"
         >
 
           <div>
 
             <h1
-              className="
-                text-lg
-                font-semibold
-
-                text-foreground
-              "
+              className="text-lg font-semibold text-foreground"
             >
               Contact Info
             </h1>
@@ -206,30 +163,12 @@ const UserProfilePage = ({
 
         {/* CONTENT */}
         <div
-          className="
-            scrollbar-hide
-
-            flex-1
-
-            overflow-y-auto
-
-            px-4
-            py-5
-          "
+          className="flex-1 px-4 py-5 overflow-y-auto scrollbar-hide"
         >
 
           {/* PROFILE HERO */}
           <div
-            className="
-              flex
-              flex-col
-              items-center
-
-              border-b
-              border-border
-
-              pb-6
-            "
+            className="flex flex-col items-center pb-6 border-b border-border"
           >
 
             {/* AVATAR */}
@@ -267,40 +206,19 @@ const UserProfilePage = ({
 
                   alt={user.fullName}
 
-                  className="
-                    h-28
-                    w-28
-
-                    rounded-full
-                    object-cover
-
-                    ring-4
-                    ring-surface-secondary
-                  "
+                  className="object-cover rounded-full h-28 w-28 ring-4 ring-surface-secondary"
                 />
 
               ) : (
 
                 <div
-                  className="
-                    flex
-                    h-28
-                    w-28
-                    items-center
-                    justify-center
-
-                    rounded-full
-
-                    bg-surface-secondary
-                  "
+                  className="flex items-center justify-center rounded-full h-28 w-28 bg-surface-secondary"
                 >
 
                   <BsPersonCircle
                     size={90}
 
-                    className="
-                      text-muted
-                    "
+                    className=" text-muted"
                   />
 
                 </div>
@@ -311,27 +229,14 @@ const UserProfilePage = ({
 
             {/* NAME */}
             <h2
-              className="
-                mt-4
-
-                text-2xl
-                font-bold
-
-                text-foreground
-              "
+              className="mt-4 text-2xl font-bold text-foreground"
             >
               {user.fullName}
             </h2>
 
             {/* USERNAME */}
             <p
-              className="
-                mt-1
-
-                text-sm
-
-                text-muted
-              "
+              className="mt-1 text-sm text-muted"
             >
               @{user.username}
             </p>
@@ -340,28 +245,11 @@ const UserProfilePage = ({
             {isOnline && (
 
               <div
-                className="
-                  mt-3
-
-                  flex
-                  items-center
-                  gap-2
-
-                  text-sm
-
-                  text-green-500
-                "
+                className="flex items-center gap-2 mt-3 text-sm text-green-500 "
               >
 
                 <div
-                  className="
-                    h-2
-                    w-2
-
-                    rounded-full
-
-                    bg-green-500
-                  "
+                  className="w-2 h-2 bg-green-500 rounded-full "
                 />
 
                 Online
@@ -374,48 +262,22 @@ const UserProfilePage = ({
 
           {/* INFO */}
           <div
-            className="
-              mt-6
-
-              grid
-              gap-4
-            "
+            className="grid gap-4 mt-6 "
           >
 
             {/* ABOUT */}
             <div
-              className="
-                rounded-2xl
-
-                bg-background
-
-                p-5
-              "
+              className="p-5 rounded-2xl bg-background"
             >
 
               <p
-                className="
-                  text-xs
-                  font-medium
-                  uppercase
-
-                  tracking-wide
-
-                  text-muted
-                "
+                className="text-xs font-medium tracking-wide uppercase text-muted"
               >
                 About
               </p>
 
               <p
-                className="
-                  mt-3
-
-                  text-sm
-                  leading-relaxed
-
-                  text-foreground
-                "
+                className="mt-3 text-sm leading-relaxed text-foreground"
               >
                 {user?.bio || "No bio yet"}
               </p>
@@ -426,20 +288,11 @@ const UserProfilePage = ({
 
           {/* SHARED MEDIA */}
           <div
-            className="
-              mt-8
-            "
+            className="mt-8 "
           >
 
             <h3
-              className="
-                mb-4
-
-                text-lg
-                font-semibold
-
-                text-foreground
-              "
+              className="mb-4 text-lg font-semibold text-foreground"
             >
               Shared Media
             </h3>
@@ -447,22 +300,7 @@ const UserProfilePage = ({
             {mediaLoading ? (
 
               <div
-                className="
-                  rounded-2xl
-
-                  border
-                  border-border
-
-                  bg-background
-
-                  p-6
-
-                  text-center
-
-                  text-sm
-
-                  text-muted
-                "
+                className="p-6 text-sm text-center border rounded-2xl border-border bg-background text-muted"
               >
                 Loading media...
               </div>
@@ -470,22 +308,7 @@ const UserProfilePage = ({
             ) : media.length === 0 ? (
 
               <div
-                className="
-                  rounded-2xl
-
-                  border
-                  border-border
-
-                  bg-background
-
-                  p-10
-
-                  text-center
-
-                  text-sm
-
-                  text-muted
-                "
+                className="p-10 text-sm text-center border rounded-2xl border-border bg-background text-muted"
               >
                 No shared media yet
               </div>
@@ -493,11 +316,7 @@ const UserProfilePage = ({
             ) : (
 
               <div
-                className="
-                  grid
-                  grid-cols-3
-                  gap-2
-                "
+                className="grid grid-cols-3 gap-2 "
               >
 
                 {media.map((message) =>
@@ -507,16 +326,7 @@ const UserProfilePage = ({
                     <div
                       key={item.publicId}
 
-                      className="
-                        overflow-hidden
-
-                        rounded-xl
-
-                        border
-    border-border
-
-    bg-background
-                      "
+                      className="overflow-hidden border rounded-xl border-border bg-background"
                     >
 
                       {/* IMAGE */}
@@ -529,11 +339,7 @@ const UserProfilePage = ({
                             setSelectedMedia(item)
                           }
 
-                          className="
-                            block
-                            h-full
-                            w-full
-                          "
+                          className="block w-full h-full "
                         >
 
                           <img
@@ -544,19 +350,7 @@ const UserProfilePage = ({
                             }
                             loading="lazy"
                             decoding="async"
-                            className="
-                              aspect-square
-                              h-full
-                              w-full
-                              cursor-pointer
-
-                              object-cover
-
-                              transition-transform
-                              duration-300
-
-                              hover:scale-105
-                            "
+                            className="object-cover w-full h-full transition-transform duration-300 cursor-pointer aspect-square hover:scale-105"
                           />
 
                         </button>
@@ -573,65 +367,23 @@ const UserProfilePage = ({
                             setSelectedMedia(item)
                           }
 
-                          className="
-      group
-      relative
-      cursor-pointer
-
-      block
-      h-full
-      w-full
-
-      overflow-hidden
-    "
+                          className="relative block w-full h-full overflow-hidden cursor-pointer group"
                         >
 
                           <video
                             src={item.url}
                             preload="metadata"
 
-                            className="
-        aspect-square
-        h-full
-        w-full
-
-        object-cover
-      "
+                            className="object-cover w-full h-full aspect-square"
                           />
 
                           {/* OVERLAY */}
                           <div
-                            className="
-        absolute
-        inset-0
-
-        flex
-        items-center
-        justify-center
-
-        bg-black/30
-
-        transition-colors
-        duration-200
-
-        group-hover:bg-black/40
-      "
+                            className="absolute inset-0 flex items-center justify-center transition-colors duration-200 bg-black/30 group-hover:bg-black/40"
                           >
 
                             <div
-                              className="
-          flex
-          h-12
-          w-12
-          items-center
-          justify-center
-
-          rounded-full
-
-          bg-white/90
-
-          text-xl
-        "
+                              className="flex items-center justify-center w-12 h-12 text-xl rounded-full bg-white/90"
                             >
                               ▶
                             </div>
@@ -652,65 +404,19 @@ const UserProfilePage = ({
                             setSelectedMedia(item)
                           }
 
-                          className="
-      group
-      relative
-      cursor-pointer
-
-      flex
-      aspect-square
-      w-full
-      flex-col
-      items-center
-      justify-center
-      gap-3
-
-      overflow-hidden
-
-      bg-gradient-to-br
-      from-zinc-800
-      to-zinc-900
-
-      p-4
-    "
+                          className="relative flex flex-col items-center justify-center w-full gap-3 p-4 overflow-hidden cursor-pointer group aspect-square bg-gradient-to-br from-zinc-800 to-zinc-900"
                         >
 
                           {/* ICON */}
                           <div
-                            className="
-        flex
-        h-14
-        w-14
-        items-center
-        justify-center
-
-        rounded-full
-
-        bg-white/10
-
-        text-2xl
-        text-white
-
-        transition-transform
-        duration-200
-
-        group-hover:scale-110
-      "
+                            className="flex items-center justify-center text-2xl text-white transition-transform duration-200 rounded-full h-14 w-14 bg-white/10 group-hover:scale-110"
                           >
                             🎵
                           </div>
 
                           {/* NAME */}
                           <p
-                            className="
-        line-clamp-2
-        max-w-full
-
-        text-center
-        text-xs
-
-        text-white/90
-      "
+                            className="max-w-full text-xs text-center line-clamp-2 text-white/90"
                           >
                             {item.name || "Audio"}
                           </p>
@@ -727,41 +433,17 @@ const UserProfilePage = ({
                           target="_blank"
                           rel="noreferrer"
 
-                          className="
-    flex
-    aspect-square
-    flex-col
-    items-center
-    justify-center
-    gap-2
-
-    p-3
-
-    text-center
-
-    transition-colors
-    duration-200
-
-    hover:bg-hover
-  "
+                          className="flex flex-col items-center justify-center gap-2 p-3 text-center transition-colors duration-200 aspect-square hover:bg-hover"
                         >
 
                           <div
-                            className="
-      text-4xl
-    "
+                            className="text-4xl "
                           >
                             📄
                           </div>
 
                           <p
-                            className="
-      line-clamp-2
-
-      text-xs
-
-      text-foreground
-    "
+                            className="text-xs line-clamp-2 text-foreground"
                           >
                             {item.name || "File"}
                           </p>
@@ -815,15 +497,7 @@ const UserProfilePage = ({
               e.stopPropagation()
             }
 
-            className="
-              relative
-
-              overflow-hidden
-
-              rounded-3xl
-
-              shadow-2xl
-            "
+            className="relative overflow-hidden shadow-2xl rounded-3xl"
           >
 
             <img
@@ -941,12 +615,7 @@ const UserProfilePage = ({
               >
 
                 <p
-                  className="
-              text-sm
-              font-medium
-
-              text-foreground
-            "
+                  className="text-sm font-medium text-foreground"
                 >
                   {selectedMedia.name}
                 </p>
@@ -969,32 +638,7 @@ const UserProfilePage = ({
                 setSelectedMedia(null)
               }
 
-              className="
-          absolute
-          right-3
-          top-3
-
-          flex
-          h-10
-          cursor-pointer
-          w-10
-          items-center
-          justify-center
-
-          rounded-full
-
-          bg-black/50
-
-          text-xl
-          text-white
-
-          backdrop-blur-md
-
-          transition-all
-          duration-200
-
-          hover:bg-black/70
-        "
+              className="absolute flex items-center justify-center w-10 h-10 text-xl text-white transition-all duration-200 rounded-full cursor-pointer right-3 top-3 bg-black/50 backdrop-blur-md hover:bg-black/70"
             >
 
               ✕

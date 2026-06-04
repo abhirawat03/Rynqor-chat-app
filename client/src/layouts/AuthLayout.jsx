@@ -7,17 +7,7 @@ const AuthLayout = () => {
 
     return (
         <div
-            className="
-        flex
-        h-screen
-        overflow-hidden
-        w-full
-
-        bg-background
-
-        transition-colors
-        duration-300
-      "
+            className="flex w-full h-screen overflow-hidden transition-colors duration-300 bg-background"
         >
 
             {/* LEFT SIDE */}
@@ -66,49 +56,18 @@ const AuthLayout = () => {
 
                 {/* CONTENT */}
                 <div
-                    className="
-            relative
-            z-10
-
-            flex
-            max-w-2xl
-            flex-col
-            items-center
-          "
+                    className="relative z-10 flex flex-col items-center max-w-2xl "
                 >
 
                     {/* BRAND */}
                     <h1
-                        className="
-    mb-2
-
-    text-4xl
-    font-bold
-    tracking-tight
-
-    text-foreground
-
-    lg:text-5xl
-    2xl:text-6xl
-    3xl:text-7xl
-  "
+                        className="mb-2 text-4xl font-bold tracking-tight text-foreground lg:text-5xl 2xl:text-6xl 3xl:text-7xl"
                     >
                         Rynqor
                     </h1>
 
                     <p
-                        className="
-    max-w-sm
-
-    text-sm
-    leading-relaxed
-
-    text-muted
-
-    lg:text-base
-    2xl:max-w-xl
-    2xl:text-lg
-  "
+                        className="max-w-sm text-sm leading-relaxed text-muted lg:text-base 2xl:max-w-xl 2xl:text-lg"
                     >
                         Fast, modern, real-time messaging
                         for seamless conversations.
@@ -118,14 +77,7 @@ const AuthLayout = () => {
                     <img
                         src={authImage}
                         alt="Auth visual"
-                        className="
-              w-full
-              max-w-lg
-
-              object-contain
-
-              2xl:max-w-xl
-            "
+                        className="object-contain w-full max-w-lg 2xl:max-w-xl"
                     />
 
                 </div>
@@ -134,61 +86,26 @@ const AuthLayout = () => {
 
             {/* RIGHT SIDE */}
             <div
-                className="
-          flex
-          flex-1
-          items-center
-          justify-center
-          px-6
-
-          lg:px-16
-
-          2xl:px-24
-        "
+                className="flex items-center justify-center flex-1 px-6 lg:px-16 2xl:px-24"
             >
 
                 <div
-                    className="
-    w-full
-
-    max-w-sm
-
-    lg:max-w-md
-    xl:max-w-lg
-    2xl:max-w-xl
-  "
+                    className="w-full max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl"
                 >
 
                     {/* MOBILE BRAND */}
                     <div
-                        className="
-              mb-10
-
-              text-center
-
-              lg:hidden
-            "
+                        className="mb-10 text-center lg:hidden"
                     >
 
                         <h1
-                            className="
-                text-4xl
-                font-bold
-
-                text-foreground
-              "
+                            className="text-4xl font-bold text-foreground"
                         >
                             Rynqor
                         </h1>
 
                         <p
-                            className="
-                mt-2
-
-                text-sm
-
-                text-muted
-              "
+                            className="mt-2 text-sm text-muted"
                         >
                             Connect instantly.
                         </p>

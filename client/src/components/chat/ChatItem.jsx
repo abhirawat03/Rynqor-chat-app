@@ -25,8 +25,8 @@ const ChatItem = memo(({
 
     // USER
     const isMe =
-        String(senderId?._id) ===
-        String(currentUserId);
+  String(senderId?._id || senderId) ===
+  String(currentUserId);
 
     // MEDIA LABELS
     const mediaLabels = {

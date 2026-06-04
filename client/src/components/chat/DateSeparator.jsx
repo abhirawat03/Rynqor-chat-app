@@ -4,27 +4,10 @@ const DateSeparator = ({
 
   return (
     <div
-      className="
-        flex
-        justify-center
-
-        py-3
-      "
+      className="flex justify-center py-3 "
     >
       <div
-        className="
-          rounded-full
-
-          bg-surface-secondary
-
-          px-3
-          py-1
-
-          text-xs
-          text-muted-foreground
-
-          shadow-sm
-        "
+        className="px-3 py-1 text-xs rounded-full shadow-sm bg-surface-secondary text-muted-foreground"
       >
         {label}
       </div>

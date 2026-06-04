@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect} from "react";
 
 import { NavLink } from "react-router-dom";
 import { IoMdChatbubbles } from "react-icons/io";
@@ -103,13 +103,7 @@ useEffect(() => {
 
         return (
             <div
-                className="
-                    flex
-                    h-full
-                    w-full
-                    items-center
-                    justify-center
-                "
+                className="flex items-center justify-center w-full h-full "
             >
                 <p className="text-muted">
                     Loading chats...
@@ -126,13 +120,7 @@ useEffect(() => {
 
         return (
             <div
-                className="
-                    flex
-                    h-full
-                    w-full
-                    items-center
-                    justify-center
-                "
+                className="flex items-center justify-center w-full h-full "
             >
                 <p className="text-red-500">
                     Failed to load chats
@@ -152,49 +140,24 @@ useEffect(() => {
 
         return (
             <div
-                className="
-                    flex
-                    flex-1
-                    items-center
-                    justify-center
-                    px-4
-                "
+                className="flex items-center justify-center flex-1 px-4 "
             >
                 <div
-                    className="
-                        mx-auto
-                        my-8
-                        max-w-sm
-                        text-center
-                    "
+                    className="max-w-sm mx-auto my-8 text-center "
                 >
                     <IoMdChatbubbles
                         size={56}
-                        className="
-                            mx-auto
-                            mb-4
-                            text-muted
-                        "
+                        className="mx-auto mb-4 text-muted"
                     />
 
                     <p
-                        className="
-                            mb-2
-                            text-2xl
-                            font-semibold
-                            text-foreground
-                        "
+                        className="mb-2 text-2xl font-semibold text-foreground"
                     >
                         No chats yet
                     </p>
 
                     <p
-                        className="
-                            mx-auto
-                            max-w-xs
-                            text-sm
-                            text-muted
-                        "
+                        className="max-w-xs mx-auto text-sm text-muted"
                     >
                         Start a conversation by
                         searching for users.
@@ -211,37 +174,11 @@ useEffect(() => {
     return (
 
         <div
-            className="
-                flex
-                flex-1
-                min-h-0
-                flex-col
-
-                bg-surface
-
-                transition-colors
-                duration-300
-            "
+            className="flex flex-col flex-1 min-h-0 transition-colors duration-300 bg-surface"
         >
 
             <div
-                className="
-                    scrollbar-hide
-                    flex
-                    flex-1
-                    min-h-0
-                    flex-col
-
-                    gap-1
-
-                    overflow-y-auto
-
-                    px-1
-                    pt-2
-                    pb-20
-
-                    md:pb-2
-                "
+                className="flex flex-col flex-1 min-h-0 gap-1 px-1 pt-2 pb-20 overflow-y-auto scrollbar-hide md:pb-2"
             >
 
                 {conversations.map(

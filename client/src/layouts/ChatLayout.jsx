@@ -11,18 +11,7 @@ const ChatLayout = () => {
 
   return (
     <div
-      className="
-        flex
-        flex-1
-        min-h-0
-
-        overflow-hidden
-
-        bg-background
-
-        transition-colors
-        duration-300
-      "
+      className="flex flex-1 min-h-0 overflow-hidden transition-colors duration-300 bg-background"
     >
 
       {/* SIDEBAR */}

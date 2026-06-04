@@ -115,30 +115,7 @@ const Navigation = () => {
 
       {/* MOBILE NAV */}
       <div
-        className="
-          fixed
-          bottom-0
-          left-0
-          right-0
-          z-50
-
-          flex
-          h-14
-          items-center
-          justify-around
-
-          border-t
-          border-border
-
-          bg-surface
-
-          backdrop-blur-xl
-
-          transition-colors
-          duration-300
-
-          md:hidden
-        "
+        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around transition-colors duration-300 border-t h-14 border-border bg-surface backdrop-blur-xl md:hidden"
       >
 
         {tabs.map((tab) => (
@@ -240,24 +217,7 @@ const Navigation = () => {
 
       {/* DESKTOP SIDEBAR */}
       <div
-        className="
-          hidden
-
-          border-r
-          border-border
-
-          bg-surface
-
-          transition-colors
-          duration-300
-
-          md:flex
-          md:w-20
-          md:flex-col
-          md:items-center
-          md:gap-6
-          md:py-6
-        "
+        className="hidden transition-colors duration-300 border-r border-border bg-surface md:flex md:w-20 md:flex-col md:items-center md:gap-6 md:py-6"
       >
 
         {tabs.map((tab) => (

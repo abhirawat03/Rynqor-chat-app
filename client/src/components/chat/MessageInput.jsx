@@ -409,48 +409,18 @@ setTimeout(() => {
   return (
 
     <div
-      className="
-        shrink-0
-        min-w-0
-
-        border-t
-        border-border
-
-        bg-surface/90
-
-        backdrop-blur-xl
-
-        transition-colors
-        duration-300
-      "
+      className="min-w-0 transition-colors duration-300 border-t shrink-0 border-border bg-surface/90 backdrop-blur-xl"
     >
 
       {/* MEDIA PREVIEWS */}
       {media.length > 0 && (
 
         <div
-          className="
-            border-b
-            border-border
-
-            px-3
-            py-3
-          "
+          className="px-3 py-3 border-b border-border"
         >
 
           <div
-            className="
-              scrollbar-hide
-
-              mx-auto
-
-              flex
-              w-full
-              max-w-5xl
-              gap-3
-
-              overflow-x-auto
-            "
+            className="flex w-full max-w-5xl gap-3 mx-auto overflow-x-auto scrollbar-hide"
           >
 
             {media.map(
@@ -473,26 +443,7 @@ setTimeout(() => {
 
                   <div
                     key={index}
-                    className="
-                      group
-
-                      relative
-
-                      h-24
-                      w-24
-
-                      shrink-0
-
-                      overflow-hidden
-                      rounded-2xl
-
-                      border
-                      border-border
-
-                      bg-surface-secondary
-
-                      shadow-sm
-                    "
+                    className="relative w-24 h-24 overflow-hidden border shadow-sm group shrink-0 rounded-2xl border-border bg-surface-secondary"
                   >
 
                     {/* IMAGE */}
@@ -505,12 +456,7 @@ setTimeout(() => {
 
                         alt="preview"
 
-                        className="
-                          h-full
-                          w-full
-
-                          object-cover
-                        "
+                        className="object-cover w-full h-full "
                       />
 
                     )}
@@ -523,12 +469,7 @@ setTimeout(() => {
                           item.preview
                         }
 
-                        className="
-                          h-full
-                          w-full
-
-                          object-cover
-                        "
+                        className="object-cover w-full h-full "
                       />
 
                     )}
@@ -538,38 +479,11 @@ setTimeout(() => {
                       !isVideo && (
 
                         <div
-                          className="
-                            flex
-                            h-full
-                            w-full
-                            flex-col
-                            items-center
-                            justify-center
-                            gap-2
-
-                            p-2
-
-                            text-center
-                          "
+                          className="flex flex-col items-center justify-center w-full h-full gap-2 p-2 text-center "
                         >
 
                           <div
-                            className="
-                              flex
-                              h-10
-                              w-10
-                              items-center
-                              justify-center
-
-                              rounded-xl
-
-                              bg-accent
-
-                              text-xs
-                              font-semibold
-
-                              text-white
-                            "
+                            className="flex items-center justify-center w-10 h-10 text-xs font-semibold text-white rounded-xl bg-accent"
                           >
 
                             {
@@ -625,31 +539,7 @@ setTimeout(() => {
 
 }}
 
-                      className="
-                        absolute
-                        cursor-pointer
-                        right-1
-                        top-1
-
-                        flex
-                        h-6
-                        w-6
-                        items-center
-                        justify-center
-
-                        rounded-full
-
-                        bg-black/70
-                        text-sm
-                        text-white
-
-                        transition-opacity
-                        duration-200
-
-                        opacity-100
-                        md:opacity-0
-                        md:group-hover:opacity-100
-                      "
+                      className="absolute flex items-center justify-center w-6 h-6 text-sm text-white transition-opacity duration-200 rounded-full opacity-100 cursor-pointer right-1 top-1 bg-black/70 md:opacity-0 md:group-hover:opacity-100"
                     >
                       <FiX size={14} />
                     </button>
@@ -678,41 +568,12 @@ setTimeout(() => {
       >
 
         <div
-          className="
-            mx-auto
-
-            flex
-            w-full
-            max-w-5xl
-            items-end
-            gap-2
-          "
+          className="flex items-end w-full max-w-5xl gap-2 mx-auto "
         >
 
           {/* INPUT WRAPPER */}
           <div
-            className="
-              flex
-              flex-1
-              items-end
-
-              overflow-hidden
-              rounded-2xl
-
-              border
-              border-border
-
-              bg-surface
-
-              shadow-sm
-
-              transition-all
-              duration-200
-
-              focus-within:border-accent
-              focus-within:ring-4
-              focus-within:ring-accent/10
-            "
+            className="flex items-end flex-1 overflow-hidden transition-all duration-200 border shadow-sm rounded-2xl border-border bg-surface focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/10"
           >
 
             {/* FILE INPUT */}
@@ -740,22 +601,7 @@ setTimeout(() => {
                 fileInputRef.current?.click()
               }
 
-              className="
-                flex
-                h-12
-                w-12
-                shrink-0
-                items-center
-                cursor-pointer
-                justify-center
-
-                text-muted
-
-                transition-all
-                duration-200
-
-                hover:text-accent
-              "
+              className="flex items-center justify-center w-12 h-12 transition-all duration-200 cursor-pointer shrink-0 text-muted hover:text-accent"
             >
 
               <FiPlus
@@ -782,22 +628,7 @@ setTimeout(() => {
 
               placeholder="Type a message..."
 
-              className="
-                flex-1
-
-                bg-transparent
-
-                py-3
-                pr-4
-
-                text-sm
-
-                text-foreground
-
-                placeholder:text-muted
-
-                outline-none
-              "
+              className="flex-1 py-3 pr-4 text-sm bg-transparent outline-none text-foreground placeholder:text-muted"
             />
 
           </div>
