@@ -128,15 +128,15 @@ const msgSchema =
         }
     );
 
-// msgSchema.index({
-//     conversationId: 1,
-//     _id: -1,
-// });
-
 msgSchema.index({
     conversationId: 1,
-    createdAt: -1,
-})
+    _id: -1,
+});
+
+// msgSchema.index({
+//     conversationId: 1,
+//     createdAt: -1,
+// })
 
 export const Message =
     mongoose.model(

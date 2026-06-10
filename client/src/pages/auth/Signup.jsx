@@ -1,13 +1,17 @@
-import {
-    Link,
-    useNavigate,
-} from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useSignupMutation } from "../../hooks/auth/useSignupMutation.js";
 
-import { useSignupMutation }
-    from "../../hooks/auth/useSignupMutation.js";
-
+const initialErrors = {
+    fullName: "",
+    username: "",
+    email: "",
+    password: "",
+    general: "",
+};
+const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const Signup = () => {
 
     const navigate =
@@ -25,120 +29,132 @@ const Signup = () => {
         });
 
     const [error, setError] =
-        useState("");
+            useState(initialErrors);
 
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const isFormValid =
+        formData.fullName.trim() &&
+        formData.username.trim().length >= 3 &&
+        emailRegex.test(
+            formData.email
+        ) &&
+        formData.password.length >= 8;
     // INPUT CHANGE
-
     const handleChange = (
         e
     ) => {
+        const { name, value } = e.target;
 
-        setFormData({
-            ...formData,
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
 
-            [e.target.name]:
-                e.target.value,
-        });
+        setError((prev) => ({
+            ...prev,
+            [name]: "",
+            general: "",
+        }));
 
     };
 
     // SUBMIT
 
-    const handleSubmit = (
-        e
-    ) => {
+    const validateForm = () => {
+
+        const newErrors = {
+            ...initialErrors,
+        };
+
+        if (!formData.fullName.trim()) {
+            newErrors.fullName =
+                "Full name is required";
+        }
+
+        if (!formData.username.trim()) {
+            newErrors.username =
+                "Username is required";
+        } else if (
+            formData.username.length < 3
+        ) {
+            newErrors.username =
+                "Username must be at least 3 characters";
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email =
+                "Email is required";
+        } else if (
+            !emailRegex.test(formData.email)
+        ) {
+            newErrors.email =
+                "Please enter a valid email";
+        }
+
+        if (!formData.password.trim()) {
+            newErrors.password =
+                "Password is required";
+        } else if (
+            formData.password.length < 8
+        ) {
+            newErrors.password =
+                "Password must be at least 8 characters";
+        }
+
+        setError(newErrors);
+
+        return !Object.values(newErrors)
+            .some(Boolean);
+    };
+    const handleSubmit = (e) => {
 
         e.preventDefault();
 
-        const {
-            fullName,
-            username,
-            email,
-            password,
-        } = formData;
-
-        if (
-            !fullName.trim() ||
-            !username.trim() ||
-            !email.trim() ||
-            !password.trim()
-        ) {
-
-            setError(
-                "All fields are required"
-            );
-
+        if (!validateForm()) {
             return;
-
         }
 
-        if (
-            username.length < 3
-        ) {
+        setError(initialErrors);
 
-            setError(
-                "Username must be at least 3 characters"
-            );
-
-            return;
-
-        }
-
-        const emailRegex =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (
-            !emailRegex.test(email)
-        ) {
-
-            setError(
-                "Please enter a valid email address"
-            );
-
-            return;
-
-        }
-
-        if (
-            password.length < 8
-        ) {
-
-            setError(
-                "Password must be at least 8 characters"
-            );
-
-            return;
-
-        }
-
-        setError("");
+        const payload = {
+            fullName:
+                formData.fullName.trim(),
+            username:
+                formData.username.trim(),
+            email:
+                formData.email
+                    .trim()
+                    .toLowerCase(),
+            password:
+                formData.password,
+        };
 
         signupMutation.mutate(
-            formData,
+            payload,
             {
-
                 onSuccess: () =>
                     navigate("/"),
 
-                onError: (
-                    error
-                ) => {
+                onError: (error) => {
 
                     const message =
-                        error.response?.data
-                            ?.message ||
+                        error.response?.data?.errors?.[0]?.message ||
+                        error.response?.data?.message ||
                         "Signup failed";
 
-                    setError(
-                        message
-                    );
-
+                    setError((prev) => ({
+                        ...prev,
+                        general: message,
+                    }));
                 },
-
             }
         );
-
     };
+    
+
+
 
     return (
         <form
@@ -146,38 +162,36 @@ const Signup = () => {
                 handleSubmit
             }
             className="
-        space-y-4
+            space-y-4
 
-        rounded-[28px]
+            rounded-[28px]
 
-        border
-        border-border
+            border
+            border-border
 
-        bg-surface/90
+            bg-surface/90
 
-        p-6
+            p-6
 
-        shadow-xl
+            shadow-xl
 
-        backdrop-blur-xl
+            backdrop-blur-xl
 
-        transition-colors
-        duration-300
+            transition-colors
+            duration-300
 
-        sm:p-6
-2xl:p-8
-      "
+            sm:p-6
+    2xl:p-8
+        "
         >
 
             {/* ERROR */}
-            {error && (
-
+            {error.general && (
                 <div
                     className="px-4 py-3 text-sm text-red-500 border rounded-2xl border-red-500/20 bg-red-500/10"
                 >
-                    {error}
+                    {error.general}
                 </div>
-
             )}
 
             {/* HEADER */}
@@ -206,6 +220,7 @@ const Signup = () => {
 
                 <input
                     type="text"
+                    autoFocus
 
                     id="fullName"
                     name="fullName"
@@ -235,6 +250,13 @@ const Signup = () => {
                 >
                     Full name
                 </label>
+                {error.fullName && (
+                    <p
+                        className="mt-1 text-sm text-red-500 "
+                    >
+                        {error.fullName}
+                    </p>
+                )}
 
             </div>
 
@@ -274,7 +296,13 @@ const Signup = () => {
                 >
                     Username
                 </label>
-
+                {error.username && (
+                    <p
+                        className="mt-1 text-sm text-red-500 "
+                    >
+                        {error.username}
+                    </p>
+                )}
             </div>
 
             {/* EMAIL */}
@@ -313,8 +341,16 @@ const Signup = () => {
                 >
                     Email
                 </label>
+                {error.email && (
+                    <p
+                        className="mt-1 text-sm text-red-500 "
+                    >
+                        {error.email}
+                    </p>
+                )}
 
             </div>
+
 
             {/* PASSWORD */}
             <div
@@ -322,7 +358,11 @@ const Signup = () => {
             >
 
                 <input
-                    type="password"
+                    type={
+                        showPassword
+                            ? "text"
+                            : "password"
+                    }
 
                     id="password"
                     name="password"
@@ -343,7 +383,7 @@ const Signup = () => {
 
                     placeholder=" "
 
-                    className="w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60 sm:text-base"
+                    className="w-full px-4 pt-6 pb-3 pr-12 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60 sm:text-base"
                 />
 
                 <label
@@ -352,6 +392,26 @@ const Signup = () => {
                 >
                     Password
                 </label>
+                {error.password && (
+                    <p
+                        className="mt-1 text-sm text-red-500 "
+                    >
+                        {error.password}
+                    </p>
+                )}
+                <button
+                    type="button"
+
+                    onClick={() =>
+    setShowPassword(prev => !prev)
+}
+                    className="absolute -translate-y-1/2 right-4 top-1/2"
+                >
+                    {showPassword
+                        ? <EyeOff size={18} />
+                        : <Eye size={18} />
+                    }
+                </button>
 
             </div>
 
@@ -360,44 +420,60 @@ const Signup = () => {
                 type="submit"
 
                 disabled={
-                    signupMutation.isPending
+                    signupMutation.isPending ||
+                    !isFormValid
                 }
 
                 className="
-          w-full
-          cursor-pointer
+            w-full
+            cursor-pointer
 
-          rounded-2xl
+            rounded-2xl
 
-          bg-accent
+            bg-accent
 
-          px-5
-          py-3.5
+            px-5
+            py-3.5
 
-          text-sm
-          font-medium
+            text-sm
+            font-medium
 
-          text-white
+            text-white
 
-          shadow-sm
+            shadow-sm
 
-          transition-all
-          duration-200
+            transition-all
+            duration-200
 
-          hover:brightness-110
+            hover:brightness-110
 
-          active:scale-[0.99]
+            active:scale-[0.99]
 
-          disabled:cursor-not-allowed
-          disabled:opacity-70
+            disabled:cursor-not-allowed
+            disabled:opacity-70
 
-          sm:text-base
-        "
+            sm:text-base
+            "
             >
 
-                {signupMutation.isPending
-                    ? "Creating account..."
-                    : "Create account"}
+                {
+                    signupMutation.isPending
+                        ? (
+                            <div
+                                className="flex items-center justify-center gap-2 "
+                            >
+                                <Loader2
+                                    size={18}
+                                    className="animate-spin"
+                                />
+
+                                Creating account...
+                            </div>
+                        )
+                        : (
+                            "Create account"
+                        )
+                }
 
             </button>
 
