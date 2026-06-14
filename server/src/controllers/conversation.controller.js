@@ -22,8 +22,9 @@ const createConversation = async (req, res) => {
 
 const getConversation = async (req, res) => {
     const userId = req.user?._id;
+    const {cursor} = req.query;
 
-    const conversations = await getConversationService(userId);
+    const conversations = await getConversationService(userId, cursor);
 
     return res
         .status(200)

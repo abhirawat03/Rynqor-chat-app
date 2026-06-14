@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
 import { Conversation } from "../models/conversation.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { formatName } from "../utils/format.js";
 import { Message } from "../models/message.model.js";
 
+const USER_PUBLIC_FIELDS =
+    "_id username fullName avatar";
 const createConversationService = async (userId, receiverId) => {
     const isSelfChat = userId.toString() === receiverId.toString();
     // if(userId === receiverId) throw new ApiError(400, "Cannot chat with yourself");
@@ -14,14 +15,14 @@ const createConversationService = async (userId, receiverId) => {
         conversation = await Conversation.findOne({
             participants: userId,
             type: "self"
-        }).populate("participants", "_id username fullName avatar");
+        }).populate("participants", USER_PUBLIC_FIELDS);
 
         if (!conversation) {
             conversation = await Conversation.create({
                 participants: [userId],
                 type: "self",
             });
-            await conversation.populate("participants", "_id username fullName avatar");
+            await conversation.populate("participants", USER_PUBLIC_FIELDS);
         }
 
         const user = conversation.participants[0];
@@ -37,14 +38,14 @@ const createConversationService = async (userId, receiverId) => {
         participants: { $all: [userId, receiverId] },
         type: "direct",
         $expr: { $eq: [{ $size: "$participants" }, 2] },
-    }).populate("participants", "_id username fullName avatar");
+    }).populate("participants", USER_PUBLIC_FIELDS);
 
     if (!conversation) {
         conversation = await Conversation.create({
             participants: [userId, receiverId],
             type: "direct",
         })
-        await conversation.populate("participants", "_id username fullName avatar");
+        await conversation.populate("participants", USER_PUBLIC_FIELDS);
     }
 
     const otherUser = conversation.participants.find(
@@ -60,20 +61,40 @@ const createConversationService = async (userId, receiverId) => {
     return result;
 };
 
-const getConversationService = async (userId) => {
-    const conversations = await Conversation.find({
+const getConversationService = async (userId, cursor) => {
+    const PAGE_SIZE = 20;
+
+    const query = {
         participants: userId,
+    }
+
+    if (cursor) {
+        query.updatedAt = {
+            $lt: new Date(cursor),
+        };
+    }
+    const conversations = await Conversation.find({
+        query
     })
-        .populate("participants", "_id username fullName avatar")
+        .populate("participants", USER_PUBLIC_FIELDS)
         .populate({
-    path: "lastMessage",
-    populate: {
-        path: "senderId",
-        select: "fullName username avatar",
-    },
-})
+            path: "lastMessage",
+            populate: {
+                path: "senderId",
+                select: "fullName username avatar",
+            },
+        })
         .sort({ updatedAt: -1 })
+        .limit(PAGE_SIZE + 1)
         .lean();
+    
+    const hasMore =
+        conversations.length >
+        PAGE_SIZE;
+
+    if (hasMore) {
+        conversations.pop();
+    }
 
     const result = conversations.map((conv) => {
         const isSelf = conv.type === "self";
@@ -105,18 +126,25 @@ const getConversationService = async (userId) => {
         };
     });
 
-    return result;
+    const nextCursor =
+        conversations.length > 0
+            ? conversations[
+                conversations.length -1
+            ].updatedAt
+            : null;
+    
+    return {
+        conversations: result,
+        nextCursor,
+        hasMore,
+    };
 };
 
 const getConversationByIdService = async (userId, conversationId) => {
-    if (!mongoose.Types.ObjectId.isValid(conversationId)) {
-        throw new ApiError(400, "Invalid conversationId");
-    }
-
     const conversation = await Conversation.findOne({
         _id: conversationId,
         participants: userId,
-    }).populate("participants", "_id username fullName avatar");
+    }).populate("participants", USER_PUBLIC_FIELDS);
 
     if (!conversation) {
         throw new ApiError(403, "Not allowed or conversation not found");
@@ -150,69 +178,42 @@ const getConversationByIdService = async (userId, conversationId) => {
 };
 
 const getConversationMediaService =
-  async (
-    userId,
-    conversationId,
-  ) => {
+    async (
+        userId,
+        conversationId,
+    ) => {
 
     // VERIFY USER BELONGS
-    const conversation =
-      await Conversation.findOne({
-
-        _id: conversationId,
-
-        participants: userId,
-
-      });
-
-    if (!conversation) {
-      throw new Error(
-        "Unauthorized access"
-      );
-    }
+    await getConversationByIdService(
+        userId,
+        conversationId
+    );
 
     // FETCH MEDIA
-    const mediaMessages =
-      await Message.find({
+    return await Message.find({
+            conversationId,
 
-        conversationId,
-
-        messageType: {
-          $in: [
-            "media",
-            "mixed",
-          ],
-        },
-
-      })
-
+            messageType: {
+                $in: [
+                    "media",
+                    "mixed",
+                ],
+            },
+    })
         .populate(
-          "senderId",
-          `
-          _id
-          username
-          fullName
-          avatar
-          `
+            "senderId",
+            USER_PUBLIC_FIELDS
         )
-
         .sort({
-          createdAt: -1,
+            createdAt: -1,
         })
-
-        .select(`
-          _id
-          text
-          media
-          messageType
-          senderId
-          createdAt
-        `)
+        .select(
+            "_id text media messageType senderId createdAt"
+        )
 
         .lean();
 
-    return mediaMessages;
-  };
+};
 
 export {
     createConversationService,

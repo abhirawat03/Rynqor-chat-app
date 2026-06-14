@@ -7,9 +7,16 @@ const createConversationSchema = z.object({
     }).strict(),
 });
 
+const getConversationsSchema =z.object({
+        query: z.object({
+            cursor: z.string().optional(),
+        }).strict(),
+});
+
 const conversationIdSchema = paramsSchema("conversationId");
 
 export {
     createConversationSchema,
+    getConversationsSchema,
     conversationIdSchema,
 };
