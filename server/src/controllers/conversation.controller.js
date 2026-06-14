@@ -5,7 +5,8 @@ const createConversation = async (req, res) => {
     const userId = req.user?._id;
     // const {receiverId} = req.params;
     // accept receiverId from params or request body
-    const receiverId = req.params?.receiverId || req.body?.receiverId;
+    // const receiverId = req.params?.receiverId || req.body?.receiverId;
+    const {receiverId} = req.body;
 
     const conversation = await createConversationService(userId, receiverId);
     return res

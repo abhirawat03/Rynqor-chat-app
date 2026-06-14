@@ -2,7 +2,7 @@ import {Router} from "express"
 import {register, login, getCurrentUser, refreshAccessToken, logout, getSessions, logoutSession} from "../controllers/auth.controller.js"
 import { verifyJwt } from "../middleware/verifyJwt.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
-import {registerSchema, loginSchema} from "../schemas/auth.schema.js"
+import {registerSchema, loginSchema, logoutSessionSchema} from "../schemas/auth.schema.js"
 
 const router = Router();
 
@@ -13,6 +13,6 @@ router.route("/refresh-token").post(refreshAccessToken);
 router.route("/current-user").get(verifyJwt, getCurrentUser);
 router.route("/logout").post( verifyJwt,logout);
 router.route("/sessions").get(verifyJwt, getSessions);
-router.route("/logout-session/:sessionId").post(verifyJwt, logoutSession);
+router.route("/logout-session/:sessionId").post(verifyJwt, validate(logoutSessionSchema), logoutSession);
 
 export default router;
