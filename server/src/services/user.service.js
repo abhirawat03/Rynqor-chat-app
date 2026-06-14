@@ -44,7 +44,7 @@ const updateAvatarService = async (userId, avatarLocalPath) => {
     if (!user) throw new ApiError(404, "User not found");
 
     const uploaded = await uploadOnCloudinary(avatarLocalPath, "Rynqor/avatar");
-    if (!uploaded || !uploaded?.url || !uploaded?.publicId) {
+    if (!uploaded?.url || !uploaded?.publicId) {
         throw new ApiError(400, "Error uploading avatar");
     }
 
@@ -61,7 +61,10 @@ const updateAvatarService = async (userId, avatarLocalPath) => {
                 },
             },
             { new: true, runValidators: true }
-        ).lean();
+        ).select(
+                    "username fullName avatar bio"
+                )
+        .lean();
 
         if (!updatedUser) throw new Error("DB update failed");
 
@@ -93,15 +96,15 @@ const deleteAvatarService = async (userId) => {
         console.error("Cloudinary delete failed:", err);
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
+    return await User.findByIdAndUpdate(
         userId,
         { $set: { avatar: null } },
         { new: true }
     )
-    .select("-password")
+    .select(
+            "username fullName avatar bio"
+        )
     .lean();
-
-    return updatedUser
 };
 
 const changePasswordService =
@@ -110,40 +113,6 @@ const changePasswordService =
     oldPassword,
     newPassword
   ) => {
-
-    if (
-      !oldPassword ||
-      !newPassword
-    ) {
-
-      throw new ApiError(
-        400,
-        "Old password and new password are required"
-      );
-
-    }
-
-    if (
-      newPassword.length < 8
-    ) {
-
-      throw new ApiError(
-        400,
-        "Password must be at least 8 characters"
-      );
-
-    }
-
-    if (
-      oldPassword === newPassword
-    ) {
-
-      throw new ApiError(
-        400,
-        "New password must be different"
-      );
-
-    }
 
     const user =
       await User.findById(userId)
@@ -184,10 +153,15 @@ const changePasswordService =
   };
 
 const searchUserService = async (search) => {
+    const escapedSearch =
+      search.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&"
+      );
     const users = await User.find({
         $or: [
-            { username: { $regex: `^${search}`, $options: "i" } },
-            { fullName: { $regex: `^${search}`, $options: "i" } },
+            { username: { $regex: `^${escapedSearch}`, $options: "i" } },
+            { fullName: { $regex: `^${escapedSearch}`, $options: "i" } },
         ],
     })
         .select("username fullName avatar bio")

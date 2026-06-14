@@ -1,6 +1,5 @@
 import { Message } from "../models/message.model.js";
 import { Conversation } from "../models/conversation.model.js";
-import { ApiError } from "../utils/ApiError.js";
 import { getConversationByIdService } from "./conversation.service.js";
 
 const sendMessageService = async (userId, payload) => {
@@ -42,26 +41,31 @@ const getMessageService = async (userId, conversationId, cursor) => {
     }
 
     if (cursor) {
-        query._id = { $lt: cursor }; //older message
+        query._id = { $lt: cursor }; 
     }
-
-    const messages = await Message.find(query)
+    const PAGE_SIZE = 20;
+    const messages = await Message.find(query)  
         .sort({ _id: -1 })
-        .limit(20)
+        .limit(PAGE_SIZE + 1)
         .populate("senderId", "username fullName avatar")
         .lean();
 
+    const hasMore =
+    messages.length > PAGE_SIZE;
+
+    if (hasMore) {
+        messages.pop();
+    }
+
     const nextCursor =
-        messages.length
-            ? messages[
-                  messages.length - 1
-              ]._id
+        messages.length > 0
+            ? messages[messages.length - 1]._id
             : null;
 
     return {
         messages: messages.reverse(),
         nextCursor,
-        hasMore: messages.length === 20,
+        hasMore,
     };
 }
 
