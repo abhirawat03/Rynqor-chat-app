@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { objectIdSchema } from "./common.schema.js";
 
-export const getUserSchema = z.object({
+const getUserSchema = z.object({
     params: z.object({
         id: objectIdSchema,
     }).strict(),
