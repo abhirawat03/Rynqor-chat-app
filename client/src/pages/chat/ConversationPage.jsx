@@ -328,7 +328,7 @@ duration-300
 
         bg-surface
 
-        xl:w-[420px]
+        xl:w-105
       "
               >
                 Loading profile...

@@ -8,8 +8,9 @@ const createConversation = async(receiverId) =>{
 }
 const getConversations = async () => {
     const res = await Api.get("/conversations");
+    console.log(res.data.data, "from service");
     return res.data.data;
-}
+};
 
 const getConversationById = async (conversationId) => {
     if (!conversationId) throw new Error("Missing conversationId");

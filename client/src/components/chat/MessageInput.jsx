@@ -17,6 +17,10 @@ import {
 import { FiX } from "react-icons/fi";
 
 import {
+  useQueryClient,
+} from "@tanstack/react-query";
+
+import {
   useSocket,
 } from "../../services/socket/useSocket.js";
 
@@ -24,12 +28,19 @@ import {
   useUploadMessageMediaMutation,
 } from "../../hooks/messages/useUploadMessageMediaMutation.js";
 
+import {
+  updateMessagesCache,
+} from "../../services/socket/helpers/updateMessagesCache.js";
+
 const MessageInput = ({
   onSend,
 }) => {
 
   const uploadMutation =
     useUploadMessageMediaMutation();
+
+  const queryClient =
+    useQueryClient();
 
   const {
     conversationId,
@@ -40,7 +51,6 @@ const MessageInput = ({
   const {
     emitTyping,
     emitStopTyping,
-    replaceMessageMedia,
     getSocket,
   } = useSocket();
 
@@ -305,21 +315,32 @@ setTimeout(() => {
         ) {
 
           uploadedMedia =
-            await uploadMutation.mutateAsync({
+  await uploadMutation.mutateAsync({
+    files:
+      currentMedia.map(
+        (item) =>
+          item.file
+      ),
+  });
 
-              files:
-                currentMedia.map(
-                  (item) =>
-                    item.file
-                ),
+updateMessagesCache({
+  queryClient,
+  conversationId,
 
-            });
+  updater: (messages) =>
+    messages.map((msg) =>
 
-          replaceMessageMedia(
-            conversationId,
-            tempMessageId,
-            uploadedMedia
-          );
+      msg.clientTempId ===
+      tempMessageId
+
+        ? {
+            ...msg,
+            media: uploadedMedia,
+          }
+
+        : msg
+    ),
+});
 
           currentMedia.forEach((item) => {
 

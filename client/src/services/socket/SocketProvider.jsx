@@ -6,6 +6,10 @@ import {
     useMemo,
 } from "react";
 
+import {
+    useQueryClient,
+} from "@tanstack/react-query";
+
 import toast from "react-hot-toast";
 
 import {
@@ -21,10 +25,6 @@ import {
 import {
     useCurrentUserQuery,
 } from "../../hooks/auth/useCurrentUserQuery.js";
-
-import {
-    updateConversationLastMessage,
-} from "./helpers/conversationHelpers";
 
 import {
     createMessageHandlers,
@@ -48,6 +48,9 @@ const SocketProvider = ({
 
     const currentUserId =
         user?._id;
+    
+    const queryClient =
+    useQueryClient();
 
     const socketRef =
         useRef(null);
@@ -58,23 +61,6 @@ const SocketProvider = ({
     const currentUserIdRef =
         useRef(null);
 
-    const [messages, setMessages] =
-        useState({});
-
-    const [
-        conversations,
-        setConversations,
-    ] = useState([]);
-
-useEffect(() => {
-    console.log(
-        "CONVERSATIONS STATE",
-        conversations.map(c => ({
-            id: c._id,
-            text: c.lastMessage?.text,
-        }))
-    );
-}, [conversations]);
     const [
         typingUsers,
         setTypingUsers,
@@ -172,8 +158,7 @@ useEffect(() => {
             onMessagesRead,
         } =
             createMessageHandlers({
-                setMessages,
-                setConversations,
+                queryClient,
                 currentUserIdRef,
             });
 
@@ -421,232 +406,7 @@ useEffect(() => {
     }, [
         currentUserId,
     ]);
-
-    // ---------------------------------------------------
-    // OPTIMISTIC MESSAGE
-    // ---------------------------------------------------
-
-    const addLocalMessage =
-        useCallback(
-            (
-                conversationId,
-                msg
-            ) => {
-
-                setMessages(
-                    (
-                        prev
-                    ) => ({
-
-                        ...prev,
-
-                        [conversationId]:
-                            [
-                                ...(prev[
-                                    conversationId
-                                ] ||
-                                    []),
-
-                                msg,
-                            ],
-                    })
-                );
-
-                updateConversationLastMessage(
-                    {
-                        setConversations,
-                        conversationId,
-                        msg,
-                    }
-                );
-
-                console.log(
-    "LOCAL MESSAGE",
-    msg._id,
-    msg.clientTempId
-);
-            },
-            []
-            
-        );
-
-    const replaceMessageMedia =
-        useCallback(
-            (
-                conversationId,
-                messageId,
-                media
-            ) => {
-
-                setMessages(
-                    (
-                        prev
-                    ) => {
-
-                        const list =
-                            prev[
-                                conversationId
-                            ] ||
-                            [];
-
-                        return {
-
-                            ...prev,
-
-                            [conversationId]:
-                                list.map(
-                                    (
-                                        msg
-                                    ) => {
-
-                                        if (
-                                            msg._id !==
-                                            messageId
-                                        ) {
-
-                                            return msg;
-                                        }
-
-                                        return {
-
-                                            ...msg,
-
-                                            media:
-                                                media.map(
-                                                    (
-                                                        item
-                                                    ) => ({
-                                                        ...item,
-
-                                                        uploading:
-                                                            false,
-                                                    })
-                                                ),
-                                        };
-                                    }
-                                ),
-                        };
-                    }
-                );
-            },
-            []
-        );
-
-    // ---------------------------------------------------
-    // HYDRATE MESSAGES
-    // ---------------------------------------------------
-
-    const setConversationMessages =
-        useCallback(
-            (
-                conversationId,
-                incomingMessages
-            ) => {
-
-                setMessages(
-                    (
-                        prev
-                    ) => {
-
-                        const existing =
-                            prev[
-                                conversationId
-                            ] ||
-                            [];
-
-                        const merged =
-                            [
-                                ...incomingMessages,
-                                ...existing,
-                            ];
-
-                        const map =
-                            new Map();
-
-                        merged.forEach(
-                            (
-                                msg
-                            ) => {
-
-                                const key =
-                                    msg.clientTempId ||
-                                    msg._id;
-
-                                if (
-                                    !map.has(
-                                        key
-                                    )
-                                ) {
-
-                                    map.set(
-                                        key,
-                                        msg
-                                    );
-                                }
-                            }
-                        );
-
-                        const unique =
-                            Array.from(
-                                map.values()
-                            );
-
-                        unique.sort(
-                            (
-                                a,
-                                b
-                            ) => {
-
-                                const aTime =
-                                    new Date(
-                                        a.createdAt ||
-                                            0
-                                    ).getTime();
-
-                                const bTime =
-                                    new Date(
-                                        b.createdAt ||
-                                            0
-                                    ).getTime();
-
-                                return (
-                                    aTime -
-                                    bTime
-                                );
-                            }
-                        );
-
-                        return {
-
-                            ...prev,
-
-                            [conversationId]:
-                                unique,
-                        };
-                    }
-                );
-            },
-            []
-        );
-
-    // ---------------------------------------------------
-    // CONTEXT VALUE
-    // ---------------------------------------------------
-        const setInitialConversations = useCallback(
-    (incoming) => {
-
-        setConversations(prev => {
-
-            if (prev.length > 0) {
-                return prev;
-            }
-
-            return incoming;
-        });
-
-    },
-    []
-);
+    
     const value =
         useMemo(
             () => ({
@@ -654,35 +414,18 @@ useEffect(() => {
                     () =>
                         socketRef.current,
 
-                messages,
-                conversations,
-
                 typingUsers,
                 presence,
 
                 emitTyping,
                 emitStopTyping,
-
-                addLocalMessage,
-                replaceMessageMedia,
-
-                setConversationMessages,
-
-                setInitialConversations,
             }),
             [
-                messages,
-                conversations,
                 typingUsers,
                 presence,
 
                 emitTyping,
                 emitStopTyping,
-
-                addLocalMessage,
-                replaceMessageMedia,
-
-                setConversationMessages,
             ]
         );
 

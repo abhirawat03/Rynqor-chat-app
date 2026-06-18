@@ -1,9 +1,9 @@
-import {
-    useEffect,
-    useRef,
-} from "react";
 import { useMessagesQuery } from "../../hooks/messages/useMessagesQuery.js";
 import { useSocket } from "../../services/socket/useSocket.js";
+import {
+    useQueryClient,
+} from "@tanstack/react-query";
+import { updateMessagesCache } from "../../services/socket/helpers/updateMessagesCache.js";
 
 export const useChatMessages = ({
     conversationId,
@@ -11,52 +11,13 @@ export const useChatMessages = ({
 }) => {
     const {
         getSocket,
-
-        messages,
-
-        addLocalMessage,
-
-        setConversationMessages,
     } = useSocket();
-const { data: messagesData, isLoading: messagesLoading, fetchNextPage, hasNextPage, isFetchingNextPage} = useMessagesQuery(conversationId);
-const hydratedRef = useRef(false);
 
-    useEffect(() => {
-        hydratedRef.current = false;
-    }, [conversationId]);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
+    const { data: messagesData, isLoading: messagesLoading, fetchNextPage, hasNextPage, isFetchingNextPage} = useMessagesQuery(conversationId);
 
-        if (
-            hydratedRef.current ||
-            !conversationId ||
-            !messagesData?.pages
-        ) {
-            return;
-        }
-
-        const allMessages =
-            messagesData.pages.flatMap(
-                (page) => page.messages
-            );
-
-        setConversationMessages(
-            conversationId,
-            allMessages
-        );
-
-        hydratedRef.current = true;
-
-    }, [
-        conversationId,
-        messagesData,
-        setConversationMessages,
-    ]);
-
-    const chatMessages =
-        messages[
-        conversationId
-        ] || [];
+    const chatMessages = messagesData?.pages?.flatMap(page => page.messages) || [];
 const sendMessage = (
         text,
         media = []
@@ -103,10 +64,15 @@ const sendMessage = (
                     "failed",
             };
 
-            addLocalMessage(
-                conversationId,
-                failedMessage
-            );
+            updateMessagesCache({
+    queryClient,
+    conversationId,
+
+    updater: (messages) => [
+        ...messages,
+        failedMessage,
+    ],
+});
 
             return;
         }
@@ -140,10 +106,15 @@ const sendMessage = (
                 "sending",
         };
 
-        addLocalMessage(
-            conversationId,
-            tempMessage
-        );
+        updateMessagesCache({
+    queryClient,
+    conversationId,
+
+    updater: (messages) => [
+        ...messages,
+        tempMessage,
+    ],
+});
 
         return clientTempId;
     };

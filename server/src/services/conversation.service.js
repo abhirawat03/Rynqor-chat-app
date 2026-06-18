@@ -61,20 +61,20 @@ const createConversationService = async (userId, receiverId) => {
     return result;
 };
 
-const getConversationService = async (userId, cursor) => {
-    const PAGE_SIZE = 20;
+const getConversationService = async (userId) => {
+    // const PAGE_SIZE = 20;
 
-    const query = {
-        participants: userId,
-    }
+    // const query = {
+    //     participants: userId,
+    // }
 
-    if (cursor) {
-        query.updatedAt = {
-            $lt: new Date(cursor),
-        };
-    }
+    // if (cursor) {
+    //     query.updatedAt = {
+    //         $lt: new Date(cursor),
+    //     };
+    // }
     const conversations = await Conversation.find({
-        query
+        participants: userId,
     })
         .populate("participants", USER_PUBLIC_FIELDS)
         .populate({
@@ -85,16 +85,16 @@ const getConversationService = async (userId, cursor) => {
             },
         })
         .sort({ updatedAt: -1 })
-        .limit(PAGE_SIZE + 1)
+        // .limit(PAGE_SIZE + 1)
         .lean();
     
-    const hasMore =
-        conversations.length >
-        PAGE_SIZE;
+    // const hasMore =
+    //     conversations.length >
+    //     PAGE_SIZE;
 
-    if (hasMore) {
-        conversations.pop();
-    }
+    // if (hasMore) {
+    //     conversations.pop();
+    // }
 
     const result = conversations.map((conv) => {
         const isSelf = conv.type === "self";
@@ -126,18 +126,20 @@ const getConversationService = async (userId, cursor) => {
         };
     });
 
-    const nextCursor =
-        conversations.length > 0
-            ? conversations[
-                conversations.length -1
-            ].updatedAt
-            : null;
+    // const nextCursor =
+    //     conversations.length > 0
+    //         ? conversations[
+    //             conversations.length -1
+    //         ].updatedAt
+    //         : null;
     
-    return {
-        conversations: result,
-        nextCursor,
-        hasMore,
-    };
+    // return {
+    //     conversations: result,
+    //     nextCursor,
+    //     hasMore,
+    // };
+
+    return result;
 };
 
 const getConversationByIdService = async (userId, conversationId) => {

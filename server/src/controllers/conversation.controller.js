@@ -3,9 +3,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createConversation = async (req, res) => {
     const userId = req.user?._id;
-    // const {receiverId} = req.params;
-    // accept receiverId from params or request body
-    // const receiverId = req.params?.receiverId || req.body?.receiverId;
     const {receiverId} = req.body;
 
     const conversation = await createConversationService(userId, receiverId);
@@ -22,9 +19,9 @@ const createConversation = async (req, res) => {
 
 const getConversation = async (req, res) => {
     const userId = req.user?._id;
-    const {cursor} = req.query;
+    // const {cursor} = req.query;
 
-    const conversations = await getConversationService(userId, cursor);
+    const conversations = await getConversationService(userId);
 
     return res
         .status(200)

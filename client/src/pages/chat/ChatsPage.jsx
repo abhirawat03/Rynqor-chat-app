@@ -13,32 +13,15 @@ import { useSocket } from "../../services/socket/useSocket.js";
 const ChatsPage = () => {
 
     const {
-        conversations,
-        setInitialConversations,
         presence,
         typingUsers,
     } = useSocket();
 
     const {
-        data,
+        data:conversations = [],
         isLoading,
         isError,
     } = useConversationsQuery();
-
-  useEffect(() => {
-    if (
-        !data ||
-        conversations.length > 0
-    ) {
-        return;
-    }
-
-    setInitialConversations(data);
-}, [
-    data,
-    conversations.length,
-    setInitialConversations,
-]);
 
     useEffect(() => {
     console.log("CHATS PAGE MOUNTED");
@@ -47,7 +30,7 @@ const ChatsPage = () => {
 console.log(
     "QUERY",
     isLoading,
-    data?.length
+    conversations?.length
 );
 
     // ---------------------------------------------------
@@ -65,20 +48,10 @@ console.log(
         String(
             user?._id || ""
         );
-useEffect(() => {
-    console.log(
-        "QUERY DATA",
-        data?.map(c => ({
-            id: c._id,
-            updatedAt: c.updatedAt,
-            lastMessage: c.lastMessage?._id,
-        }))
-    );
-}, [data]);
 
 useEffect(() => {
     console.log(
-        "SOCKET STATE",
+        "CONVERSATIONS CACHE",
         conversations.map(c => ({
             id: c._id,
             updatedAt: c.updatedAt,
@@ -86,12 +59,15 @@ useEffect(() => {
         }))
     );
 }, [conversations]);
-
-// useEffect(() => {
-//     if (!data) return;
-
-//     setInitialConversations(data);
-// }, [data, setInitialConversations]);
+useEffect(() => {
+    console.log(
+        "CONVERSATIONS",
+        conversations.map(c => ({
+            id: c._id,
+            text: c.lastMessage?.text,
+        }))
+    );
+}, [conversations]);
     // ---------------------------------------------------
     // LOADING
     // ---------------------------------------------------
