@@ -24,8 +24,9 @@ import { useConversationByIdQuery } from "../../hooks/conversations/useConversat
 
 import { useReadReceipts } from "../../hooks/chat/useReadReceipts.js";
 import { useChatMessages } from "../../hooks/chat/useChatMessages.js";
-import NewMessagesButton from "../../components/chat/NewMessagesButton.jsx";
+import ScrollToBottomButton from "../../components/chat/ScrollToBottomButton.jsx";
 import { useChatScroll } from "../../hooks/chat/useChatScroll.js";
+import { Skeleton, MessageListSkeleton, ConversationSkeleton } from "../../components/common/Skeleton.jsx";
 
 const UserProfilePage = lazy(
   () =>
@@ -88,6 +89,17 @@ const ConversationPage = () => {
   messagesLoading,
 });
 
+const handleBottomChange = (
+  bottom
+) => {
+  console.log(
+    "BOTTOM:",
+    bottom
+  );
+
+  setIsAtBottom(bottom);
+};
+
 const otherUser =
   conversation?.participants?.find(
     (u) =>
@@ -118,28 +130,40 @@ useEffect(() => {
   setUnreadCount(0);
 }, [conversationId, setUnreadCount]);
 
-  // AUTH LOADING
-useEffect(() => {
-  const handleEsc = (e) => {
-    if (e.key === "Escape") {
-      document.activeElement?.blur();
-      navigate("/");
-    }
-  };
+  // KEYBOARD SHORTCUTS (Escape to close, End to scroll to bottom)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        document.activeElement?.blur();
+        navigate("/");
+      }
 
-  window.addEventListener(
-    "keydown",
-    handleEsc
-  );
+      if (e.key === "End") {
+        e.preventDefault();
+        setUnreadCount(0);
+        const firstItemIndex = Math.max(0, 10000 - chatMessages.length);
+        const lastIndex = chatMessages.length > 0 ? (firstItemIndex + chatMessages.length - 1) : 0;
+        virtuosoRef.current?.scrollToIndex({
+          index: lastIndex,
+          align: "end",
+          behavior: "smooth",
+        });
+      }
+    };
 
-  return () => {
-    window.removeEventListener(
+    window.addEventListener(
       "keydown",
-      handleEsc
+      handleKeyDown
     );
-  };
 
-}, [navigate]);
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+
+  }, [navigate, chatMessages.length, setUnreadCount, virtuosoRef]);
 
 const handleTopReached =
   async () => {
@@ -162,15 +186,7 @@ const handleTopReached =
   };
 
   if (loading) {
-
-    return (
-      <div
-        className="flex items-center justify-center flex-1 duration-300 "
-      >
-        Loading...
-      </div>
-    );
-
+    return <ConversationSkeleton />;
   }
 
   // NO USER
@@ -192,15 +208,7 @@ const handleTopReached =
     convLoading ||
     messagesLoading
   ) {
-
-    return (
-      <div
-        className="flex items-center justify-center flex-1 transition-colors duration-300 "
-      >
-        Loading chat...
-      </div>
-    );
-
+    return <ConversationSkeleton />;
   }
 
   // ERROR
@@ -275,21 +283,22 @@ duration-300
           currentUserId={currentUserId}
           isTyping={isTyping}
           onTopReached={handleTopReached}
-          onBottomStateChange={setIsAtBottom}
-          isAtBottom={isAtBottom}
+          onBottomStateChange={handleBottomChange}
+          isFetchingNextPage={isFetchingNextPage}
         />
 
-        <NewMessagesButton
-          count={unreadCount}
+        <ScrollToBottomButton
+          isAtBottom={isAtBottom}
+          unreadCount={unreadCount}
           onClick={() => {
             setUnreadCount(0);
+            const firstItemIndex = Math.max(0, 10000 - chatMessages.length);
+            const lastIndex = chatMessages.length > 0 ? (firstItemIndex + chatMessages.length - 1) : 0;
             virtuosoRef.current?.scrollToIndex({
-              index:
-                chatMessages.length - 1,
+              index: lastIndex,
               align: "end",
               behavior: "smooth",
             });
-
           }}
         />
 
@@ -322,6 +331,7 @@ duration-300
               <div
                 className="
         flex
+        h-full
         w-full
         items-center
         justify-center

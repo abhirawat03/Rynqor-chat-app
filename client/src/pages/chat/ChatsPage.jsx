@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { IoMdChatbubbles } from "react-icons/io";
 
 import ChatItem from "../../components/chat/ChatItem.jsx";
+import { ChatListSkeleton } from "../../components/common/Skeleton.jsx";
 
 import { useConversationsQuery } from "../../hooks/conversations/useConversationsQuery.js";
 import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
@@ -78,12 +79,12 @@ useEffect(() => {
     ) {
 
         return (
-            <div
-                className="flex items-center justify-center w-full h-full "
-            >
-                <p className="text-muted">
-                    Loading chats...
-                </p>
+            <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto">
+                {/* Header title skeleton simulation */}
+                <div className="p-4 border-b border-border">
+                    <div className="h-6 w-32 bg-zinc-100 dark:bg-zinc-800/35 rounded-md animate-pulse" />
+                </div>
+                <ChatListSkeleton count={6} />
             </div>
         );
     }

@@ -11,6 +11,7 @@ export const useChatScroll = ({
 
     const virtuosoRef = useRef(null);
     const lastMessageIdRef = useRef(null);
+    const lastScrolledMessageIdRef = useRef(null);
 
     useEffect(() => {
         const lastMessage =
@@ -55,15 +56,27 @@ export const useChatScroll = ({
 
         if (!lastMessage) return;
 
+        if (
+            lastMessage._id ===
+            lastScrolledMessageIdRef.current
+        ) {
+            return;
+        }
+
+        lastScrolledMessageIdRef.current =
+            lastMessage._id;
+
         const senderId =
             lastMessage.senderId?._id ||
             lastMessage.senderId;
 
         // My message
         if (senderId === currentUserId) {
+            const firstItemIndex = Math.max(0, 10000 - chatMessages.length);
+            const lastIndex = chatMessages.length > 0 ? (firstItemIndex + chatMessages.length - 1) : 0;
             requestAnimationFrame(() => {
                 virtuosoRef.current?.scrollToIndex({
-                    index: chatMessages.length - 1,
+                    index: lastIndex,
                     align: "end",
                     behavior: "smooth",
                 });
@@ -83,6 +96,7 @@ export const useChatScroll = ({
 
     useEffect(() => {
         lastMessageIdRef.current = null;
+        lastScrolledMessageIdRef.current = null;
         setUnreadCount(0);
     }, [conversationId]);
 
@@ -91,19 +105,24 @@ export const useChatScroll = ({
             !messagesLoading &&
             chatMessages.length > 0
         ) {
-            requestAnimationFrame(() => {
+            const firstItemIndex = Math.max(0, 10000 - chatMessages.length);
+            const lastIndex = firstItemIndex + chatMessages.length - 1;
+            const timer = setTimeout(() => {
                 virtuosoRef.current?.scrollToIndex({
-                    index: chatMessages.length - 1,
+                    index: lastIndex,
                     align: "end",
                     behavior: "auto",
                 });
-            });
+            }, 50);
+
+            return () =>
+                clearTimeout(timer);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         conversationId,
         messagesLoading,
     ]);
-
     return {
         virtuosoRef,
         isAtBottom,

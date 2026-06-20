@@ -1,7 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   StrictMode,
   lazy,
-  Suspense,
 } from "react";
 
 import { createRoot } from "react-dom/client";
@@ -33,6 +33,7 @@ import AuthLayout from "./layouts/AuthLayout.jsx";
 /* PAGES */
 import Login from "./pages/auth/Login.jsx";
 import Signup from "./pages/auth/Signup.jsx";
+import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
 const ProfilePage = lazy(
   () => import("./pages/profile/ProfilePage.jsx")
@@ -50,6 +51,10 @@ const SearchPage = lazy(
 import PublicRoute from "./routes/PublicRoute.jsx";
 
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
+
+import GlobalErrorBoundary from "./components/app/GlobalErrorBoundary.jsx";
+import { LazyPage } from "./components/common/LazyPage.jsx";
+import { ConversationSkeleton, SearchSkeleton, SettingsSkeleton } from "./components/common/Skeleton.jsx";
 
 
 // APPLY THEME BEFORE REACT LOADS
@@ -87,28 +92,7 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 const queryClient =
   new QueryClient();
 
-const PageLoader = () => (
-  <div
-    className="
-      flex
-      min-h-screen
-      items-center
-      justify-center
-    "
-  >
-    Loading...
-  </div>
-);
 
-const LazyPage = ({
-  children,
-}) => (
-  <Suspense
-    fallback={<PageLoader />}
-  >
-    {children}
-  </Suspense>
-);
 
 const router =
   createBrowserRouter([
@@ -119,6 +103,7 @@ const router =
           <ProtectedRoute />
         </App>
       ),
+      errorElement: <GlobalErrorBoundary />,
 
       children: [
         {
@@ -158,7 +143,7 @@ const router =
                   path: "chat/:conversationId",
 
                   element: (
-                    <LazyPage>
+                    <LazyPage fallback={<ConversationSkeleton />}>
                       <ConversationPage />
                     </LazyPage>
                   ),
@@ -171,7 +156,7 @@ const router =
               path: "search",
 
               element: (
-                <LazyPage>
+                <LazyPage fallback={<SearchSkeleton />}>
                   <SearchPage />
                 </LazyPage>
               ),
@@ -181,7 +166,7 @@ const router =
               path: "profile",
 
               element: (
-                <LazyPage>
+                <LazyPage fallback={<SettingsSkeleton />}>
                   <ProfilePage />
                 </LazyPage>
               ),
@@ -201,6 +186,7 @@ const router =
           <PublicRoute />
         </App>
       ),
+      errorElement: <GlobalErrorBoundary />,
 
       children: [
         {
@@ -218,6 +204,12 @@ const router =
               path: "signup",
 
               element: <Signup />,
+            },
+
+            {
+              path: "forgot-password",
+
+              element: <ForgotPassword />,
             },
 
           ],

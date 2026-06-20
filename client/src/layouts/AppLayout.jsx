@@ -6,15 +6,16 @@ import {
 
 import AppHeader from "../components/app/AppHeader.jsx";
 import Navigation from "../components/navigation/Navigation.jsx";
+import { useSocket } from "../services/socket/useSocket.js";
 
 function AppLayout() {
-
   const isChatRoute =
     useMatch("/chat/:conversationId");
+  const { isConnected } = useSocket();
 
   return (
     <div
-      className="flex h-screen overflow-hidden transition-colors duration-300 bg-background text-foreground"
+      className="flex h-[100dvh] overflow-hidden transition-colors duration-300 bg-background text-foreground"
     >
 
       {/* DESKTOP SIDEBAR */}
@@ -34,6 +35,14 @@ function AppLayout() {
       <div
         className="flex flex-col flex-1 overflow-hidden "
       >
+
+        {/* CONNECTION BANNER */}
+        {!isConnected && (
+          <div className="bg-amber-500 text-white text-xs font-semibold py-2 px-4 text-center shrink-0 flex items-center justify-center gap-2 select-none border-b border-amber-600/30">
+            <span className="animate-pulse">⏳</span>
+            Connection lost. Trying to reconnect...
+          </div>
+        )}
 
         {/* HEADER */}
         <div

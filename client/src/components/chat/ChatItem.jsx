@@ -1,4 +1,6 @@
 import { memo } from "react";
+import { getRelativeTimeShort } from "../../utils/date.js";
+
 const ChatItem = memo(({
     name,
     lastMessage,
@@ -12,16 +14,7 @@ const ChatItem = memo(({
 }) => {
 
     // TIME
-    const formattedTime =
-        time
-            ? new Date(time).toLocaleTimeString(
-                [],
-                {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                }
-            )
-            : "";
+    const formattedTime = getRelativeTimeShort(time);
 
     // USER
     const isMe =
@@ -258,22 +251,6 @@ const ChatItem = memo(({
                         {name}
                     </p>
 
-                    {/* TIME */}
-                    {time && (
-
-                        <span
-                            className="
-                shrink-0
-                text-[11px]
-
-                text-muted
-              "
-                        >
-                            {formattedTime}
-                        </span>
-
-                    )}
-
                 </div>
 
                 {/* PREVIEW */}
@@ -292,6 +269,7 @@ const ChatItem = memo(({
           `}
                 >
                     {getPreviewText()}
+                    {time && ` • ${formattedTime}`}
                 </p>
 
             </div>

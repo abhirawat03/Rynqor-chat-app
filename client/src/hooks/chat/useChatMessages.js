@@ -17,7 +17,10 @@ export const useChatMessages = ({
 
     const { data: messagesData, isLoading: messagesLoading, fetchNextPage, hasNextPage, isFetchingNextPage} = useMessagesQuery(conversationId);
 
-    const chatMessages = messagesData?.pages?.flatMap(page => page.messages) || [];
+    const chatMessages =
+        messagesData?.pages
+            ? [...messagesData.pages].reverse().flatMap((page) => page.messages)
+            : [];
 const sendMessage = (
         text,
         media = []

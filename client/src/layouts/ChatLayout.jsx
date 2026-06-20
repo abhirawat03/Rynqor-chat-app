@@ -26,8 +26,8 @@ const ChatLayout = () => {
           duration-300
 
           md:flex
-          md:w-80
-          lg:w-96
+          md:w-72
+          lg:w-80
           md:flex-col
 
           ${
@@ -37,8 +37,8 @@ const ChatLayout = () => {
                 flex
                 w-full
 
-                md:w-80
-                lg:w-96
+                md:w-72
+                lg:w-80
               `
           }
         `}

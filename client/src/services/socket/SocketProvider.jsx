@@ -71,6 +71,11 @@ const SocketProvider = ({
         setPresence,
     ] = useState({});
 
+    const [
+        isConnected,
+        setIsConnected,
+    ] = useState(true);
+
     // ---------------------------------------------------
     // SOCKET HELPERS
     // ---------------------------------------------------
@@ -190,6 +195,7 @@ useEffect(() => {
 
         const onConnect =
             () => {
+                setIsConnected(true);
 
                 toast.dismiss(
                     "socket-disconnected"
@@ -214,6 +220,7 @@ useEffect(() => {
 
         const onDisconnect =
             () => {
+                setIsConnected(false);
 
                 toast.error(
                     "Disconnected from server",
@@ -238,6 +245,7 @@ useEffect(() => {
             (
                 error
             ) => {
+                setIsConnected(false);
 
                 console.error(
                     "Socket error:",
@@ -405,6 +413,7 @@ useEffect(() => {
 
     }, [
         currentUserId,
+        queryClient,
     ]);
     
     const value =
@@ -414,6 +423,7 @@ useEffect(() => {
                     () =>
                         socketRef.current,
 
+                isConnected,
                 typingUsers,
                 presence,
 
@@ -421,6 +431,7 @@ useEffect(() => {
                 emitStopTyping,
             }),
             [
+                isConnected,
                 typingUsers,
                 presence,
 

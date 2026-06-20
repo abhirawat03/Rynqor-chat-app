@@ -321,6 +321,32 @@ setTimeout(() => {
         (item) =>
           item.file
       ),
+    onUploadProgress: (progressEvent) => {
+      const progress = Math.round(
+        (progressEvent.loaded * 100) / progressEvent.total
+      );
+      updateMessagesCache({
+        queryClient,
+        conversationId,
+
+        updater: (messages) =>
+          messages.map((msg) =>
+
+            msg.clientTempId ===
+            tempMessageId
+
+              ? {
+                  ...msg,
+                  media: msg.media?.map((m) => ({
+                    ...m,
+                    uploadProgress: progress,
+                  })),
+                }
+
+              : msg
+          ),
+      });
+    },
   });
 
 updateMessagesCache({
@@ -342,13 +368,12 @@ updateMessagesCache({
     ),
 });
 
-          currentMedia.forEach((item) => {
-
-  URL.revokeObjectURL(
-    item.preview
-  );
-
-});
+          // Delay revoking the local blob URLs to give the browser time to load the server-hosted media URLs in the background without layout flashing
+          setTimeout(() => {
+            currentMedia.forEach((item) => {
+              URL.revokeObjectURL(item.preview);
+            });
+          }, 5000);
 
         }
 

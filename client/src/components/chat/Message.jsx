@@ -77,8 +77,6 @@ const Message = memo(({
       {/* MESSAGE */}
       <div
         className={`
-          mb-2
-
           flex
 
           ${

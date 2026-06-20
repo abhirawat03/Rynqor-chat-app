@@ -7,7 +7,7 @@ const AuthLayout = () => {
 
     return (
         <div
-            className="flex w-full h-screen overflow-hidden transition-colors duration-300 bg-background"
+            className="flex w-full h-[100dvh] overflow-hidden transition-colors duration-300 bg-background"
         >
 
             {/* LEFT SIDE */}

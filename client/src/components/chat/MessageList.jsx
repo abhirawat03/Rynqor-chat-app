@@ -1,41 +1,10 @@
+// import { useRef, useEffect } from "react";
 import { Virtuoso } from "react-virtuoso";
 import Message from "./Message";
 import TypingIndicator from "./TypingIndicator";
 import DateSeparator from "./DateSeparator";
 
-const getDateLabel = (
-  date
-) => {
-
-  const today =
-    new Date();
-
-  const yesterday =
-    new Date();
-
-  yesterday.setDate(
-    yesterday.getDate() - 1
-  );
-
-  const messageDate =
-    new Date(date);
-
-  if (
-    messageDate.toDateString() ===
-    today.toDateString()
-  ) {
-    return "Today";
-  }
-
-  if (
-    messageDate.toDateString() ===
-    yesterday.toDateString()
-  ) {
-    return "Yesterday";
-  }
-
-  return messageDate.toLocaleDateString();
-};
+import { getDateLabel } from "../../utils/date.js";
 
 const MessageList = ({
   conversationId,
@@ -45,9 +14,23 @@ const MessageList = ({
   isTyping,
   onTopReached,
   onBottomStateChange,
-  isAtBottom,
+  isFetchingNextPage
 }) => {
+  // const scrollerRefLocal = useRef(null);
 
+  // useEffect(() => {
+  //   if (isTyping && isAtBottom && scrollerRefLocal.current) {
+  //     requestAnimationFrame(() => {
+  //       const el = scrollerRefLocal.current;
+  //       el.scrollTo({
+  //         top: el.scrollHeight,
+  //         behavior: "smooth",
+  //       });
+  //     });
+  //   }
+  // }, [isTyping, isAtBottom]);
+
+  const firstItemIndex = Math.max(0, 10000 - chatMessages.length);
 
   return (
     <div
@@ -57,28 +40,30 @@ const MessageList = ({
         key={conversationId}
         ref={virtuosoRef}
         data={chatMessages}
+        firstItemIndex={firstItemIndex}
         className="h-full scrollbar-hide"
         initialTopMostItemIndex={
-    chatMessages.length > 0
-      ? chatMessages.length - 1
-      : undefined
-  }
-        followOutput={isAtBottom ? "smooth" : false}
+          chatMessages.length > 0
+            ? 9999
+            : undefined
+        }
+        followOutput={(isBottom) => isBottom ? "smooth" : false}
+
         startReached={
           onTopReached
         }
         atBottomStateChange={
           onBottomStateChange
         }
-        overscan={300}
+        overscan={1200}
         itemContent={(
           index,
           msg
         ) => {
-
+          const relativeIndex = index - firstItemIndex;
           const prevMessage =
             chatMessages[
-            index - 1
+              relativeIndex - 1
             ];
 
           const showDateSeparator =
@@ -101,7 +86,7 @@ const MessageList = ({
               )}
 
               <div
-                className="w-full max-w-5xl px-3 pb-1 mx-auto first:pt-3"
+                className="w-full max-w-5xl px-3 pb-3 mx-auto"
               >
                 <Message
                   message={msg}
@@ -121,16 +106,21 @@ const MessageList = ({
           );
         }}
         components={{
-    Footer: () => (
-      <>
-        {isTyping && (
-          <div className="w-full max-w-5xl px-3 py-2 mx-auto">
-            <TypingIndicator />
-          </div>
-        )}
-      </>
-    ),
-  }}
+          Header: () => (
+            <div className="w-full flex justify-center py-2 shrink-0">
+              {isFetchingNextPage && (
+                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+              )}
+            </div>
+          ),
+          Footer: () => (
+            <div className="w-full max-w-5xl px-3 py-1 mx-auto">
+              {isTyping && (
+                <TypingIndicator />
+              )}
+            </div>
+          ),
+        }}
       />
     </div>
   );

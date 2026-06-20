@@ -63,3 +63,7 @@ html.dark {
   color-scheme: dark;
 }
 
+[data-virtuoso-scroller="true"] {
+  overflow-anchor: none;
+}
+

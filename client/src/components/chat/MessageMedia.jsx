@@ -44,21 +44,47 @@ const MessageMedia = memo(({
   // UPLOAD OVERLAY
   // -----------------------------------
 
+  const radius = 18;
+  const circumference = 2 * Math.PI * radius;
+  const progress = item.uploadProgress ?? 0;
+  const strokeDashoffset = circumference * (1 - progress / 100);
+
   const UploadOverlay =
     isUploading && (
 
       <div
-        className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/65 backdrop-blur-sm"
+        className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/65 backdrop-blur-sm select-none"
       >
 
-        {/* SPINNER */}
-        <div
-          className="w-8 h-8 border-2 rounded-full animate-spin border-white/20 border-t-white"
-        />
+        {/* CIRCULAR PROGRESS TRACK */}
+        <div className="relative flex items-center justify-center">
+          <svg className="w-14 h-14 transform -rotate-90" viewBox="0 0 48 48">
+            <circle
+              cx="24"
+              cy="24"
+              r={radius}
+              className="stroke-white/20 fill-transparent"
+              strokeWidth="3.5"
+            />
+            <circle
+              cx="24"
+              cy="24"
+              r={radius}
+              className="stroke-white fill-transparent transition-all duration-300"
+              strokeWidth="3.5"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="absolute text-[10px] font-bold text-white tracking-tighter">
+            {progress}%
+          </span>
+        </div>
 
         {/* TEXT */}
         <p
-          className="mt-3 text-xs font-medium text-white "
+          className="mt-2 text-[10px] font-medium text-white/90"
         >
           Uploading...
         </p>

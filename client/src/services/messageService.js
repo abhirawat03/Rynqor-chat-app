@@ -16,7 +16,7 @@ const getMessage = async (conversationId, cursor = null) => {
 }
 
 const uploadMessageMedia =
-    async ({ files}) => {
+    async ({ files, onUploadProgress }) => {
 
         const formData =
             new FormData();
@@ -35,6 +35,9 @@ const uploadMessageMedia =
             await Api.post(
                 "/messages/upload",
                 formData,
+                {
+                    onUploadProgress,
+                }
             );
 
         return res.data.data;

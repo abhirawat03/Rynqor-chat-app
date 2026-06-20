@@ -229,7 +229,7 @@ const Login = () => {
       >
 
         <Link
-          to="/forgot-password"
+          to="/auth/forgot-password"
           className="text-sm transition-opacity duration-200 text-accent hover:opacity-80"
         >
           Forgot password?
