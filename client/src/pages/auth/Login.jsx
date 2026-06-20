@@ -25,6 +25,16 @@ const Login = () => {
       password: "",
     });
 
+  const [touched, setTouched] =
+    useState({
+      login: false,
+      password: false,
+    });
+
+  const isFormValid =
+    formData.login.trim() &&
+    formData.password.length >= 8;
+
   // INPUT CHANGE
 
   const handleChange = (
@@ -37,6 +47,22 @@ const Login = () => {
       [e.target.name]:
         e.target.value,
     });
+
+    setTouched((prev) => ({
+      ...prev,
+      [e.target.name]: true,
+    }));
+
+  };
+
+  const handleBlur = (
+    e
+  ) => {
+
+    setTouched((prev) => ({
+      ...prev,
+      [e.target.name]: true,
+    }));
 
   };
 
@@ -170,9 +196,17 @@ const Login = () => {
             handleChange
           }
 
+          onBlur={
+            handleBlur
+          }
+
           placeholder=" "
 
-          className="w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60"
+          className={`w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl bg-background text-foreground focus:ring-4 focus:ring-accent/10 disabled:opacity-60 ${
+            touched.login && !formData.login.trim()
+              ? "border-red-500 focus:border-red-500"
+              : "border-border focus:border-accent"
+          }`}
         />
 
         <label
@@ -181,6 +215,12 @@ const Login = () => {
         >
           Username or email
         </label>
+
+        {touched.login && !formData.login.trim() && (
+          <p className="mt-1 ml-1 text-xs text-red-500">
+            Username or email is required
+          </p>
+        )}
 
       </div>
 
@@ -209,9 +249,17 @@ const Login = () => {
             handleChange
           }
 
+          onBlur={
+            handleBlur
+          }
+
           placeholder=" "
 
-          className="w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:opacity-60"
+          className={`w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl bg-background text-foreground focus:ring-4 focus:ring-accent/10 disabled:opacity-60 ${
+            touched.password && (formData.password.length < 8 || !formData.password.trim())
+              ? "border-red-500 focus:border-red-500"
+              : "border-border focus:border-accent"
+          }`}
         />
 
         <label
@@ -220,6 +268,18 @@ const Login = () => {
         >
           Password
         </label>
+
+        {touched.password && (
+          !formData.password.trim() ? (
+            <p className="mt-1 ml-1 text-xs text-red-500">
+              Password is required
+            </p>
+          ) : formData.password.length < 8 ? (
+            <p className="mt-1 ml-1 text-xs text-red-500">
+              Password must be at least 8 characters
+            </p>
+          ) : null
+        )}
 
       </div>
 
@@ -242,7 +302,7 @@ const Login = () => {
         type="submit"
 
         disabled={
-          loginMutation.isPending
+          loginMutation.isPending || !isFormValid
         }
 
         className="

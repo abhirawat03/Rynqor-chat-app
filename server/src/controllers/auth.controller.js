@@ -1,4 +1,4 @@
-import { registerService, loginService, getCurrentUserService, logoutService, getSessionsService, logoutSessionService, refreshAccessTokenService } from "../services/auth.service.js";
+import { registerService, loginService, getCurrentUserService, logoutService, getSessionsService, logoutSessionService, refreshAccessTokenService, checkUsernameAvailabilityService } from "../services/auth.service.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { getDeviceInfo } from "../utils/getDeviceInfo.js";
@@ -293,4 +293,18 @@ const getCurrentUser = async (req, res) => {
         )
 }
 
-export { register, login, refreshAccessToken, logout, getSessions, logoutSession, getCurrentUser }
+const checkUsernameAvailability = async (req, res) => {
+    const { username } = req.query;
+    const available = await checkUsernameAvailabilityService(username);
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                { available },
+                available ? "Username is available" : "Username is already taken"
+            )
+        );
+}
+
+export { register, login, refreshAccessToken, logout, getSessions, logoutSession, getCurrentUser, checkUsernameAvailability }

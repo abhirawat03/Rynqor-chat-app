@@ -43,4 +43,11 @@ async (
     return res.data.data;
 };
 
-export {signup, login, getCurrentUser, refreshAccessToken, logout, getSessions, logoutSession};
+const checkUsername = async (username) => {
+    const res = await Api.get(`/auth/check-username`, {
+        params: { username }
+    });
+    return res.data.data;
+};
+
+export {signup, login, getCurrentUser, refreshAccessToken, logout, getSessions, logoutSession, checkUsername};

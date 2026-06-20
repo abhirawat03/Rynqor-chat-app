@@ -93,7 +93,7 @@ const Message = memo(({
 
             max-w-xs
 
-            break-words
+            wrap-break-word
 
             rounded-2xl
 
@@ -169,7 +169,7 @@ const Message = memo(({
                 mt-1
 
                 whitespace-pre-wrap
-                break-words
+                wrap-break-word
 
                 px-1
 

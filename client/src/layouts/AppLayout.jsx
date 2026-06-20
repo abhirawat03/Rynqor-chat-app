@@ -15,7 +15,7 @@ function AppLayout() {
 
   return (
     <div
-      className="flex h-[100dvh] overflow-hidden transition-colors duration-300 bg-background text-foreground"
+      className="flex h-dvh overflow-hidden transition-colors duration-300 bg-background text-foreground"
     >
 
       {/* DESKTOP SIDEBAR */}

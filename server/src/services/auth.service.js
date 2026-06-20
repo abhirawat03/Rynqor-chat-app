@@ -392,6 +392,14 @@ async (userId) => {
     return user;
 };
 
+const checkUsernameAvailabilityService = async (username) => {
+    if (!username) {
+        throw new ApiError(400, "Username is required");
+    }
+    const normalizedUsername = username.toLowerCase().trim();
+    const existing = await User.findOne({ username: normalizedUsername });
+    return !existing;
+};
 
 export {
     registerService,
@@ -400,5 +408,6 @@ export {
     logoutService,
     logoutSessionService,
     getSessionsService,
-    getCurrentUserService
-};
+    getCurrentUserService,
+    checkUsernameAvailabilityService
+};

@@ -94,7 +94,7 @@ const UserProfilePage = ({
           transition-transform
           duration-300
 
-          xl:w-[420px]
+          xl:w-105
           max-w-full
         "
       >
@@ -404,7 +404,7 @@ const UserProfilePage = ({
                             setSelectedMedia(item)
                           }
 
-                          className="relative flex flex-col items-center justify-center w-full gap-3 p-4 overflow-hidden cursor-pointer group aspect-square bg-gradient-to-br from-zinc-800 to-zinc-900"
+                          className="relative flex flex-col items-center justify-center w-full gap-3 p-4 overflow-hidden cursor-pointer group aspect-square bg-linear-to-br from-zinc-800 to-zinc-900"
                         >
 
                           {/* ICON */}
@@ -478,7 +478,7 @@ const UserProfilePage = ({
           className="
             fixed
             inset-0
-            z-[100]
+            z-100
 
             flex
             items-center
@@ -530,7 +530,7 @@ const UserProfilePage = ({
           className="
       fixed
       inset-0
-      z-[120]
+      z-120
 
       flex
       items-center

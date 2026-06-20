@@ -22,6 +22,39 @@ import useChangePasswordMutation from "../../hooks/users/useChangePasswordMutati
 import useLogoutMutation from "../../hooks/auth/useLogoutMutation.js";
 import useSessionsQuery from "../../hooks/auth/useSessionsQuery.js";
 import useLogoutSessionMutation from "../../hooks/auth/useLogoutSessionMutation.js";
+import { checkUsername } from "../../services/authService.js";
+import { Check, X } from "lucide-react";
+
+const PasswordChecklist = ({ password, touched }) => {
+  const rules = [
+    { label: "At least 8 characters", valid: password.length >= 8 },
+    { label: "One uppercase letter (A-Z)", valid: /[A-Z]/.test(password) },
+    { label: "One lowercase letter (a-z)", valid: /[a-z]/.test(password) },
+    { label: "One number (0-9)", valid: /\d/.test(password) },
+    { label: "One special character (e.g. @, $, !, %)", valid: /[\W_]/.test(password) },
+  ];
+
+  if (!touched) return null;
+
+  return (
+    <div className="p-3 mt-2 space-y-1.5 text-xs border rounded-2xl bg-surface-secondary/40 border-border/50">
+      <p className="font-medium text-muted">Password requirements:</p>
+      {rules.map((rule, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          {rule.valid ? (
+            <Check className="w-3.5 h-3.5 text-emerald-500" />
+          ) : (
+            <X className="w-3.5 h-3.5 text-red-500" />
+          )}
+          <span className={rule.valid ? "text-emerald-500/90" : "text-muted"}>
+            {rule.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 
 const ProfilePage = () => {
 
@@ -95,9 +128,81 @@ const ProfilePage = () => {
   ] = useState({
     oldPassword: "",
     newPassword: "",
+    confirmNewPassword: "",
   });
+
+  const [passwordTouched, setPasswordTouched] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmNewPassword: false,
+  });
+
+  const [usernameAvailability, setUsernameAvailability] = useState({
+    status: "idle", // 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
+    message: "",
+  });
+
+  const [usernameTouched, setUsernameTouched] = useState(false);
+
+  const [formData, setFormData] =
+    useState({
+      username: "",
+      bio: "",
+    });
+
   const [previewAvatar, setPreviewAvatar] =
     useState(null);
+
+  useEffect(() => {
+    const username = formData.username.trim();
+    if (!username) {
+      setUsernameAvailability({ status: "idle", message: "" });
+      return;
+    }
+
+    if (username === currentUser?.username) {
+      setUsernameAvailability({ status: "available", message: "" });
+      return;
+    }
+
+    if (username.length < 3) {
+      setUsernameAvailability({ status: "invalid", message: "Username must be at least 3 characters" });
+      return;
+    }
+
+    if (username.length > 30) {
+      setUsernameAvailability({ status: "invalid", message: "Username must be at most 30 characters" });
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setUsernameAvailability({ status: "invalid", message: "Username must contain only letters, numbers, and underscores" });
+      return;
+    }
+
+    setUsernameAvailability({ status: "checking", message: "Checking availability..." });
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await checkUsername(username);
+        if (response.available) {
+          setUsernameAvailability({ status: "available", message: "Username is available" });
+        } else {
+          setUsernameAvailability({ status: "taken", message: "Username is already taken" });
+        }
+      } catch {
+        setUsernameAvailability({ status: "idle", message: "" });
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [formData.username, currentUser?.username]);
+
+  const isProfileFormValid =
+    (formData.username === currentUser?.username || usernameAvailability.status === "available") &&
+    formData.username.trim().length >= 3 &&
+    formData.username.trim().length <= 30 &&
+    formData.bio.length <= 100;
 
   const [
     showAvatarModal,
@@ -114,12 +219,6 @@ const ProfilePage = () => {
       ?.toUpperCase() ||
 
     "?";
-
-  const [formData, setFormData] =
-    useState({
-      username: "",
-      bio: "",
-    });
 
   useEffect(() => {
 
@@ -220,23 +319,48 @@ const ProfilePage = () => {
     );
 
   };
+  const closePasswordModal = () => {
+    setPasswordData({
+      oldPassword: "",
+      newPassword: "",
+      confirmNewPassword: "",
+    });
+    setPasswordTouched({
+      oldPassword: false,
+      newPassword: false,
+      confirmNewPassword: false,
+    });
+    setShowPasswordModal(false);
+  };
+
+  const isNewPasswordValid =
+    passwordData.newPassword.length >= 8 &&
+    /[A-Z]/.test(passwordData.newPassword) &&
+    /[a-z]/.test(passwordData.newPassword) &&
+    /\d/.test(passwordData.newPassword) &&
+    /[\W_]/.test(passwordData.newPassword);
+
+  const isPasswordFormValid =
+    passwordData.oldPassword.trim() &&
+    isNewPasswordValid &&
+    passwordData.newPassword === passwordData.confirmNewPassword &&
+    passwordData.newPassword !== passwordData.oldPassword;
+
   const handleChangePassword =
     () => {
 
+      if (!isPasswordFormValid) return;
+
+      const payload = {
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword,
+      };
+
       changePasswordMutation(
-        passwordData,
+        payload,
         {
           onSuccess: () => {
-
-            setPasswordData({
-              oldPassword: "",
-              newPassword: "",
-            });
-
-            setShowPasswordModal(
-              false
-            );
-
+            closePasswordModal();
           },
         }
       );
@@ -569,25 +693,52 @@ const ProfilePage = () => {
                 name="username"
                 type="text"
 
-                autoComplete="username"
+                autoComplete="off"
 
                 value={
                   formData?.username
                 }
 
-                onChange={(e) =>
+                onChange={(e) => {
+                  setUsernameTouched(true);
                   setFormData({
                     ...formData,
+                    username: e.target.value,
+                  });
+                }}
 
-                    username:
-                      e.target.value,
-                  })
-                }
+                onBlur={() => setUsernameTouched(true)}
 
                 placeholder="Username"
 
-                className="w-full px-4 py-3 transition-all duration-200 border outline-none rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10"
+                className={`w-full px-4 py-3 transition-all duration-200 border outline-none rounded-2xl bg-background text-foreground focus:ring-4 focus:ring-accent/10 ${
+                  usernameTouched && formData.username !== currentUser?.username
+                    ? usernameAvailability.status === "available"
+                      ? "border-emerald-500 focus:border-emerald-500"
+                      : "border-red-500 focus:border-red-500"
+                    : "border-border focus:border-accent"
+                }`}
               />
+
+              {usernameTouched && formData.username !== currentUser?.username && (
+                usernameAvailability.status === "checking" ? (
+                  <p className="mt-1 ml-1 text-xs text-muted animate-pulse">
+                    Checking username availability...
+                  </p>
+                ) : usernameAvailability.status === "available" ? (
+                  <p className="mt-1 ml-1 text-xs text-emerald-500">
+                    Username is available
+                  </p>
+                ) : usernameAvailability.status === "taken" ? (
+                  <p className="mt-1 ml-1 text-xs text-red-500">
+                    Username is already taken
+                  </p>
+                ) : usernameAvailability.status === "invalid" ? (
+                  <p className="mt-1 ml-1 text-xs text-red-500">
+                    {usernameAvailability.message}
+                  </p>
+                ) : null
+              )}
 
             </div>
 
@@ -608,7 +759,7 @@ const ProfilePage = () => {
 
                 rows="4"
 
-                maxLength={160}
+                maxLength={100}
 
                 value={
                   formData.bio
@@ -628,6 +779,10 @@ const ProfilePage = () => {
                 className="w-full px-4 py-3 transition-all duration-200 border outline-none resize-none rounded-2xl border-border bg-background text-foreground focus:border-accent focus:ring-4 focus:ring-accent/10"
               />
 
+              <div className="flex justify-end mt-1 text-xs text-muted">
+                {formData.bio.length} / 100 characters
+              </div>
+
             </div>
 
             {/* SAVE */}
@@ -640,7 +795,8 @@ const ProfilePage = () => {
 
               disabled={
                 isUpdatingProfile ||
-                !isFormChanged
+                !isFormChanged ||
+                !isProfileFormValid
               }
 
               className="
@@ -991,16 +1147,28 @@ const ProfilePage = () => {
                   passwordData.oldPassword
                 }
 
-                onChange={(e) =>
+                onChange={(e) => {
+                  setPasswordTouched((prev) => ({ ...prev, oldPassword: true }));
                   setPasswordData({
                     ...passwordData,
                     oldPassword:
                       e.target.value,
-                  })
+                  });
+                }}
+
+                onBlur={() =>
+                  setPasswordTouched((prev) => ({ ...prev, oldPassword: true }))
                 }
 
-                className="w-full px-4 py-3 border outline-none rounded-2xl border-border bg-background"
+                className={`w-full px-4 py-3 border outline-none rounded-2xl bg-background ${
+                  passwordTouched.oldPassword && !passwordData.oldPassword.trim()
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-border focus:border-accent"
+                }`}
               />
+              {passwordTouched.oldPassword && !passwordData.oldPassword.trim() && (
+                <p className="text-xs text-red-500 mt-1 ml-1">Current password is required</p>
+              )}
 
               <input
                 id="new-password"
@@ -1013,16 +1181,73 @@ const ProfilePage = () => {
                   passwordData.newPassword
                 }
 
-                onChange={(e) =>
+                onChange={(e) => {
+                  setPasswordTouched((prev) => ({ ...prev, newPassword: true }));
                   setPasswordData({
                     ...passwordData,
                     newPassword:
                       e.target.value,
-                  })
+                  });
+                }}
+
+                onBlur={() =>
+                  setPasswordTouched((prev) => ({ ...prev, newPassword: true }))
                 }
 
-                className="w-full px-4 py-3 border outline-none rounded-2xl border-border bg-background"
+                className={`w-full px-4 py-3 border outline-none rounded-2xl bg-background ${
+                  passwordTouched.newPassword && (!isNewPasswordValid || passwordData.newPassword === passwordData.oldPassword)
+                    ? "border-red-500 focus:border-red-500"
+                    : passwordTouched.newPassword && isNewPasswordValid && passwordData.newPassword !== passwordData.oldPassword
+                    ? "border-emerald-500 focus:border-emerald-500"
+                    : "border-border focus:border-accent"
+                }`}
               />
+              {passwordTouched.newPassword && passwordData.newPassword === passwordData.oldPassword && (
+                <p className="text-xs text-red-500 mt-1 ml-1">New password must be different from current password</p>
+              )}
+
+              {/* PASSWORD CHECKLIST */}
+              <PasswordChecklist password={passwordData.newPassword} touched={passwordTouched.newPassword} />
+
+              <input
+                id="confirm-new-password"
+                name="confirm-new-password"
+                type="password"
+
+                placeholder="Confirm new password"
+
+                value={
+                  passwordData.confirmNewPassword
+                }
+
+                onChange={(e) => {
+                  setPasswordTouched((prev) => ({ ...prev, confirmNewPassword: true }));
+                  setPasswordData({
+                    ...passwordData,
+                    confirmNewPassword:
+                      e.target.value,
+                  });
+                }}
+
+                onBlur={() =>
+                  setPasswordTouched((prev) => ({ ...prev, confirmNewPassword: true }))
+                }
+
+                className={`w-full px-4 py-3 border outline-none rounded-2xl bg-background ${
+                  passwordTouched.confirmNewPassword && passwordData.newPassword !== passwordData.confirmNewPassword
+                    ? "border-red-500 focus:border-red-500"
+                    : passwordTouched.confirmNewPassword && passwordData.newPassword === passwordData.confirmNewPassword && isNewPasswordValid
+                    ? "border-emerald-500 focus:border-emerald-500"
+                    : "border-border focus:border-accent"
+                }`}
+              />
+              {passwordTouched.confirmNewPassword && (
+                passwordData.newPassword !== passwordData.confirmNewPassword ? (
+                  <p className="text-xs text-red-500 mt-1 ml-1">Passwords do not match</p>
+                ) : isNewPasswordValid && passwordData.newPassword !== passwordData.oldPassword ? (
+                  <p className="text-xs text-emerald-500 mt-1 ml-1">Passwords match</p>
+                ) : null
+              )}
 
             </div>
 
@@ -1031,10 +1256,8 @@ const ProfilePage = () => {
             >
 
               <button
-                onClick={() =>
-                  setShowPasswordModal(
-                    false
-                  )
+                onClick={
+                  closePasswordModal
                 }
 
                 className="px-4 py-2 border cursor-pointer rounded-2xl border-border"
@@ -1048,10 +1271,10 @@ const ProfilePage = () => {
                 }
 
                 disabled={
-                  isChangingPassword
+                  isChangingPassword || !isPasswordFormValid
                 }
 
-                className="px-4 py-2 text-white cursor-pointer rounded-2xl bg-accent"
+                className="px-4 py-2 text-white cursor-pointer rounded-2xl bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
               >
 
                 {isChangingPassword
