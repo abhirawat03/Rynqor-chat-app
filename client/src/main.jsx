@@ -55,6 +55,8 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import GlobalErrorBoundary from "./components/app/GlobalErrorBoundary.jsx";
 import { LazyPage } from "./components/common/LazyPage.jsx";
 import { ConversationSkeleton, SearchSkeleton, SettingsSkeleton } from "./components/common/Skeleton.jsx";
+import { ErrorBoundary } from "./components/common/ErrorBoundary.jsx";
+
 
 
 // APPLY THEME BEFORE REACT LOADS
@@ -232,9 +234,11 @@ createRoot(
 
         <ThemeProvider>
 
-          <RouterProvider
-            router={router}
-          />
+          <ErrorBoundary>
+            <RouterProvider
+              router={router}
+            />
+          </ErrorBoundary>
 
           <Toaster />
 
