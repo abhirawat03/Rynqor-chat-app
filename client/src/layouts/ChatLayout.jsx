@@ -3,6 +3,7 @@ import {
   useMatch,
 } from "react-router-dom";
 import ChatsPage from "../pages/chat/ChatsPage.jsx";
+import { ErrorBoundary } from "../components/common/ErrorBoundary.jsx";
 
 const ChatLayout = () => {
 
@@ -44,7 +45,9 @@ const ChatLayout = () => {
         `}
       >
 
-        <ChatsPage />
+        <ErrorBoundary>
+          <ChatsPage />
+        </ErrorBoundary>
 
       </aside>
 
@@ -70,7 +73,9 @@ const ChatLayout = () => {
         `}
       >
 
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
 
       </main>
 

@@ -7,6 +7,7 @@ import {
 import AppHeader from "../components/app/AppHeader.jsx";
 import Navigation from "../components/navigation/Navigation.jsx";
 import { useSocket } from "../services/socket/useSocket.js";
+import { ErrorBoundary } from "../components/common/ErrorBoundary.jsx";
 
 function AppLayout() {
   const isChatRoute =
@@ -67,7 +68,9 @@ function AppLayout() {
           <div
             className="flex flex-col h-full "
           >
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </div>
 
         </main>

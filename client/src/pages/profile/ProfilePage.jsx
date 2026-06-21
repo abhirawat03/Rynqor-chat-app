@@ -24,6 +24,7 @@ import useSessionsQuery from "../../hooks/auth/useSessionsQuery.js";
 import useLogoutSessionMutation from "../../hooks/auth/useLogoutSessionMutation.js";
 import { checkUsername } from "../../services/authService.js";
 import { Check, X } from "lucide-react";
+import { MAX_AVATAR_SIZE_BYTES } from "../../constants/upload.js";
 
 
 const PasswordChecklist = ({ password, touched }) => {
@@ -278,7 +279,7 @@ const ProfilePage = () => {
 
     if (
       file.size >
-      5 * 1024 * 1024
+      MAX_AVATAR_SIZE_BYTES
     ) {
       return;
     }

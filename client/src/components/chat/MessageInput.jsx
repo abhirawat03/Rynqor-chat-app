@@ -31,6 +31,7 @@ import {
 import {
   updateMessagesCache,
 } from "../../services/socket/helpers/updateMessagesCache.js";
+import { BLOCKED_EXTENSIONS, ALLOWED_MIME_TYPES } from "../../constants/upload.js";
 
 
 const MessageInput = ({
@@ -118,39 +119,6 @@ const MessageInput = ({
         e.target.files
       );
 
-    const blockedExtensions = [
-      "exe",
-      "bat",
-      "apk",
-      "sh",
-      "msi",
-    ];
-
-    const allowedMimeTypes = [
-
-  // IMAGES
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/heic",
-  "image/heif",
-
-  // VIDEO
-  "video/mp4",
-  "video/webm",
-  "video/quicktime",
-
-  // AUDIO
-  "audio/mpeg",
-  "audio/mp3",
-  "audio/wav",
-
-  // DOCUMENTS
-  "application/pdf",
-  "text/plain",
-
-];
-
     const validFiles = [];
 
     files.forEach((file) => {
@@ -163,7 +131,7 @@ const MessageInput = ({
 
       // BLOCK DANGEROUS FILES
       if (
-        blockedExtensions.includes(
+        BLOCKED_EXTENSIONS.includes(
           extension
         )
       ) {
@@ -178,7 +146,7 @@ const MessageInput = ({
 
       // MIME VALIDATION
       if (
-        !allowedMimeTypes.includes(
+        !ALLOWED_MIME_TYPES.includes(
           file.type
         )
       ) {
