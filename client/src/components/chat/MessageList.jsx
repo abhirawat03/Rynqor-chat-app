@@ -16,20 +16,9 @@ const MessageList = ({
   onBottomStateChange,
   isFetchingNextPage
 }) => {
-  // const scrollerRefLocal = useRef(null);
 
-  // useEffect(() => {
-  //   if (isTyping && isAtBottom && scrollerRefLocal.current) {
-  //     requestAnimationFrame(() => {
-  //       const el = scrollerRefLocal.current;
-  //       el.scrollTo({
-  //         top: el.scrollHeight,
-  //         behavior: "smooth",
-  //       });
-  //     });
-  //   }
-  // }, [isTyping, isAtBottom]);
-
+  // React-virtuoso prepending requires allocating a virtual coordinate space so items prepended
+  // at the top do not shift the current scroll position. We reserve 10,000 virtual slots at the top.
   const firstItemIndex = Math.max(0, 10000 - chatMessages.length);
 
   return (
@@ -43,6 +32,7 @@ const MessageList = ({
         firstItemIndex={firstItemIndex}
         className="h-full scrollbar-hide"
         initialTopMostItemIndex={
+          // Scroll immediately to the end of our reserved index range to show the latest messages first
           chatMessages.length > 0
             ? 9999
             : undefined
