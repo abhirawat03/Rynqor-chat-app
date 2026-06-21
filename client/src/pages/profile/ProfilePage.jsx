@@ -24,7 +24,6 @@ import useSessionsQuery from "../../hooks/auth/useSessionsQuery.js";
 import useLogoutSessionMutation from "../../hooks/auth/useLogoutSessionMutation.js";
 import { checkUsername } from "../../services/authService.js";
 import { Check, X } from "lucide-react";
-import { compressImage } from "../../utils/imageCompressor.js";
 
 
 const PasswordChecklist = ({ password, touched }) => {
@@ -262,7 +261,7 @@ const ProfilePage = () => {
 
   };
 
-  const handleAvatarChange = async (e) => {
+  const handleAvatarChange = (e) => {
 
     const file =
       e.target.files?.[0];
@@ -284,15 +283,8 @@ const ProfilePage = () => {
       return;
     }
 
-    // Compress avatar image to max 800x800 and 0.8 quality
-    const compressedFile = await compressImage(file, {
-      maxWidth: 800,
-      maxHeight: 800,
-      quality: 0.8,
-    });
-
     const previewUrl =
-      URL.createObjectURL(compressedFile);
+      URL.createObjectURL(file);
 
     setPreviewAvatar(
       previewUrl
@@ -303,7 +295,7 @@ const ProfilePage = () => {
 
     formData.append(
       "avatar",
-      compressedFile
+      file
     );
 
     updateAvatarMutation(

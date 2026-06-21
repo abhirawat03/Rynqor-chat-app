@@ -31,7 +31,6 @@ import {
 import {
   updateMessagesCache,
 } from "../../services/socket/helpers/updateMessagesCache.js";
-import { compressImage } from "../../utils/imageCompressor.js";
 
 
 const MessageInput = ({
@@ -110,7 +109,7 @@ const MessageInput = ({
   // MEDIA CHANGE
   // -----------------------------------
 
-  const handleMediaChange = async (
+  const handleMediaChange = (
     e
   ) => {
 
@@ -152,7 +151,9 @@ const MessageInput = ({
 
 ];
 
-    const processedPromises = files.map(async (file) => {
+    const validFiles = [];
+
+    files.forEach((file) => {
 
       const extension =
         file.name
@@ -171,7 +172,7 @@ const MessageInput = ({
           `${file.name} is not allowed`
         );
 
-        return null;
+        return;
 
       }
 
@@ -186,26 +187,22 @@ const MessageInput = ({
           `${file.name} is unsupported`
         );
 
-        return null;
+        return;
 
       }
 
-      // Compress image files to max 1600x1600 and quality 0.75
-      const compressedFile = await compressImage(file, {
-        maxWidth: 1600,
-        maxHeight: 1600,
-        quality: 0.75,
+      validFiles.push({
+
+        file,
+
+        preview:
+          URL.createObjectURL(
+            file
+          ),
+
       });
 
-      return {
-        file: compressedFile,
-        preview: URL.createObjectURL(compressedFile),
-      };
-
     });
-
-    const results = await Promise.all(processedPromises);
-    const validFiles = results.filter(Boolean);
 
     setMedia((prev) => [
       ...prev,
