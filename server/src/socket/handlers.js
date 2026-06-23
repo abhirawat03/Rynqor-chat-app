@@ -5,6 +5,7 @@ import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
 
 const onlineUsers = new Map();
+const socketLimits = new Map();
 
 export const registerHandlers = async (
     io,
@@ -17,6 +18,31 @@ export const registerHandlers = async (
     if (!userId) {
         return;
     }
+
+    const checkRateLimit = (action, maxEvents, windowMs) => {
+        const now = Date.now();
+        if (!socketLimits.has(userId)) {
+            socketLimits.set(userId, { send_message: [], mark_read: [], typing: 0 });
+        }
+        const limits = socketLimits.get(userId);
+
+        if (action === "typing") {
+            if (now - limits.typing < windowMs) {
+                return false;
+            }
+            limits.typing = now;
+            return true;
+        }
+
+        const history = limits[action] || [];
+        const recent = history.filter((time) => now - time < windowMs);
+        if (recent.length >= maxEvents) {
+            return false;
+        }
+        recent.push(now);
+        limits[action] = recent;
+        return true;
+    };
 
     // ---------------------------------------------------
     // ONLINE USERS
@@ -133,6 +159,11 @@ export const registerHandlers = async (
         "send_message",
         async (payload) => {
 
+            if (!checkRateLimit("send_message", 10, 10000)) {
+                socket.emit("error", "Rate limit exceeded. Please wait before sending more messages.");
+                return;
+            }
+
             try {
 
                 const {
@@ -248,6 +279,10 @@ export const registerHandlers = async (
             lastReadAt,
         }) => {
 
+            if (!checkRateLimit("mark_read", 5, 5000)) {
+                return;
+            }
+
             try {
 
                 if (
@@ -334,6 +369,10 @@ export const registerHandlers = async (
             conversationId,
         }) => {
 
+            if (!checkRateLimit("typing", 1, 2000)) {
+                return;
+            }
+
             try {
 
                 await getConversationByIdService(
@@ -416,6 +455,10 @@ export const registerHandlers = async (
                 ) {
 
                     onlineUsers.delete(
+                        userId
+                    );
+
+                    socketLimits.delete(
                         userId
                     );
 

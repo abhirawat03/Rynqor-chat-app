@@ -59,6 +59,8 @@ const refreshTokenSchema =
         }
     );
 
+refreshTokenSchema.index({ user: 1 });
+
 export const RefreshToken =
     mongoose.model(
         "RefreshToken",

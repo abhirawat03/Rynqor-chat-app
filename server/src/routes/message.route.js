@@ -15,12 +15,13 @@ import {
 import { handleMultipleUpload } from "../middleware/upload.middleware.js";
 import { getMessagesSchema } from "../schemas/message.schema.js";
 import { validate } from "../middleware/validate.middleware.js";
+import { uploadLimiter } from "../middleware/rateLimiter.middleware.js";
 
 const router = Router();
 
 router.use(verifyJwt);
 
-router.route("/upload").post(handleMultipleUpload( "media", 5),uploadMessageMedia);
+router.route("/upload").post(uploadLimiter, handleMultipleUpload( "media", 5),uploadMessageMedia);
 
 router.route("/:conversationId").get(validate(getMessagesSchema),getMessage);
 

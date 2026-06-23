@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { ALLOWED_MIME_TYPES, BLOCKED_EXTENSIONS, MAX_FILE_SIZE_BYTES } from "../constants/fileConfig.js";
 
 const tempDir =
   "./public/temp";
@@ -56,48 +57,6 @@ const storage =
   });
 
 // -------------------------------------
-// ALLOWED MIME TYPES
-// -------------------------------------
-
-const allowedMimeTypes = [
-
-  // IMAGES
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/heic",
-  "image/heif",
-
-  // VIDEOS
-  "video/mp4",
-  "video/webm",
-  "video/quicktime",
-
-  // AUDIO
-  "audio/mpeg",
-  "audio/mp3",
-  "audio/wav",
-
-  // DOCUMENTS
-  "application/pdf",
-  "text/plain",
-
-];
-
-// -------------------------------------
-// BLOCKED EXTENSIONS
-// -------------------------------------
-
-const blockedExtensions = [
-  ".exe",
-  ".bat",
-  ".apk",
-  ".sh",
-  ".msi",
-  ".cmd",
-];
-
-// -------------------------------------
 // FILE FILTER
 // -------------------------------------
 
@@ -120,7 +79,7 @@ const fileFilter =
 
     // MIME VALIDATION
     if (
-      !allowedMimeTypes.includes(
+      !ALLOWED_MIME_TYPES.includes(
         file.mimetype
       )
     ) {
@@ -141,7 +100,7 @@ const fileFilter =
       ).toLowerCase();
 
     if (
-      blockedExtensions.includes(
+      BLOCKED_EXTENSIONS.includes(
         extension
       )
     ) {
@@ -172,9 +131,8 @@ export const upload =
 
     limits: {
 
-      // 25MB
       fileSize:
-        25 * 1024 * 1024,
+        MAX_FILE_SIZE_BYTES,
 
     },
 

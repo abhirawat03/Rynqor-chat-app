@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Message } from "../models/message.model.js";
 import { Conversation } from "../models/conversation.model.js";
 import { getConversationByIdService } from "./conversation.service.js";
@@ -7,30 +8,48 @@ const sendMessageService = async (userId, payload) => {
     await getConversationByIdService(userId, conversationId);
     let messageType = "text";
 
-if (media.length > 0 && text.trim()) {
-    messageType = "mixed";
-}
-else if (media.length > 0) {
-    messageType = "media";
-}
-    const message = await Message.create({
-        conversationId,
-        senderId: userId,
-        text: text.trim() || "",
-        media,
-        messageType
-    });
+    if (media.length > 0 && text.trim()) {
+        messageType = "mixed";
+    }
+    else if (media.length > 0) {
+        messageType = "media";
+    }
 
-    await Conversation.findByIdAndUpdate(conversationId, {
-        // lastMessage: {
-        //     text: message.text,
-        //     senderId: userId,
-        //     createdAt: message.createdAt,
-        // },
-        lastMessage: message._id,
-    });
+    const session = await mongoose.startSession();
+    let message;
 
-    return message;
+    try {
+        await session.withTransaction(async () => {
+            const [newMessage] = await Message.create(
+                [
+                    {
+                        conversationId,
+                        senderId: userId,
+                        text: text.trim() || "",
+                        media,
+                        messageType,
+                    },
+                ],
+                { session }
+            );
+
+            message = newMessage;
+
+            await Conversation.findByIdAndUpdate(
+                conversationId,
+                { lastMessage: message._id },
+                { session }
+            );
+        });
+
+        return message;
+
+    } catch (error) {
+        console.error("❌ Send message transaction failed, rolling back:", error);
+        throw error;
+    } finally {
+        session.endSession();
+    }
 }
 
 const getMessageService = async (userId, conversationId, cursor) => {

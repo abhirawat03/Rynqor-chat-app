@@ -133,6 +133,12 @@ msgSchema.index({
     _id: -1,
 });
 
+msgSchema.index({
+    conversationId: 1,
+    senderId: 1,
+    status: 1,
+});
+
 // msgSchema.index({
 //     conversationId: 1,
 //     createdAt: -1,
