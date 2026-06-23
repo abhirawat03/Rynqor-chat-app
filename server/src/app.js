@@ -2,6 +2,8 @@ import express from 'express'
 import cors from "cors"
 import helmet from "helmet"
 import cookieParser from "cookie-parser"
+import mongoSanitize from "express-mongo-sanitize"
+import compression from "compression"
 import { CLIENT_URL } from "./config/config.js";
 import { apiLimiter } from "./middleware/rateLimiter.middleware.js";
 
@@ -10,6 +12,8 @@ const app = express();
 
 app.use(helmet());
 app.set("trust proxy", true);
+app.use(mongoSanitize());
+app.use(compression());
 
 app.use(
     cors({
