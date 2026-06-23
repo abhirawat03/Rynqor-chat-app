@@ -1,5 +1,6 @@
 import { changePasswordService, deleteAvatarService, getUserService, searchUserService, updateAvatarService, updateProfileService } from "../services/user.service.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { invalidateCache } from "../middleware/cache.middleware.js";
 
 const getUser = async (req, res) => {
   const { id } = req.params;
@@ -9,6 +10,7 @@ const getUser = async (req, res) => {
 
 const updateProfile  = async (req, res) => {
   const user = await updateProfileService(req.user?._id, req.body);
+  await invalidateCache("users", req.user?._id);
   return res
   .status(200)
   .json(
@@ -22,6 +24,7 @@ const updateProfile  = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
   const user = await updateAvatarService(req.user?._id, req.file?.path);
+  await invalidateCache("users", req.user?._id);
   return res
   .status(200)
   .json(
@@ -35,6 +38,7 @@ const updateAvatar = async (req, res) => {
 
 const deleteAvatar = async (req, res) => {
   const user = await deleteAvatarService(req.user?._id);
+  await invalidateCache("users", req.user?._id);
 
   return res
   .status(200)

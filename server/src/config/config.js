@@ -37,3 +37,5 @@ export const REFRESH_TOKEN = {
   secret: getRequiredEnv("REFRESH_TOKEN_SECRET"),
   expiry: getRequiredEnv("REFRESH_TOKEN_EXPIRY", "7d"),
 };
+
+export const REDIS_URL = getRequiredEnv("REDIS_URL","");

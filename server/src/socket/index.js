@@ -1,9 +1,10 @@
 import { Server } from "socket.io";
+import { createAdapter } from "@socket.io/redis-adapter";
 import { registerHandlers } from "./handlers.js";
 import { socketAuth } from "./socketAuth.js";
 import { CLIENT_URL } from "../config/config.js";
 
-const initSocket = (server) => {
+const initSocket = (server, redisClient) => {
     const io = new Server(server, {
         cors: {
             origin: [
@@ -13,6 +14,22 @@ const initSocket = (server) => {
             credentials: true,
         },
     });
+
+    // Configure Redis Adapter for scaling if Redis client is available
+    if (redisClient) {
+        const pubClient = redisClient;
+        const subClient = redisClient.duplicate();
+        subClient.connect()
+            .then(() => {
+                io.adapter(createAdapter(pubClient, subClient));
+                console.log("🔌 Socket.io Redis Adapter configured successfully.");
+            })
+            .catch((err) => {
+                console.error("❌ Failed to initialize Socket.io Redis Adapter:", err.message);
+            });
+    } else {
+        console.log("🔌 Socket.io running with default in-memory adapter.");
+    }
 
     // apply auth middleware
     io.use(socketAuth);
