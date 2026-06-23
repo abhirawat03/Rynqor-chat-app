@@ -7,6 +7,7 @@ export const authLimiter = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
   handler: (req, res, next, options) => {
     next(new ApiError(429, options.message, "TOO_MANY_REQUESTS"));
   },
@@ -19,6 +20,7 @@ export const uploadLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
   handler: (req, res, next, options) => {
     next(new ApiError(429, options.message, "TOO_MANY_REQUESTS"));
   },
@@ -31,6 +33,7 @@ export const apiLimiter = rateLimit({
   max: 150,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
   handler: (req, res, next, options) => {
     next(new ApiError(429, options.message, "TOO_MANY_REQUESTS"));
   },

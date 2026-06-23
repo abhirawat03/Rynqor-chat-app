@@ -58,7 +58,7 @@ export const errorHandler = async (err, req, res, next) => {
         code: error.code,
         statusCode: error.statusCode,
         errors: error.errors,
-        stack: process.env.NODE_ENV !== "production" ? err.stack : undefined,
+        stack: (error.statusCode >= 500 && process.env.NODE_ENV !== "production") ? err.stack : undefined,
     });
 
     // In production, hide raw internal details of unexpected 500 errors
