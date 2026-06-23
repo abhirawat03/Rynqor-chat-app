@@ -1,4 +1,4 @@
-import { registerService, loginService, getCurrentUserService, logoutService, getSessionsService, logoutSessionService, refreshAccessTokenService, checkUsernameAvailabilityService } from "../services/auth.service.js";
+import { registerService, loginService, getCurrentUserService, logoutService, getSessionsService, logoutSessionService, refreshAccessTokenService, checkUsernameAvailabilityService, forgotPasswordService, resetPasswordService } from "../services/auth.service.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { getDeviceInfo } from "../utils/getDeviceInfo.js";
@@ -293,18 +293,28 @@ const getCurrentUser = async (req, res) => {
         )
 }
 
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    await forgotPasswordService(email);
+    return res.status(200).json(
+        new ApiResponse(200, null, "Password reset OTP sent successfully")
+    );
+};
+
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    await resetPasswordService(email, otp, newPassword);
+    return res.status(200).json(
+        new ApiResponse(200, null, "Password reset successfully")
+    );
+};
+
 const checkUsernameAvailability = async (req, res) => {
     const { username } = req.query;
-    const available = await checkUsernameAvailabilityService(username);
-    return res
-        .status(200)
-        .json(
-            new ApiResponse(
-                200,
-                { available },
-                available ? "Username is available" : "Username is already taken"
-            )
-        );
-}
+    const isAvailable = await checkUsernameAvailabilityService(username);
+    return res.status(200).json(
+        new ApiResponse(200, { available: isAvailable }, "Username availability checked successfully")
+    );
+};
 
-export { register, login, refreshAccessToken, logout, getSessions, logoutSession, getCurrentUser, checkUsernameAvailability }
+export { register, login, refreshAccessToken, logout, getSessions, logoutSession, getCurrentUser, checkUsernameAvailability, forgotPassword, resetPassword }

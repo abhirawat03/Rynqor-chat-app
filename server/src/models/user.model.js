@@ -47,6 +47,14 @@ const userSchema = new Schema({
         maxlength: 160,
         default: "",
     },
+    resetOtp: {
+        type: String,
+        default: null,
+    },
+    resetOtpExpires: {
+        type: Date,
+        default: null,
+    },
     // isOnline:{
     //     type:Boolean,
     //     default:false,

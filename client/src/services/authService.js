@@ -50,4 +50,14 @@ const checkUsername = async (username) => {
     return res.data.data;
 };
 
-export {signup, login, getCurrentUser, refreshAccessToken, logout, getSessions, logoutSession, checkUsername};
+const forgotPassword = async (email) => {
+    const res = await Api.post("/auth/forgot-password", { email });
+    return res.data.data;
+};
+
+const resetPassword = async (email, otp, newPassword) => {
+    const res = await Api.post("/auth/reset-password", { email, otp, newPassword });
+    return res.data.data;
+};
+
+export {signup, login, getCurrentUser, refreshAccessToken, logout, getSessions, logoutSession, checkUsername, forgotPassword, resetPassword};

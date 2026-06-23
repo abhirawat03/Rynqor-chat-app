@@ -401,6 +401,60 @@ const checkUsernameAvailabilityService = async (username) => {
     return !existing;
 };
 
+const forgotPasswordService = async (email) => {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+        throw new ApiError(404, "User not found with this email");
+    }
+
+    // Generate 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Set OTP and expiry (10 minutes)
+    user.resetOtp = otp;
+    user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    // In local development, print the OTP clearly in console
+    console.log(`\n📧 [${normalizedEmail}] PASSWORD RESET OTP: ${otp} (Expires in 10 mins)\n`);
+
+    return null;
+};
+
+const resetPasswordService = async (email, otp, newPassword) => {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    if (!user.resetOtp || user.resetOtp !== otp) {
+        throw new ApiError(400, "Invalid or missing OTP");
+    }
+
+    if (!user.resetOtpExpires || user.resetOtpExpires < new Date()) {
+        // Clear expired OTP
+        user.resetOtp = null;
+        user.resetOtpExpires = null;
+        await user.save();
+        throw new ApiError(400, "OTP has expired");
+    }
+
+    // Set new password (will trigger the pre-save bcrypt hash middleware)
+    user.password = newPassword;
+    user.resetOtp = null;
+    user.resetOtpExpires = null;
+    await user.save();
+
+    // Revoke all active sessions for this user on password reset (production-grade security!)
+    await RefreshToken.deleteMany({ user: user._id });
+
+    return null;
+};
+
 export {
     registerService,
     loginService,
@@ -409,5 +463,7 @@ export {
     logoutSessionService,
     getSessionsService,
     getCurrentUserService,
-    checkUsernameAvailabilityService
+    checkUsernameAvailabilityService,
+    forgotPasswordService,
+    resetPasswordService
 };

@@ -51,4 +51,36 @@ const loginSchema = z.object({
 
 const logoutSessionSchema = paramsSchema("sessionId");
 
-export {registerSchema, loginSchema, logoutSessionSchema};
+const forgotPasswordSchema = z.object({
+    body: z.object({
+        email: z
+            .string()
+            .trim()
+            .email("Invalid email format")
+            .transform((value) => value.toLowerCase()),
+    }).strict(),
+});
+
+const resetPasswordSchema = z.object({
+    body: z.object({
+        email: z
+            .string()
+            .trim()
+            .email("Invalid email format")
+            .transform((value) => value.toLowerCase()),
+        otp: z
+            .string()
+            .trim()
+            .length(6, "OTP must be exactly 6 digits")
+            .regex(/^\d+$/, "OTP must contain only numbers"),
+        newPassword: z
+            .string()
+            .min(8, "Password must be at least 8 characters")
+            .regex(
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/,
+                "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+            ),
+    }).strict(),
+});
+
+export {registerSchema, loginSchema, logoutSessionSchema, forgotPasswordSchema, resetPasswordSchema};
