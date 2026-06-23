@@ -30,43 +30,27 @@ export const errorHandler = async (err, req, res, next) => {
 
     // Convert non-ApiError instances if they are database errors we know how to handle
     if (!(error instanceof ApiError)) {
-        let statusCode = error.statusCode || 500;
-        let message = error.message || "Internal Server Error";
-        let code = error.code || "INTERNAL_SERVER_ERROR";
-        let errors = [];
-
-        // Handle Mongoose Validation Error
         if (error.name === "ValidationError") {
-            statusCode = 400;
-            message = "Validation Error";
-            code = "VALIDATION_ERROR";
-            errors = Object.values(error.errors).map((el) => ({
+            const validationErrors = Object.values(error.errors).map((el) => ({
                 field: el.path,
                 message: el.message,
             }));
-        }
-        // Handle Mongoose Cast Error (e.g. invalid ObjectId)
-        else if (error.name === "CastError") {
-            statusCode = 400;
-            message = `Invalid ${error.path}: ${error.value}`;
-            code = "INVALID_ID_FORMAT";
-        }
-        // Handle MongoDB duplicate key error (11000)
-        else if (error.code === 11000) {
-            statusCode = 400;
-            code = "DUPLICATE_KEY_ERROR";
-            
-            // Try to extract the duplicate field name
+            error = new ApiError(400, "Validation Error", "VALIDATION_ERROR", validationErrors);
+        } else if (error.name === "CastError") {
+            error = new ApiError(400, `Invalid ${error.path}: ${error.value}`, "INVALID_ID_FORMAT");
+        } else if (error.code === 11000) {
             const field = Object.keys(error.keyValue || {})[0];
-            if (field) {
-                const capitalizedField = field.charAt(0).toUpperCase() + field.slice(1);
-                message = `${capitalizedField} is already taken.`;
-            } else {
-                message = "Duplicate key error.";
-            }
+            const message = field
+                ? `${field.charAt(0).toUpperCase() + field.slice(1)} is already taken.`
+                : "Duplicate key error.";
+            error = new ApiError(400, message, "DUPLICATE_KEY_ERROR");
+        } else {
+            error = new ApiError(
+                error.statusCode || 500,
+                error.message || "Internal Server Error",
+                error.code || "INTERNAL_SERVER_ERROR"
+            );
         }
-
-        error = new ApiError(statusCode, message, code, errors);
     }
 
     console.error("🔥 ERROR:", {
