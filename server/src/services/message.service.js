@@ -23,6 +23,7 @@ const sendMessageService = async (userId, payload) => {
             const [newMessage] = await Message.create(
                 [
                     {
+                        _id: payload._id,
                         conversationId,
                         senderId: userId,
                         text: text.trim() || "",

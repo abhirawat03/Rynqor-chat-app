@@ -1,10 +1,14 @@
+import mongoose from "mongoose";
 import { sendMessageService } from "../services/message.service.js";
 import { getConversationByIdService } from "../services/conversation.service.js";
+import { getUserService } from "../services/user.service.js";
+import { messageQueue } from "../config/queue.js";
+import { getRedisClient } from "../config/redisClient.js";
 
 import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
 
-const onlineUsers = new Map();
+const localOnlineUsers = new Map();
 const socketLimits = new Map();
 
 export const registerHandlers = async (
@@ -17,6 +21,19 @@ export const registerHandlers = async (
 
     if (!userId) {
         return;
+    }
+
+    // Cache user profile details on connection to avoid DB lookups for every sent message
+    try {
+        const user = await getUserService(userId);
+        socket.userProfile = {
+            _id: user._id,
+            username: user.username,
+            fullName: user.fullName,
+            avatar: user.avatar || null,
+        };
+    } catch (err) {
+        console.error("❌ Failed to fetch user details for socket connection:", err.message);
     }
 
     const checkRateLimit = (action, maxEvents, windowMs) => {
@@ -45,25 +62,43 @@ export const registerHandlers = async (
     };
 
     // ---------------------------------------------------
-    // ONLINE USERS
+    // ONLINE USERS & PRESENCE
     // ---------------------------------------------------
+    const redisClient = getRedisClient();
 
-    if (!onlineUsers.has(userId)) {
+    if (redisClient) {
+        try {
+            // Check if user was already online from another tab
+            const wasOnline = await redisClient.sIsMember("online_users", userId);
 
-        onlineUsers.set(
-            userId,
-            new Set()
-        );
+            await redisClient.sAdd(`user:sockets:${userId}`, socket.id);
+            await redisClient.sAdd("online_users", userId);
+
+            console.log(`🟢 User online (Redis): ${userId} (socket: ${socket.id})`);
+
+            // Emit current list of online users to the newly connected user
+            const allOnline = await redisClient.sMembers("online_users");
+            socket.emit("online_users", allOnline);
+
+            // Broadcast presence to others only if this is their first active session/tab
+            if (!wasOnline) {
+                socket.broadcast.emit("user_online", { userId });
+            }
+        } catch (err) {
+            console.error("❌ Redis presence error:", err.message);
+        }
+    } else {
+        // Fallback to local memory Map
+        if (!localOnlineUsers.has(userId)) {
+            localOnlineUsers.set(userId, new Set());
+        }
+        localOnlineUsers.get(userId).add(socket.id);
+
+        console.log(`🟢 User online (Local): ${userId} (socket: ${socket.id})`);
+
+        socket.emit("online_users", Array.from(localOnlineUsers.keys()));
+        socket.broadcast.emit("user_online", { userId });
     }
-
-    onlineUsers
-        .get(userId)
-        .add(socket.id);
-
-    console.log(
-        "🟢 User online:",
-        userId
-    );
 
     // ---------------------------------------------------
     // AUTO JOIN CONVERSATIONS
@@ -96,22 +131,6 @@ export const registerHandlers = async (
             err.message
         );
     }
-
-    // ---------------------------------------------------
-    // PRESENCE
-    // ---------------------------------------------------
-
-    socket.emit(
-        "online_users",
-        Array.from(
-            onlineUsers.keys()
-        )
-    );
-
-    socket.broadcast.emit(
-        "user_online",
-        { userId }
-    );
 
     // ---------------------------------------------------
     // JOIN CONVERSATION
@@ -180,7 +199,7 @@ export const registerHandlers = async (
                 }
 
                 const hasText =
-                    text.trim();
+                    text && text.trim();
 
                 const hasMedia =
                     media.length > 0;
@@ -192,62 +211,81 @@ export const registerHandlers = async (
                     return;
                 }
 
-                // validate membership
-                // await getConversationByIdService(
-                //     userId,
-                //     conversationId
-                // );
-                
-                const savedMessage =
-                    await sendMessageService(
-                        userId,
-                        {
-                            conversationId,
-                            text,
-                            media,
-                        }
-                    );
+                // 1. Verify room membership in-memory instead of hitting the DB
+                if (!socket.rooms.has(conversationId)) {
+                    socket.emit("error", "Not allowed to send messages to this conversation");
+                    return;
+                }
 
-                const populatedMessage =
-                    await savedMessage.populate(
-                        "senderId",
-                        "fullName avatar username"
-                    );
+                // 2. Pre-generate ID and format outgoing message in memory
+                const messageId = new mongoose.Types.ObjectId();
+                let messageType = "text";
+                if (media.length > 0 && text && text.trim()) {
+                    messageType = "mixed";
+                } else if (media.length > 0) {
+                    messageType = "media";
+                }
+
+                const senderDetails = socket.userProfile || {
+                    _id: userId,
+                    username: "User",
+                    fullName: "User",
+                    avatar: null,
+                };
 
                 const outgoingMessage = {
-                    ...populatedMessage.toObject(),
-
+                    _id: messageId.toString(),
+                    conversationId,
+                    senderId: senderDetails,
+                    text: text ? text.trim() : "",
+                    media,
+                    messageType,
+                    status: "sent",
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
                     clientTempId,
                 };
 
-                const conversation =
-                    await Conversation
-                        .findById(
-                            conversationId
-                        )
-                        .populate(
-                            "participants",
-                            "fullName avatar username"
-                        );
+                // Fetch conversation with lean to broadcast updated conversation state
+                const conversation = await Conversation.findById(conversationId)
+                    .populate("participants", "fullName avatar username")
+                    .lean();
 
-                // sender ACK
+                // 3. Broadcast to client and other participants instantly
                 socket.emit(
                     "message_sent",
                     outgoingMessage
                 );
 
-                // others in room
                 socket.to(
                     conversationId
                 ).emit(
                     "new_message",
                     {
-                        message:
-                            outgoingMessage,
-
+                        message: outgoingMessage,
                         conversation,
                     }
                 );
+
+                // 4. Queue the message save job asynchronously in Redis
+                const jobPayload = {
+                    userId,
+                    payload: {
+                        _id: messageId,
+                        conversationId,
+                        text: text ? text.trim() : "",
+                        media,
+                    }
+                };
+
+                if (messageQueue) {
+                    await messageQueue.add("save-message", jobPayload);
+                    console.log(`📥 [Socket] Queued message ${messageId} for background save.`);
+                } else {
+                    // Fallback to synchronous database write if Redis/BullMQ is down
+                    await sendMessageService(userId, jobPayload.payload);
+                    console.log(`⚠️ [Socket] Redis down. Saved message ${messageId} directly to DB.`);
+                }
 
             } catch (err) {
 
@@ -291,11 +329,10 @@ export const registerHandlers = async (
                     return;
                 }
 
-                // validate membership
-                await getConversationByIdService(
-                    userId,
-                    conversationId
-                );
+                // validate membership in-memory using socket rooms
+                if (!socket.rooms.has(conversationId)) {
+                    return;
+                }
 
                 const readAt =
                     lastReadAt
@@ -375,10 +412,9 @@ export const registerHandlers = async (
 
             try {
 
-                await getConversationByIdService(
-                    userId,
-                    conversationId
-                );
+                if (!socket.rooms.has(conversationId)) {
+                    return;
+                }
 
                 socket.to(
                     conversationId
@@ -408,10 +444,9 @@ export const registerHandlers = async (
 
             try {
 
-                await getConversationByIdService(
-                    userId,
-                    conversationId
-                );
+                if (!socket.rooms.has(conversationId)) {
+                    return;
+                }
 
                 socket.to(
                     conversationId
@@ -436,41 +471,49 @@ export const registerHandlers = async (
 
     socket.on(
         "disconnect",
-        () => {
+        async () => {
+            if (redisClient) {
+                try {
+                    await redisClient.sRem(`user:sockets:${userId}`, socket.id);
+                    const tabCount = await redisClient.sCard(`user:sockets:${userId}`);
 
-            const sockets =
-                onlineUsers.get(
-                    userId
-                );
+                    if (tabCount === 0) {
+                        await redisClient.sRem("online_users", userId);
+                        await redisClient.del(`user:sockets:${userId}`); // clean up key
 
-            if (sockets) {
+                        socketLimits.delete(userId);
 
-                sockets.delete(
-                    socket.id
-                );
+                        socket.broadcast.emit(
+                            "user_offline",
+                            {
+                                userId,
+                                lastSeen: new Date(),
+                            }
+                        );
+                    }
+                } catch (err) {
+                    console.error("❌ Redis disconnect presence error:", err.message);
+                }
+            } else {
+                // Fallback to local memory Map
+                const sockets = localOnlineUsers.get(userId);
 
-                // fully offline
-                if (
-                    sockets.size === 0
-                ) {
+                if (sockets) {
+                    sockets.delete(socket.id);
 
-                    onlineUsers.delete(
-                        userId
-                    );
+                    // fully offline
+                    if (sockets.size === 0) {
+                        localOnlineUsers.delete(userId);
+                        socketLimits.delete(userId);
 
-                    socketLimits.delete(
-                        userId
-                    );
-
-                    socket.broadcast.emit(
-                        "user_offline",
-                        {
-                            userId,
-
-                            lastSeen:
-                                new Date(),
-                        }
-                    );
+                        socket.broadcast.emit(
+                            "user_offline",
+                            {
+                                userId,
+                                lastSeen: new Date(),
+                            }
+                        );
+                    }
                 }
             }
 

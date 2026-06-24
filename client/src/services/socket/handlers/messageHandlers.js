@@ -7,6 +7,8 @@ import {
 } from "../helpers/updateConversationCache.js";
 import { updateMessagesCache } from "../helpers/updateMessagesCache.js";
 
+const notificationSound = typeof Audio !== "undefined" ? new Audio("/notification.mp3") : null;
+
 export const createMessageHandlers = ({
     queryClient,
     currentUserIdRef,
@@ -20,6 +22,24 @@ export const createMessageHandlers = ({
         message: msg,
         conversation,
     }) => {
+        // Play notification sound if tab is backgrounded OR user is in a different chat room
+        const isTabBackgrounded = typeof document !== "undefined" && document.hidden;
+        const pathParts = typeof window !== "undefined" ? window.location.pathname.split("/") : [];
+        const chatIndex = pathParts.indexOf("chat");
+        const activeConversationId = chatIndex !== -1 ? pathParts[chatIndex + 1] : null;
+        const isDifferentChat = activeConversationId !== msg.conversationId;
+        
+        const senderId = msg.senderId?._id || msg.senderId;
+        const isMyMessage = String(senderId) === String(currentUserIdRef.current);
+
+        if (!isMyMessage && (isTabBackgrounded || isDifferentChat)) {
+            if (notificationSound) {
+                notificationSound.play().catch(() => {
+                    // Ignore autoplay block errors (e.g. if user hasn't clicked on the page yet)
+                });
+            }
+        }
+
         console.log(
         "NEW_MESSAGE FULL",
         JSON.stringify(msg, null, 2)

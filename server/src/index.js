@@ -4,6 +4,7 @@ import { initRedis } from "./config/redisClient.js";
 import {app} from './app.js'
 import {PORT} from "./config/config.js"
 import { initSocket } from "./socket/index.js";
+import "./workers/message.worker.js";
 
 const server = http.createServer(app); // required for socket
 
