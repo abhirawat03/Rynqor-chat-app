@@ -1,6 +1,10 @@
 import {
   useQuery,
 } from "@tanstack/react-query";
+import {
+  useState,
+  useEffect,
+} from "react";
 
 import {
   searchUsers,
@@ -8,19 +12,30 @@ import {
 
 const useSearchUsersQuery =
   (query) => {
+    const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedQuery(query);
+      }, 300); // 300ms debounce delay
+
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [query]);
 
     return useQuery({
 
       queryKey: [
         "search-users",
-        query,
+        debouncedQuery,
       ],
 
       queryFn: () =>
-        searchUsers(query),
+        searchUsers(debouncedQuery),
 
       enabled:
-        !!query.trim(),
+        !!debouncedQuery.trim(),
 
       staleTime:
         1000 * 60 * 5,

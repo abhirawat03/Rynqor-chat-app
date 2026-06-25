@@ -65,6 +65,9 @@ const MessageInput = ({
   const typingTimeoutRef =
     useRef(null);
 
+  const lastEmitTimeRef =
+    useRef(0);
+
   const fileInputRef =
     useRef(null);
 
@@ -81,9 +84,13 @@ const MessageInput = ({
 
     setMessage(value);
 
-    emitTyping(
-      conversationId
-    );
+    const now = Date.now();
+    if (now - lastEmitTimeRef.current > 2000) {
+      emitTyping(
+        conversationId
+      );
+      lastEmitTimeRef.current = now;
+    }
 
     if (
       typingTimeoutRef.current
@@ -101,8 +108,9 @@ const MessageInput = ({
         emitStopTyping(
           conversationId
         );
+        lastEmitTimeRef.current = 0;
 
-      }, 1000);
+      }, 1500);
 
   };
 
