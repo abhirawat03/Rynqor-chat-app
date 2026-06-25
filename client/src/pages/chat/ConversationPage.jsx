@@ -15,6 +15,7 @@ import {
 import ChatHeader from "../../components/chat/ChatHeader.jsx";
 import MessageInput from "../../components/chat/MessageInput.jsx";
 import MessageList from "../../components/chat/MessageList.jsx";
+import TypingIndicator from "../../components/chat/TypingIndicator.jsx";
 
 import { useSocket } from "../../services/socket/useSocket.js";
 
@@ -103,7 +104,7 @@ const handleBottomChange = (
 const otherUser =
   conversation?.participants?.find(
     (u) =>
-      u._id !== currentUserId
+      currentUserId && String(u._id) !== String(currentUserId)
   );
 
 const userId = otherUser?._id?.toString();
@@ -111,10 +112,10 @@ const userId = otherUser?._id?.toString();
 const isOnline = presence?.[userId]?.online || false;
 
 const isTyping = Boolean(
-  otherUser?._id &&
+  userId &&
   typingUsers[
     conversationId
-  ]?.has(otherUser._id)
+  ]?.has(userId)
 );
 
 useReadReceipts({
@@ -124,6 +125,13 @@ useReadReceipts({
   getSocket,
   isAtBottom,
 });
+
+useEffect(() => {
+  const socket = getSocket();
+  if (socket && conversationId) {
+    socket.emit("join_conversation", conversationId);
+  }
+}, [conversationId, getSocket]);
 
 useEffect(() => {
   setShowProfile(false);
@@ -281,11 +289,16 @@ duration-300
           virtuosoRef={virtuosoRef}
           chatMessages={chatMessages}
           currentUserId={currentUserId}
-          isTyping={isTyping}
           onTopReached={handleTopReached}
           onBottomStateChange={handleBottomChange}
           isFetchingNextPage={isFetchingNextPage}
         />
+
+        {isTyping && (
+          <div className="w-full max-w-5xl px-3 py-1 mx-auto shrink-0 bg-background">
+            <TypingIndicator />
+          </div>
+        )}
 
         <ScrollToBottomButton
           isAtBottom={isAtBottom}

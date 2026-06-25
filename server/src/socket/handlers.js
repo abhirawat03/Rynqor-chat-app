@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { sendMessageService } from "../services/message.service.js";
 import { getConversationByIdService } from "../services/conversation.service.js";
 import { getUserService } from "../services/user.service.js";
-import { messageQueue } from "../config/queue.js";
 import { getRedisClient } from "../config/redisClient.js";
 
 import { Conversation } from "../models/conversation.model.js";
@@ -267,25 +266,14 @@ export const registerHandlers = async (
                     }
                 );
 
-                // 4. Queue the message save job asynchronously in Redis
-                const jobPayload = {
-                    userId,
-                    payload: {
-                        _id: messageId,
-                        conversationId,
-                        text: text ? text.trim() : "",
-                        media,
-                    }
-                };
-
-                if (messageQueue) {
-                    await messageQueue.add("save-message", jobPayload);
-                    console.log(`📥 [Socket] Queued message ${messageId} for background save.`);
-                } else {
-                    // Fallback to synchronous database write if Redis/BullMQ is down
-                    await sendMessageService(userId, jobPayload.payload);
-                    console.log(`⚠️ [Socket] Redis down. Saved message ${messageId} directly to DB.`);
-                }
+                // 4. Save message synchronously to the database
+                await sendMessageService(userId, {
+                    _id: messageId,
+                    conversationId,
+                    text: text ? text.trim() : "",
+                    media,
+                });
+                console.log(`💾 Saved message ${messageId} directly to DB.`);
 
             } catch (err) {
 
@@ -446,6 +434,11 @@ export const registerHandlers = async (
 
                 if (!socket.rooms.has(conversationId)) {
                     return;
+                }
+
+                // Reset typing rate limit so the next start-typing event is allowed immediately
+                if (socketLimits.has(userId)) {
+                    socketLimits.get(userId).typing = 0;
                 }
 
                 socket.to(

@@ -1,7 +1,5 @@
-// import { useRef, useEffect } from "react";
 import { Virtuoso } from "react-virtuoso";
 import Message from "./Message";
-import TypingIndicator from "./TypingIndicator";
 import DateSeparator from "./DateSeparator";
 
 import { getDateLabel } from "../../utils/date.js";
@@ -11,7 +9,6 @@ const MessageList = ({
   virtuosoRef,
   chatMessages,
   currentUserId,
-  isTyping,
   onTopReached,
   onBottomStateChange,
   isFetchingNextPage
@@ -103,13 +100,7 @@ const MessageList = ({
               )}
             </div>
           ),
-          Footer: () => (
-            <div className="w-full max-w-5xl px-3 py-1 mx-auto">
-              {isTyping && (
-                <TypingIndicator />
-              )}
-            </div>
-          ),
+          Footer: () => <div className="h-2 shrink-0" />,
         }}
       />
     </div>
