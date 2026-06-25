@@ -11,7 +11,8 @@ const MessageList = ({
   currentUserId,
   onTopReached,
   onBottomStateChange,
-  isFetchingNextPage
+  isFetchingNextPage,
+  isGroup
 }) => {
 
   // React-virtuoso prepending requires allocating a virtual coordinate space so items prepended
@@ -87,6 +88,7 @@ const MessageList = ({
                   syncState={
                     msg.syncState
                   }
+                  isGroup={isGroup}
                 />
               </div>
             </>

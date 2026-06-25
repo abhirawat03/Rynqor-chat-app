@@ -1,4 +1,4 @@
-const TypingIndicator = () => {
+const TypingIndicator = ({ label = "Typing" }) => {
 
   return (
     <div
@@ -13,7 +13,7 @@ const TypingIndicator = () => {
         <span
           className="text-sm font-medium text-muted"
         >
-          Typing
+          {label}
         </span>
 
         {/* DOTS */}

@@ -1,10 +1,12 @@
-import { useEffect} from "react";
+import { useEffect, useState } from "react";
 
 import { NavLink } from "react-router-dom";
 import { IoMdChatbubbles } from "react-icons/io";
+import { FiUsers } from "react-icons/fi";
 
 import ChatItem from "../../components/chat/ChatItem.jsx";
 import { ChatListSkeleton } from "../../components/common/Skeleton.jsx";
+import CreateGroupModal from "../../components/chat/CreateGroupModal.jsx";
 
 import { useConversationsQuery } from "../../hooks/conversations/useConversationsQuery.js";
 import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
@@ -12,6 +14,7 @@ import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
 import { useSocket } from "../../services/socket/useSocket.js";
 
 const ChatsPage = () => {
+    const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
 
     const {
         presence,
@@ -116,30 +119,46 @@ useEffect(() => {
     ) {
 
         return (
-            <div
-                className="flex items-center justify-center flex-1 px-4 "
-            >
+            <div className="relative flex flex-col flex-1 min-h-0 bg-surface">
                 <div
-                    className="max-w-sm mx-auto my-8 text-center "
+                    className="flex items-center justify-center flex-1 px-4 "
                 >
-                    <IoMdChatbubbles
-                        size={56}
-                        className="mx-auto mb-4 text-muted"
-                    />
-
-                    <p
-                        className="mb-2 text-2xl font-semibold text-foreground"
+                    <div
+                        className="max-w-sm mx-auto my-8 text-center "
                     >
-                        No chats yet
-                    </p>
+                        <IoMdChatbubbles
+                            size={56}
+                            className="mx-auto mb-4 text-muted"
+                        />
 
-                    <p
-                        className="max-w-xs mx-auto text-sm text-muted"
-                    >
-                        Start a conversation by
-                        searching for users.
-                    </p>
+                        <p
+                            className="mb-2 text-2xl font-semibold text-foreground"
+                        >
+                            No chats yet
+                        </p>
+
+                        <p
+                            className="max-w-xs mx-auto text-sm text-muted"
+                        >
+                            Start a conversation by
+                            searching for users.
+                        </p>
+                    </div>
                 </div>
+
+                {/* FLOATING ACTION BUTTON */}
+                <button
+                    onClick={() => setIsGroupModalOpen(true)}
+                    className="absolute bottom-20 md:bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 rounded-full shadow-lg bg-accent text-accent-foreground hover:bg-accent-hover hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
+                    title="Create Group Chat"
+                >
+                    <FiUsers size={20} />
+                </button>
+
+                <CreateGroupModal 
+                    isOpen={isGroupModalOpen} 
+                    onClose={() => setIsGroupModalOpen(false)} 
+                />
             </div>
         );
     }
@@ -151,7 +170,7 @@ useEffect(() => {
     return (
 
         <div
-            className="flex flex-col flex-1 min-h-0 transition-colors duration-300 bg-surface"
+            className="relative flex flex-col flex-1 min-h-0 transition-colors duration-300 bg-surface"
         >
 
             <div
@@ -161,8 +180,11 @@ useEffect(() => {
                 {conversations.map(
                     (chat) => {
 
-                        const otherUser =
-                            chat.participants?.find(
+                        const isGroup = chat.type === "group";
+
+                        const otherUser = isGroup
+                            ? null
+                            : chat.participants?.find(
                                 (
                                     participant
                                 ) =>
@@ -172,13 +194,15 @@ useEffect(() => {
                                     currentUserId
                             );
 
-                        const userId =
-                            String(
+                        const userId = isGroup
+                            ? ""
+                            : String(
                                 otherUser?._id ||
                                     ""
                             );
 
                         const isOnline =
+                            !isGroup &&
                             Boolean(
                                 userId &&
                                     presence?.[
@@ -187,8 +211,12 @@ useEffect(() => {
                                         ?.online
                             );
 
-                        const isTyping =
-                            Boolean(
+                        const isTyping = isGroup
+                            ? Boolean(
+                                typingUsers?.[chat._id] &&
+                                Array.from(typingUsers[chat._id]).some(id => id !== currentUserId)
+                            )
+                            : Boolean(
                                 userId &&
                                     typingUsers?.[
                                         chat._id
@@ -270,6 +298,19 @@ console.log(
 
             </div>
 
+            {/* FLOATING ACTION BUTTON */}
+            <button
+                onClick={() => setIsGroupModalOpen(true)}
+                className="absolute bottom-20 md:bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 rounded-full shadow-lg bg-accent text-accent-foreground hover:bg-accent-hover hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
+                title="Create Group Chat"
+            >
+                <FiUsers size={20} />
+            </button>
+
+            <CreateGroupModal 
+                isOpen={isGroupModalOpen} 
+                onClose={() => setIsGroupModalOpen(false)} 
+            />
         </div>
 
     );

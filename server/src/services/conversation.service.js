@@ -98,6 +98,7 @@ const getConversationService = async (userId) => {
 
     const result = conversations.map((conv) => {
         const isSelf = conv.type === "self";
+        const isGroup = conv.type === "group";
 
         if (isSelf) {
             const user = conv.participants[0];
@@ -107,6 +108,20 @@ const getConversationService = async (userId) => {
                 name: `${formatName(user.fullName)} (You)`,
                 avatar: user.avatar || null,
                 participants: conv.participants,
+                type: conv.type,
+                lastMessage: conv.lastMessage || null,
+                updatedAt: conv.updatedAt,
+            };
+        }
+
+        if (isGroup) {
+            return {
+                _id: conv._id,
+                name: conv.name,
+                avatar: conv.avatar || null,
+                participants: conv.participants,
+                type: conv.type,
+                admins: conv.admins || [],
                 lastMessage: conv.lastMessage || null,
                 updatedAt: conv.updatedAt,
             };
@@ -121,6 +136,7 @@ const getConversationService = async (userId) => {
             name: formatName(otherUser?.fullName || ""),
             avatar: otherUser?.avatar || null,
             participants: conv.participants,
+            type: conv.type,
             lastMessage: conv.lastMessage || null,
             updatedAt: conv.updatedAt,
         };
@@ -153,6 +169,7 @@ const getConversationByIdService = async (userId, conversationId) => {
     }
 
     const isSelf = conversation.type === "self";
+    const isGroup = conversation.type === "group";
 
     if (isSelf) {
         const user = conversation.participants[0];
@@ -163,6 +180,17 @@ const getConversationByIdService = async (userId, conversationId) => {
             avatar: user.avatar || null,
             participants: conversation.participants,
             type: conversation.type,
+        };
+    }
+
+    if (isGroup) {
+        return {
+            _id: conversation._id,
+            name: conversation.name,
+            avatar: conversation.avatar || null,
+            participants: conversation.participants,
+            type: conversation.type,
+            admins: conversation.admins || [],
         };
     }
 
@@ -217,9 +245,33 @@ const getConversationMediaService =
 
 };
 
+const createGroupConversationService = async (userId, name, participants, avatar = null) => {
+    if (!name || !name.trim()) {
+        throw new ApiError(400, "Group name is required");
+    }
+    if (!participants || !Array.isArray(participants) || participants.length === 0) {
+        throw new ApiError(400, "Group must have at least one other participant");
+    }
+
+    const allParticipants = Array.from(new Set([userId, ...participants]));
+
+    const conversation = await Conversation.create({
+        name: name.trim(),
+        type: "group",
+        participants: allParticipants,
+        admins: [userId],
+        avatar: avatar ? { url: avatar.url, publicId: avatar.publicId } : null,
+    });
+
+    await conversation.populate("participants", USER_PUBLIC_FIELDS);
+
+    return conversation;
+};
+
 export {
     createConversationService,
     getConversationService,
     getConversationByIdService,
-    getConversationMediaService
+    getConversationMediaService,
+    createGroupConversationService
 };

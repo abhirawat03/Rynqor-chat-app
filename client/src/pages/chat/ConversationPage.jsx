@@ -101,22 +101,38 @@ const handleBottomChange = (
   setIsAtBottom(bottom);
 };
 
-const otherUser =
-  conversation?.participants?.find(
-    (u) =>
-      currentUserId && String(u._id) !== String(currentUserId)
-  );
+const isGroup = conversation?.type === "group";
 
-const userId = otherUser?._id?.toString();
+const otherUser = isGroup
+  ? null
+  : conversation?.participants?.find(
+      (u) =>
+        currentUserId && String(u._id) !== String(currentUserId)
+    );
 
-const isOnline = presence?.[userId]?.online || false;
+const userId = isGroup ? "" : otherUser?._id?.toString();
 
-const isTyping = Boolean(
-  userId &&
-  typingUsers[
-    conversationId
-  ]?.has(userId)
-);
+const isOnline = !isGroup && presence?.[userId]?.online || false;
+
+const typingUserIds = typingUsers[conversationId] 
+  ? Array.from(typingUsers[conversationId]).filter(id => id !== currentUserId)
+  : [];
+
+const isTyping = typingUserIds.length > 0;
+
+const getTypingLabel = () => {
+  if (typingUserIds.length === 0) return "";
+  if (!isGroup) return "Typing";
+
+  const typingNames = typingUserIds
+    .map(id => conversation?.participants?.find(p => String(p._id) === String(id))?.fullName)
+    .filter(Boolean);
+
+  if (typingNames.length === 0) return "Someone is typing";
+  if (typingNames.length === 1) return `${typingNames[0]} is typing`;
+  if (typingNames.length === 2) return `${typingNames[0]} and ${typingNames[1]} are typing`;
+  return "Several people are typing";
+};
 
 useReadReceipts({
   conversationId,
@@ -292,11 +308,12 @@ duration-300
           onTopReached={handleTopReached}
           onBottomStateChange={handleBottomChange}
           isFetchingNextPage={isFetchingNextPage}
+          isGroup={isGroup}
         />
 
         {isTyping && (
           <div className="w-full max-w-5xl px-3 py-1 mx-auto shrink-0 bg-background">
-            <TypingIndicator />
+            <TypingIndicator label={getTypingLabel()} />
           </div>
         )}
 

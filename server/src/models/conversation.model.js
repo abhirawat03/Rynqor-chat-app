@@ -8,18 +8,32 @@ const convoSchema = new Schema({
     }],
     type: {
         type: String,
-        enum: ["direct", "self"],
+        enum: ["direct", "self", "group"],
         required: true,
     },
+    name: {
+        type: String,
+        trim: true,
+        default: "",
+    },
+    avatar: {
+        url: {
+            type: String,
+            default: null,
+        },
+        publicId: {
+            type: String,
+            default: null,
+        },
+    },
+    admins: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: [],
+    }],
     lastMessage: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Message"
-        // text: String,
-        // senderId: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: "User",
-        // },
-        // createdAt: Date,
     }
 },{timestamps:true})
 

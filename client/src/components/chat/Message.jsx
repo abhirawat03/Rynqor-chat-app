@@ -6,7 +6,10 @@ const Message = memo(({
   message,
   isOwn,
   syncState,
+  isGroup = false,
 }) => {
+
+  const senderName = message.senderId?.fullName || message.senderId?.username || "Someone";
 
   const {
     text,
@@ -87,9 +90,16 @@ const Message = memo(({
         `}
       >
 
-        <div
-          className={`
-            relative
+        <div className="flex flex-col max-w-[70%]">
+          {isGroup && !isOwn && (
+            <span className="text-[10px] font-bold text-muted/70 ml-2 mb-0.5 select-none uppercase tracking-wider">
+              {senderName}
+            </span>
+          )}
+
+          <div
+            className={`
+              relative
 
             max-w-xs
 
@@ -262,6 +272,8 @@ const Message = memo(({
               </span>
 
             )}
+
+          </div>
 
           </div>
 

@@ -1,4 +1,4 @@
-import { createConversationService, getConversationByIdService, getConversationMediaService, getConversationService } from "../services/conversation.service.js"
+import { createConversationService, getConversationByIdService, getConversationMediaService, getConversationService, createGroupConversationService } from "../services/conversation.service.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 const createConversation = async (req, res) => {
@@ -82,4 +82,20 @@ const getConversationMedia = async (
         );
 };
 
-export { createConversation, getConversation, getConversationById, getConversationMedia };
+const createGroupConversation = async (req, res) => {
+    const userId = req.user?._id;
+    const { name, participants, avatar } = req.body;
+
+    const conversation = await createGroupConversationService(userId, name, participants, avatar);
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                conversation,
+                "Group conversation created successfully"
+            )
+        );
+};
+
+export { createConversation, getConversation, getConversationById, getConversationMedia, createGroupConversation };

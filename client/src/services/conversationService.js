@@ -24,4 +24,13 @@ const getConversationMedia = async (conversationId) => {
     return res.data.data;
 }
 
-export {createConversation, getConversations, getConversationById, getConversationMedia};
+const createGroupConversation = async ({ name, participants, avatar = null }) => {
+    const res = await Api.post(`/conversations/group`, {
+        name,
+        participants,
+        avatar,
+    });
+    return res.data.data;
+};
+
+export {createConversation, getConversations, getConversationById, getConversationMedia, createGroupConversation};
