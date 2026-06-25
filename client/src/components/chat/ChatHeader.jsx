@@ -1,12 +1,14 @@
 import { useNavigate } from "react-router-dom";
 
 import { FaCircle } from "react-icons/fa";
+import { IoInformationCircle } from "react-icons/io5";
 
 const ChatHeader = ({
   name,
   isOnline,
   avatar,
   isSelf,
+  isGroup,
   profileId,
   onOpenProfile,
 }) => {
@@ -60,7 +62,7 @@ const ChatHeader = ({
 
   }}
 
-  className="flex items-center flex-1 min-w-0 gap-3 text-left cursor-pointer "
+  className="flex items-center flex-1 min-w-0 gap-3 text-left cursor-pointer lg:pointer-events-none lg:cursor-default"
 >
       {/* AVATAR */}
       <div
@@ -119,7 +121,7 @@ const ChatHeader = ({
         </p>
 
         {/* STATUS */}
-        {!isSelf && (
+        {!isSelf && !isGroup && (
 
           <div
             className="
@@ -160,6 +162,40 @@ const ChatHeader = ({
 
       </div>
       </button>
+
+      {/* INFO BUTTON */}
+      {profileId && (
+        <button
+          type="button"
+          onClick={onOpenProfile}
+          className="
+            hidden
+            lg:flex
+            h-10
+            w-10
+            items-center
+            justify-center
+            cursor-pointer
+
+            rounded-xl
+
+            text-xl
+
+            text-muted
+
+            transition-all
+            duration-200
+
+            hover:bg-hover
+            hover:text-foreground
+
+            active:scale-[0.96]
+          "
+          title="Open Profile"
+        >
+          <IoInformationCircle size={24} />
+        </button>
+      )}
 
     </div>
   );

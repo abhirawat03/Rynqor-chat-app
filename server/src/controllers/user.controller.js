@@ -79,7 +79,7 @@ const changePassword =
 
 const searchUsers = async (req, res) => {
   const { search } = req.query;
-  const users = await searchUserService(search);
+  const users = await searchUserService(search, req.user?._id);
   return res
   .status(200)
   .json(

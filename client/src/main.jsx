@@ -133,7 +133,7 @@ const router =
                           Your messages
                         </h2>
                         
-                        <p className="text-sm text-muted mb-6 max-w-[280px] leading-relaxed">
+                        <p className="text-sm text-muted mb-6 max-w-70 leading-relaxed">
                           Send photos and messages to a friend or group.
                         </p>
                         

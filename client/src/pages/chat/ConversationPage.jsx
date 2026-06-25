@@ -36,11 +36,19 @@ const UserProfilePage = lazy(
     )
 );
 
+const GroupProfilePage = lazy(
+  () =>
+    import(
+      "../profile/GroupProfilePage.jsx"
+    )
+);
+
 const ConversationPage = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
 
   const [showProfile, setShowProfile] = useState(false);
+  const [viewedUserId, setViewedUserId] = useState(null);
   const loadingMoreRef = useRef(false);
 
   const {
@@ -151,6 +159,7 @@ useEffect(() => {
 
 useEffect(() => {
   setShowProfile(false);
+  setViewedUserId(null);
   setUnreadCount(0);
 }, [conversationId, setUnreadCount]);
 
@@ -255,6 +264,7 @@ const handleTopReached =
     >
       <div
         className={`
+    relative
     flex
     flex-1
     min-h-0
@@ -289,10 +299,13 @@ duration-300
             conversation?.type ===
             "self"
           }
+          isGroup={isGroup}
           profileId={
             conversation?.type === "self"
               ? currentUserId
-              : userId
+              : isGroup
+                ? conversationId
+                : userId
           }
           onOpenProfile={() =>
             setShowProfile(true)
@@ -375,21 +388,42 @@ duration-300
               </div>
             }
           >
-            <UserProfilePage
-              userId={
-                conversation?.type ===
-                  "self"
-                  ? currentUserId
-                  : userId
-              }
-              isOnline={isOnline}
-              conversationId={
-                conversationId
-              }
-              onClose={() =>
-                setShowProfile(false)
-              }
-            />
+            {isGroup && !viewedUserId ? (
+              <GroupProfilePage
+                conversationId={conversationId}
+                onClose={() =>
+                  setShowProfile(false)
+                }
+                onMemberClick={(memberId) =>
+                  setViewedUserId(memberId)
+                }
+              />
+            ) : (
+              <UserProfilePage
+                userId={
+                  viewedUserId || (
+                    conversation?.type === "self"
+                      ? currentUserId
+                      : userId
+                  )
+                }
+                isOnline={
+                  viewedUserId
+                    ? (presence?.[viewedUserId]?.online || false)
+                    : isOnline
+                }
+                conversationId={conversationId}
+                onClose={() => {
+                  setShowProfile(false);
+                  setViewedUserId(null);
+                }}
+                onBack={
+                  isGroup && viewedUserId
+                    ? () => setViewedUserId(null)
+                    : null
+                }
+              />
+            )}
           </Suspense>
 
         </div>

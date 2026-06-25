@@ -84,6 +84,30 @@ export const createMessageHandlers = ({
     msg,
 });
 
+        if (msg.messageType === "system") {
+            queryClient.invalidateQueries({ queryKey: ["conversations"] });
+            queryClient.invalidateQueries({ queryKey: ["conversation", msg.conversationId] });
+        }
+
+        if (msg.media && msg.media.length > 0) {
+            // 1. Update in-memory cache instantly
+            queryClient.setQueryData(
+                ["conversation-media", msg.conversationId],
+                (oldMedia = []) => {
+                    const exists = oldMedia.some((m) => m._id === msg._id);
+                    if (exists) return oldMedia;
+                    return [msg, ...oldMedia];
+                }
+            );
+
+            // 2. Invalidate query with a slight delay to avoid DB race condition
+            setTimeout(() => {
+                queryClient.invalidateQueries({
+                    queryKey: ["conversation-media", msg.conversationId]
+                });
+            }, 500);
+        }
+
         if (
             import.meta.env.MODE !==
             "production"
@@ -166,6 +190,30 @@ console.log(
                 msg.conversationId,
             msg,
         });
+
+        if (msg.messageType === "system") {
+            queryClient.invalidateQueries({ queryKey: ["conversations"] });
+            queryClient.invalidateQueries({ queryKey: ["conversation", msg.conversationId] });
+        }
+
+        if (msg.media && msg.media.length > 0) {
+            // 1. Update in-memory cache instantly
+            queryClient.setQueryData(
+                ["conversation-media", msg.conversationId],
+                (oldMedia = []) => {
+                    const exists = oldMedia.some((m) => m._id === msg._id);
+                    if (exists) return oldMedia;
+                    return [msg, ...oldMedia];
+                }
+            );
+
+            // 2. Invalidate query with a slight delay to avoid DB race condition
+            setTimeout(() => {
+                queryClient.invalidateQueries({
+                    queryKey: ["conversation-media", msg.conversationId]
+                });
+            }, 500);
+        }
 
         if (
             import.meta.env.MODE !==

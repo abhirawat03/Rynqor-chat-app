@@ -21,6 +21,16 @@ const Message = memo(({
     messageType,
   } = message;
 
+  if (messageType === "system") {
+    return (
+      <div className="flex justify-center w-full my-3 px-4">
+        <div className="bg-zinc-150 dark:bg-zinc-800/40 border border-border/30 rounded-full px-4 py-1.5 text-center text-[11px] text-muted-foreground/80 max-w-[85%] select-none leading-relaxed shadow-xs">
+          📢 {text}
+        </div>
+      </div>
+    );
+  }
+
   const [preview, setPreview] =
     useState(null);
 

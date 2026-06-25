@@ -7,6 +7,7 @@ import { ImSearch } from "react-icons/im";
 import useSearchUsersQuery from "../../hooks/users/useSearchUsersQuery.js";
 import { createGroupConversation } from "../../services/conversationService.js";
 import { useSocket } from "../../services/socket/useSocket.js";
+import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
 
 const CreateGroupModal = ({ isOpen, onClose }) => {
   const [groupName, setGroupName] = useState("");
@@ -18,7 +19,10 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { getSocket } = useSocket();
 
+  const { data: currentUser } = useCurrentUserQuery();
   const { data: searchResults = [], isLoading } = useSearchUsersQuery(userSearch.trim());
+
+  const filteredSearchResults = searchResults.filter((u) => u._id !== currentUser?._id);
 
   if (!isOpen) return null;
 
@@ -39,8 +43,8 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
       toast.error("Please enter a group name");
       return;
     }
-    if (selectedUsers.length === 0) {
-      toast.error("Please select at least one participant");
+    if (selectedUsers.length < 2) {
+      toast.error("Please select at least 2 participants");
       return;
     }
 
@@ -128,7 +132,7 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
                         {user.fullName?.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <span className="truncate max-w-[80px]">{user.fullName}</span>
+                    <span className="truncate max-w-20">{user.fullName}</span>
                     <button 
                       onClick={() => handleRemoveUser(user._id)}
                       className="p-0.5 rounded-full hover:bg-hover text-muted hover:text-foreground transition-colors duration-200"
@@ -166,8 +170,8 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
                   <div className="flex justify-center py-4">
                     <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                   </div>
-                ) : searchResults.length > 0 ? (
-                  searchResults.map((user) => {
+                ) : filteredSearchResults.length > 0 ? (
+                  filteredSearchResults.map((user) => {
                     const isSelected = selectedUsers.some((u) => u._id === user._id);
                     return (
                       <div 
@@ -219,7 +223,7 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
           <button
             onClick={handleCreate}
             className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-foreground rounded-xl text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-            disabled={isSubmitting || !groupName.trim() || selectedUsers.length === 0}
+            disabled={isSubmitting || !groupName.trim() || selectedUsers.length < 2}
           >
             {isSubmitting && (
               <div className="w-4 h-4 border-2 border-accent-foreground border-t-transparent rounded-full animate-spin" />

@@ -106,6 +106,7 @@ const msgSchema =
         "text",
         "media",
         "mixed",
+        "system",
     ],
     default: "text"
 },

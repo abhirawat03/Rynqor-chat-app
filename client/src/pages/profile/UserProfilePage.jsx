@@ -22,6 +22,7 @@ const UserProfilePage = ({
   isOnline,
   conversationId,
   onClose,
+  onBack,
 }) => {
 
   const {
@@ -104,26 +105,39 @@ const UserProfilePage = ({
           className="sticky top-0 z-10 flex items-center justify-between px-4 py-4 border-b border-border bg-surface/90 backdrop-blur-xl"
         >
 
-          <div>
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="p-1.5 rounded-xl text-muted hover:text-foreground hover:bg-hover transition-all cursor-pointer"
+                title="Back to Group Profile"
+              >
+                &larr;
+              </button>
+            )}
 
-            <h1
-              className="text-lg font-semibold text-foreground"
-            >
-              Contact Info
-            </h1>
+            <div>
 
-            <p
-              className="
-                mt-0.5
+              <h1
+                className="text-lg font-semibold text-foreground"
+              >
+                Contact Info
+              </h1>
 
-                text-xs
+              <p
+                className="
+                  mt-0.5
 
-                text-muted
-              "
-            >
-              User profile
-            </p>
+                  text-xs
 
+                  text-muted
+                "
+              >
+                User profile
+              </p>
+
+            </div>
           </div>
 
           <button
@@ -432,8 +446,8 @@ const UserProfilePage = ({
                           href={item.url}
                           target="_blank"
                           rel="noreferrer"
-
-                          className="flex flex-col items-center justify-center gap-2 p-3 text-center transition-colors duration-200 aspect-square hover:bg-hover"
+                          title={item.name}
+                          className="flex flex-col items-center justify-center gap-2 p-3 text-center transition-colors duration-200 hover:bg-hover min-h-24 h-full w-full"
                         >
 
                           <div
@@ -443,7 +457,7 @@ const UserProfilePage = ({
                           </div>
 
                           <p
-                            className="text-xs line-clamp-2 text-foreground"
+                            className="text-xs text-foreground break-all"
                           >
                             {item.name || "File"}
                           </p>

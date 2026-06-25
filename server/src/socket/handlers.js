@@ -22,6 +22,9 @@ export const registerHandlers = async (
         return;
     }
 
+    socket.join(userId);
+    console.log(`🔌 Socket ${socket.id} joined personal room ${userId}`);
+
     // Cache user profile details on connection to avoid DB lookups for every sent message
     try {
         const user = await getUserService(userId);

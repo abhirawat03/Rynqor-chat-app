@@ -12,7 +12,8 @@ const startServer = async () => {
         await connectDB();
         const redisClient = await initRedis();
         
-        initSocket(server, redisClient);
+        const io = initSocket(server, redisClient);
+        app.set("io", io);
 
         server.listen(PORT, () => {
             console.log(`Server is running at PORT: ${PORT}`);

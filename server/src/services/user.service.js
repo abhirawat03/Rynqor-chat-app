@@ -152,18 +152,25 @@ const changePasswordService =
 
   };
 
-const searchUserService = async (search) => {
+const searchUserService = async (search, currentUserId) => {
     const escapedSearch =
       search.replace(
           /[.*+?^${}()|[\]\\]/g,
           "\\$&"
       );
-    const users = await User.find({
+
+    const query = {
         $or: [
             { username: { $regex: `^${escapedSearch}`, $options: "i" } },
             { fullName: { $regex: `^${escapedSearch}`, $options: "i" } },
         ],
-    })
+    };
+
+    if (currentUserId) {
+        query._id = { $ne: currentUserId };
+    }
+
+    const users = await User.find(query)
         .select("username fullName avatar bio")
         .limit(10)
         .lean();
