@@ -7,6 +7,8 @@ const Message = memo(({
   isOwn,
   syncState,
   isGroup = false,
+  hideAvatar = false,
+  hideName = false,
 }) => {
 
   const senderName = message.senderId?.fullName || message.senderId?.username || "Someone";
@@ -81,7 +83,8 @@ const Message = memo(({
       <div
         className={`
           flex
-
+          gap-2.5
+          items-end
           ${
             isOwn
               ? "justify-end"
@@ -89,9 +92,32 @@ const Message = memo(({
           }
         `}
       >
+        {!isOwn && (
+          <div className="w-8 shrink-0 flex justify-center mb-1">
+            {!hideAvatar ? (
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs font-semibold overflow-hidden select-none border border-border/50"
+                title={senderName}
+              >
+                {message.senderId?.avatar?.url ? (
+                  <img
+                    src={message.senderId.avatar.url}
+                    alt={senderName}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="text-muted-foreground">
+                    {senderName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
 
         <div className="flex flex-col max-w-[70%]">
-          {isGroup && !isOwn && (
+          {isGroup && !isOwn && !hideName && (
             <span className="text-[10px] font-bold text-muted/70 ml-2 mb-0.5 select-none uppercase tracking-wider">
               {senderName}
             </span>

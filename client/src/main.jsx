@@ -11,6 +11,7 @@ import "./index.css";
 import {
   createBrowserRouter,
   RouterProvider,
+  NavLink,
 } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -56,6 +57,7 @@ import GlobalErrorBoundary from "./components/app/GlobalErrorBoundary.jsx";
 import { LazyPage } from "./components/common/LazyPage.jsx";
 import { ConversationSkeleton, SearchSkeleton, SettingsSkeleton } from "./components/common/Skeleton.jsx";
 import { ErrorBoundary } from "./components/common/ErrorBoundary.jsx";
+import { BsFillChatLeftFill } from "react-icons/bs";
 
 
 
@@ -122,21 +124,27 @@ const router =
                   index: true,
 
                   element: (
-                    <div
-                      className="
-                        hidden
-                        flex-1
-                        items-center
-                        justify-center
-
-                        text-zinc-500
-
-                        dark:text-zinc-400
-
-                        md:flex
-                      "
-                    >
-                      Select a chat
+                    <div className="hidden flex-1 flex-col items-center justify-center bg-background md:flex select-none">
+                      <div className="flex flex-col items-center max-w-sm p-6 text-center">
+                        {/* Solid modern chat icon */}
+                        <BsFillChatLeftFill size={56} className="text-foreground/95 dark:text-foreground/90 mb-5" />
+                        
+                        <h2 className="text-xl font-normal text-foreground mb-1">
+                          Your messages
+                        </h2>
+                        
+                        <p className="text-sm text-muted mb-6 max-w-[280px] leading-relaxed">
+                          Send photos and messages to a friend or group.
+                        </p>
+                        
+                        {/* Instagram-style filled button */}
+                        <NavLink
+                          to="/search"
+                          className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
+                        >
+                          Send message
+                        </NavLink>
+                      </div>
                     </div>
                   ),
                 },

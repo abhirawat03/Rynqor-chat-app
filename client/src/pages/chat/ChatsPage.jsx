@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { NavLink } from "react-router-dom";
 import { IoMdChatbubbles } from "react-icons/io";
-import { FiUsers } from "react-icons/fi";
+import { FiUsers, FiSearch, FiX } from "react-icons/fi";
 
 import ChatItem from "../../components/chat/ChatItem.jsx";
 import { ChatListSkeleton } from "../../components/common/Skeleton.jsx";
@@ -15,6 +15,7 @@ import { useSocket } from "../../services/socket/useSocket.js";
 
 const ChatsPage = () => {
     const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const {
         presence,
@@ -52,6 +53,24 @@ console.log(
         String(
             user?._id || ""
         );
+
+    const filteredConversations = conversations.filter((chat) => {
+        if (!searchQuery.trim()) return true;
+        const query = searchQuery.toLowerCase();
+
+        if (chat.type === "group") {
+            return chat.name?.toLowerCase().includes(query);
+        } else {
+            const targetUser = chat.type === "self"
+                ? chat.participants?.[0]
+                : chat.participants?.find((p) => String(p._id) !== currentUserId);
+
+            return (
+                targetUser?.fullName?.toLowerCase().includes(query) ||
+                targetUser?.username?.toLowerCase().includes(query)
+            );
+        }
+    });
 
 useEffect(() => {
     console.log(
@@ -172,12 +191,42 @@ useEffect(() => {
         <div
             className="relative flex flex-col flex-1 min-h-0 transition-colors duration-300 bg-surface"
         >
+            {/* LOCAL FIND/FILTER CHAT SEARCH BAR */}
+            <div className="px-3 py-2 border-b border-border/40">
+                <div className="relative">
+                    <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Find chat..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-8 py-1.5 text-sm rounded-lg bg-zinc-100 dark:bg-zinc-800/50 text-foreground border border-transparent focus:border-accent focus:bg-background focus:outline-none transition-all duration-200"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors duration-150"
+                        >
+                            <FiX size={16} />
+                        </button>
+                    )}
+                </div>
+            </div>
 
             <div
                 className="flex flex-col flex-1 min-h-0 gap-1 px-1 pt-2 pb-20 overflow-y-auto scrollbar-hide md:pb-2"
             >
 
-                {conversations.map(
+                {filteredConversations.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center flex-1 py-12 text-center text-muted">
+                        <FiSearch size={32} className="mb-2 opacity-50" />
+                        <p className="text-sm font-medium">No chats found</p>
+                        <p className="text-xs max-w-xs mt-1">
+                            No active conversations match "{searchQuery}"
+                        </p>
+                    </div>
+                ) : (
+                    filteredConversations.map(
                     (chat) => {
 
                         const isGroup = chat.type === "group";
@@ -294,6 +343,7 @@ console.log(
                         );
 
                     }
+                )
                 )}
 
             </div>
