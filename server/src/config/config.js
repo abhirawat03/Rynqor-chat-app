@@ -41,3 +41,8 @@ export const REFRESH_TOKEN = {
 };
 
 export const REDIS_URL = getRequiredEnv("REDIS_URL", "");
+
+export const RESEND = {
+  apiKey: process.env.RESEND_API_KEY || "",
+  from: process.env.SMTP_FROM || "Rynqor Chat <onboarding@resend.dev>",
+};

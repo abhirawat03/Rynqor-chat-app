@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { RESEND } from "../config/config.js";
 
 /**
  * Generates a beautiful, responsive HTML email body with matching branding.
@@ -59,7 +60,7 @@ let resendClient = null;
 const getResendClient = () => {
   if (resendClient) return resendClient;
 
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = RESEND.apiKey;
   if (!apiKey) return null;
 
   resendClient = new Resend(apiKey);
@@ -72,7 +73,7 @@ const getResendClient = () => {
  */
 const sendEmail = async ({ to, subject, html, text }) => {
   const resend = getResendClient();
-  const fromAddress = process.env.SMTP_FROM || "Rynqor Chat <onboarding@resend.dev>";
+  const fromAddress = RESEND.from;
 
   if (!resend) {
     console.log("\n-----------------------------------------");
