@@ -294,8 +294,8 @@ const forgotPasswordService = async (email) => {
     throw new ApiError(404, "User not found with this email");
   }
 
-  // Generate 6-digit numeric OTP
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  // Generate a cryptographically secure 6-digit numeric OTP
+  const otp = crypto.randomInt(100000, 1000000).toString();
 
   // Set OTP and expiry (10 minutes)
   user.resetOtp = otp;
