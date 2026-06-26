@@ -193,9 +193,13 @@ const Signup = () => {
     };
 
     signupMutation.mutate(payload, {
-      onSuccess: () => {
-        localStorage.setItem("unverified_email", payload.email);
-        navigate(`/auth/verify-email?email=${encodeURIComponent(payload.email)}`);
+      onSuccess: (data) => {
+        if (data?.message) {
+          localStorage.setItem("unverified_email", payload.email);
+          navigate(`/auth/verify-email?email=${encodeURIComponent(payload.email)}`);
+        } else {
+          navigate("/");
+        }
       },
       onError: (error) => {
         const message =

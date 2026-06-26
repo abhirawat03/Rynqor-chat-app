@@ -11,6 +11,7 @@ import {
 import { RefreshToken } from "../models/refreshToken.model.js";
 import { verifyRefreshToken } from "../utils/verifyToken.js";
 import { sendEmail, getOtpTemplate, getVerificationTemplate } from "./email.service.js";
+import { EMAIL_VERIFICATION_REQUIRED } from "../config/config.js";
 
 // ==============================
 // Helper
@@ -51,33 +52,66 @@ const registerService = async (
     }
   }
 
-  // Generate cryptographically secure 6-digit verification code
-  const otp = crypto.randomInt(100000, 1000000).toString();
-  const otpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hour expiry
+  // Generate cryptographically secure 6-digit verification code if required
+  const otp = EMAIL_VERIFICATION_REQUIRED ? crypto.randomInt(100000, 1000000).toString() : null;
+  const otpExpires = EMAIL_VERIFICATION_REQUIRED ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null; // 24 hour expiry
 
   const user = await User.create({
     fullName,
     username,
     email,
     password,
-    isVerified: false,
+    isVerified: !EMAIL_VERIFICATION_REQUIRED,
     verificationOtp: otp,
     verificationOtpExpires: otpExpires,
   });
 
-  // Non-blocking background email dispatch
-  sendEmail({
-    to: user.email,
-    subject: "Verify your Rynqor account",
-    text: `Your verification code is: ${otp}. This code expires in 24 hours.`,
-    html: getVerificationTemplate(otp, user.fullName),
-  }).catch((err) => {
-    console.error("❌ Failed to send registration verification email:", err.message);
+  if (EMAIL_VERIFICATION_REQUIRED) {
+    // Non-blocking background email dispatch
+    sendEmail({
+      to: user.email,
+      subject: "Verify your Rynqor account",
+      text: `Your verification code is: ${otp}. This code expires in 24 hours.`,
+      html: getVerificationTemplate(otp, user.fullName),
+    }).catch((err) => {
+      console.error("❌ Failed to send registration verification email:", err.message);
+    });
+
+    return {
+      email: user.email,
+      message: "Verification OTP sent",
+    };
+  }
+
+  // If email verification is paused, log in immediately
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
+  const hashedRefreshToken = hashToken(refreshToken);
+
+  const session = await RefreshToken.create({
+    user: user._id,
+    token: hashedRefreshToken,
+    device: deviceInfo.device,
+    ipAddress: deviceInfo.ipAddress,
+    location: deviceInfo.location,
+    userAgent: deviceInfo.userAgent,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
-  return {
+  const sanitizedUser = {
+    _id: user._id,
+    username: user.username,
+    fullName: user.fullName,
     email: user.email,
-    message: "Verification OTP sent",
+    avatar: user.avatar,
+    bio: user.bio,
+  };
+
+  return {
+    user: sanitizedUser,
+    accessToken,
+    refreshToken,
+    sessionId: session._id,
   };
 };
 
@@ -102,8 +136,8 @@ const loginService = async ({ login, password }, deviceInfo) => {
     throw new ApiError(400, "Invalid credentials");
   }
 
-  // Prevent logging in if user is not verified
-  if (!user.isVerified) {
+  // Prevent logging in if user is not verified and verification is required
+  if (EMAIL_VERIFICATION_REQUIRED && !user.isVerified) {
     throw new ApiError(
       403,
       "Your email is not verified. Please verify your email first.",

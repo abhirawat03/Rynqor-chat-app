@@ -1,12 +1,15 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { signup } from "../../services/authService";
 import toast from "react-hot-toast";
 
 export const useSignupMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: signup,
-    onSuccess: () => {
-      // Do not set currentUser yet; the user must verify their email first.
+    onSuccess: (data) => {
+      if (data && !data.message) {
+        queryClient.setQueryData(["currentUser"], data);
+      }
     },
     onError: (error) => {
       toast.error("Signup failed");

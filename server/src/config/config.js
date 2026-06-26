@@ -46,3 +46,5 @@ export const RESEND = {
   apiKey: process.env.RESEND_API_KEY || "",
   from: process.env.SMTP_FROM || "Rynqor Chat <onboarding@resend.dev>",
 };
+
+export const EMAIL_VERIFICATION_REQUIRED = process.env.EMAIL_VERIFICATION_REQUIRED === "true";
