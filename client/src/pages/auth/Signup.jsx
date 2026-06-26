@@ -193,7 +193,10 @@ const Signup = () => {
     };
 
     signupMutation.mutate(payload, {
-      onSuccess: () => navigate("/"),
+      onSuccess: () => {
+        localStorage.setItem("unverified_email", payload.email);
+        navigate(`/auth/verify-email?email=${encodeURIComponent(payload.email)}`);
+      },
       onError: (error) => {
         const message =
           error.response?.data?.errors?.[0]?.message ||

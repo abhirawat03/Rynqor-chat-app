@@ -10,7 +10,7 @@ import {
 
 import { RefreshToken } from "../models/refreshToken.model.js";
 import { verifyRefreshToken } from "../utils/verifyToken.js";
-import { sendEmail, getOtpTemplate } from "./email.service.js";
+import { sendEmail, getOtpTemplate, getVerificationTemplate } from "./email.service.js";
 
 // ==============================
 // Helper
@@ -31,57 +31,53 @@ const registerService = async (
   email = email.toLowerCase().trim();
   username = username.toLowerCase().trim();
 
-  const existing = await User.findOne({
-    $or: [{ email }, { username }],
-  });
+  // If unverified user with same email or username exists, delete to allow clean re-signup
+  const existingEmail = await User.findOne({ email });
+  const existingUsername = await User.findOne({ username });
 
-  if (existing) {
-    throw new ApiError(400, "User already exists");
+  if (existingEmail) {
+    if (existingEmail.isVerified) {
+      throw new ApiError(400, "Email is already registered");
+    } else {
+      await User.deleteOne({ _id: existingEmail._id });
+    }
   }
+
+  if (existingUsername) {
+    if (existingUsername.isVerified) {
+      throw new ApiError(400, "Username is already taken");
+    } else {
+      await User.deleteOne({ _id: existingUsername._id });
+    }
+  }
+
+  // Generate cryptographically secure 6-digit verification code
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  const otpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hour expiry
 
   const user = await User.create({
     fullName,
     username,
     email,
     password,
+    isVerified: false,
+    verificationOtp: otp,
+    verificationOtpExpires: otpExpires,
   });
 
-  const accessToken = generateAccessToken(user._id);
-
-  const refreshToken = generateRefreshToken(user._id);
-
-  const hashedRefreshToken = hashToken(refreshToken);
-
-  const session = await RefreshToken.create({
-    user: user._id,
-
-    token: hashedRefreshToken,
-
-    device: deviceInfo.device,
-
-    ipAddress: deviceInfo.ipAddress,
-
-    location: deviceInfo.location,
-
-    userAgent: deviceInfo.userAgent,
-
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  // Non-blocking background email dispatch
+  sendEmail({
+    to: user.email,
+    subject: "Verify your Rynqor account",
+    text: `Your verification code is: ${otp}. This code expires in 24 hours.`,
+    html: getVerificationTemplate(otp, user.fullName),
+  }).catch((err) => {
+    console.error("❌ Failed to send registration verification email:", err.message);
   });
-
-  const sanitizedUser = {
-    _id: user._id,
-    username: user.username,
-    fullName: user.fullName,
-    email: user.email,
-    avatar: user.avatar,
-    bio: user.bio,
-  };
 
   return {
-    user: sanitizedUser,
-    accessToken,
-    refreshToken,
-    sessionId: session._id,
+    email: user.email,
+    message: "Verification OTP sent",
   };
 };
 
@@ -104,6 +100,16 @@ const loginService = async ({ login, password }, deviceInfo) => {
 
   if (!isMatch) {
     throw new ApiError(400, "Invalid credentials");
+  }
+
+  // Prevent logging in if user is not verified
+  if (!user.isVerified) {
+    throw new ApiError(
+      403,
+      "Your email is not verified. Please verify your email first.",
+      "EMAIL_NOT_VERIFIED",
+      [{ email: user.email }],
+    );
   }
 
   const accessToken = generateAccessToken(user._id);
@@ -347,9 +353,113 @@ const resetPasswordService = async (email, otp, newPassword) => {
   return null;
 };
 
+// ==============================
+// Verify Email
+// ==============================
+
+const verifyEmailService = async ({ email, otp }, deviceInfo) => {
+  email = email.toLowerCase().trim();
+  const trimmedOtp = otp.trim();
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (user.isVerified) {
+    throw new ApiError(400, "Email is already verified");
+  }
+
+  if (user.verificationOtp !== trimmedOtp) {
+    throw new ApiError(400, "Invalid verification code");
+  }
+
+  if (!user.verificationOtpExpires || user.verificationOtpExpires < new Date()) {
+    throw new ApiError(400, "Verification code has expired");
+  }
+
+  // Activate user profile
+  user.isVerified = true;
+  user.verificationOtp = null;
+  user.verificationOtpExpires = null;
+  await user.save();
+
+  // Create active login session
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
+  const hashedRefreshToken = hashToken(refreshToken);
+
+  const session = await RefreshToken.create({
+    user: user._id,
+    token: hashedRefreshToken,
+    device: deviceInfo.device,
+    ipAddress: deviceInfo.ipAddress,
+    location: deviceInfo.location,
+    userAgent: deviceInfo.userAgent,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  });
+
+  const sanitizedUser = {
+    _id: user._id,
+    username: user.username,
+    fullName: user.fullName,
+    email: user.email,
+    avatar: user.avatar,
+    bio: user.bio,
+  };
+
+  return {
+    user: sanitizedUser,
+    accessToken,
+    refreshToken,
+    sessionId: session._id,
+  };
+};
+
+// ==============================
+// Resend Verification
+// ==============================
+
+const resendVerificationService = async ({ email }) => {
+  email = email.toLowerCase().trim();
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (user.isVerified) {
+    throw new ApiError(400, "Email is already verified");
+  }
+
+  const otp = crypto.randomInt(100000, 1000000).toString();
+  const otpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+  user.verificationOtp = otp;
+  user.verificationOtpExpires = otpExpires;
+  await user.save();
+
+  // Background email sending
+  sendEmail({
+    to: user.email,
+    subject: "Verify your Rynqor account",
+    text: `Your verification code is: ${otp}. This code expires in 24 hours.`,
+    html: getVerificationTemplate(otp, user.fullName),
+  }).catch((err) => {
+    console.error("❌ Failed to resend verification email:", err.message);
+  });
+
+  return {
+    email: user.email,
+    message: "Verification OTP resent successfully",
+  };
+};
+
 export {
   registerService,
   loginService,
+  verifyEmailService,
+  resendVerificationService,
   refreshAccessTokenService,
   logoutService,
   logoutSessionService,

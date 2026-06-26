@@ -1,6 +1,8 @@
 import {
   registerService,
   loginService,
+  verifyEmailService,
+  resendVerificationService,
   getCurrentUserService,
   logoutService,
   getSessionsService,
@@ -31,30 +33,17 @@ const cookieOptions = {
 const register = async (req, res) => {
   const deviceInfo = getDeviceInfo(req);
 
-  const { user, accessToken, refreshToken, sessionId } = await registerService(
-    req.body,
-    deviceInfo,
-  );
+  const result = await registerService(req.body, deviceInfo);
 
   return res
-    // Short-lived access token for API requests
-    .cookie("accessToken", accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000,
-    })
-    // Long-lived refresh token to acquire new access tokens silently
-    .cookie("refreshToken", refreshToken, {
-      ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
-    // Used to match and identify the current active session in the client UI
-    .cookie("sessionId", sessionId.toString(), {
-      ...cookieOptions,
-
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
     .status(201)
-    .json(new ApiResponse(201, user, "User registered successfully"));
+    .json(
+      new ApiResponse(
+        201,
+        result,
+        "Registration successful. Please verify your email.",
+      ),
+    );
 };
 
 // Authenticates credentials, generates JWT access/refresh token pair, and tracks current device/location metadata.
@@ -194,9 +183,54 @@ const checkUsernameAvailability = async (req, res) => {
     );
 };
 
+const verifyEmail = async (req, res) => {
+  const deviceInfo = getDeviceInfo(req);
+
+  const { user, accessToken, refreshToken, sessionId } =
+    await verifyEmailService(req.body, deviceInfo);
+
+  return res
+    .cookie("accessToken", accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000,
+    })
+    .cookie("refreshToken", refreshToken, {
+      ...cookieOptions,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    })
+    .cookie("sessionId", sessionId.toString(), {
+      ...cookieOptions,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    })
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user,
+        "Email verified and logged in successfully",
+      ),
+    );
+};
+
+const resendVerification = async (req, res) => {
+  const result = await resendVerificationService(req.body);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        result,
+        "Verification code resent successfully",
+      ),
+    );
+};
+
 export {
   register,
   login,
+  verifyEmail,
+  resendVerification,
   refreshAccessToken,
   logout,
   getSessions,

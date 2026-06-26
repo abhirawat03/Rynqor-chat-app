@@ -28,6 +28,7 @@ import AuthLayout from "./layouts/AuthLayout.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Signup from "./pages/auth/Signup.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
+import VerifyEmail from "./pages/auth/VerifyEmail.jsx";
 
 const ProfilePage = lazy(() => import("./pages/profile/ProfilePage.jsx"));
 
@@ -187,6 +188,12 @@ const router = createBrowserRouter([
             path: "forgot-password",
 
             element: <ForgotPassword />,
+          },
+
+          {
+            path: "verify-email",
+
+            element: <VerifyEmail />,
           },
         ],
       },

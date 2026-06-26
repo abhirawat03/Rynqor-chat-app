@@ -86,10 +86,41 @@ const resetPasswordSchema = z.object({
     .strict(),
 });
 
+const verifyEmailSchema = z.object({
+  body: z
+    .object({
+      email: z
+        .string()
+        .trim()
+        .email("Invalid email format")
+        .transform((value) => value.toLowerCase()),
+      otp: z
+        .string()
+        .trim()
+        .length(6, "Verification code must be exactly 6 digits")
+        .regex(/^\d+$/, "Verification code must contain only numbers"),
+    })
+    .strict(),
+});
+
+const resendVerificationSchema = z.object({
+  body: z
+    .object({
+      email: z
+        .string()
+        .trim()
+        .email("Invalid email format")
+        .transform((value) => value.toLowerCase()),
+    })
+    .strict(),
+});
+
 export {
   registerSchema,
   loginSchema,
   logoutSessionSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
 };

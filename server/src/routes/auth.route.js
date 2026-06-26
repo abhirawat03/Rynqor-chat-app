@@ -2,6 +2,8 @@ import { Router } from "express";
 import {
   register,
   login,
+  verifyEmail,
+  resendVerification,
   getCurrentUser,
   refreshAccessToken,
   logout,
@@ -19,6 +21,8 @@ import {
   logoutSessionSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
 } from "../schemas/auth.schema.js";
 import { authLimiter } from "../middleware/rateLimiter.middleware.js";
 
@@ -26,6 +30,12 @@ const router = Router();
 
 router.route("/register").post(authLimiter, validate(registerSchema), register);
 router.route("/login").post(authLimiter, validate(loginSchema), login);
+router
+  .route("/verify-email")
+  .post(authLimiter, validate(verifyEmailSchema), verifyEmail);
+router
+  .route("/resend-verification")
+  .post(authLimiter, validate(resendVerificationSchema), resendVerification);
 router.route("/refresh-token").post(authLimiter, refreshAccessToken);
 router.route("/check-username").get(checkUsernameAvailability);
 router

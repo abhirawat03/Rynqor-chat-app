@@ -56,6 +56,18 @@ const userSchema = new Schema(
       type: Date,
       default: null,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationOtp: {
+      type: String,
+      default: null,
+    },
+    verificationOtpExpires: {
+      type: Date,
+      default: null,
+    },
     // isOnline:{
     //     type:Boolean,
     //     default:false,

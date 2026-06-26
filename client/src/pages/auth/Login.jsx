@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useLoginMutation } from "../../hooks/auth/useLoginMutation.js";
 
@@ -15,6 +15,14 @@ const Login = () => {
     login: "",
     password: "",
   });
+
+  // Auto-redirect if there is a pending unverified email in storage (Pattern B)
+  useEffect(() => {
+    const pendingEmail = localStorage.getItem("unverified_email");
+    if (pendingEmail) {
+      navigate(`/auth/verify-email?email=${encodeURIComponent(pendingEmail)}`);
+    }
+  }, [navigate]);
 
   const [touched, setTouched] = useState({
     login: false,
@@ -72,7 +80,14 @@ const Login = () => {
       },
 
       onError: (error) => {
-        setError(error.response?.data?.message || "Login failed");
+        const errorData = error.response?.data;
+        if (errorData?.code === "EMAIL_NOT_VERIFIED") {
+          const email = errorData.errors?.[0]?.email || formData.login;
+          localStorage.setItem("unverified_email", email);
+          navigate(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        setError(errorData?.message || "Login failed");
       },
     });
   };

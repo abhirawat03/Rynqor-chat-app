@@ -57,9 +57,21 @@ const resetPassword = async (email, otp, newPassword) => {
   return res.data.data;
 };
 
+const verifyEmail = async (email, otp) => {
+  const res = await Api.post("/auth/verify-email", { email, otp });
+  return res.data.data;
+};
+
+const resendVerification = async (email) => {
+  const res = await Api.post("/auth/resend-verification", { email });
+  return res.data.data;
+};
+
 export {
   signup,
   login,
+  verifyEmail,
+  resendVerification,
   getCurrentUser,
   refreshAccessToken,
   logout,
