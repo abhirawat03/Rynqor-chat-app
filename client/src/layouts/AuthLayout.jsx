@@ -69,8 +69,8 @@ const AuthLayout = () => {
       </div>
 
       {/* RIGHT SIDE */}
-      <div className="flex items-center justify-center flex-1 px-6 lg:px-16 2xl:px-24">
-        <div className="w-full max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl">
+      <div className="flex flex-col flex-1 overflow-y-auto h-full px-6 py-8 lg:px-16 2xl:px-24">
+        <div className="w-full max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl my-auto">
           {/* MOBILE BRAND */}
           <div className="mb-10 text-center lg:hidden">
             <h1 className="text-4xl font-bold text-foreground">Rynqor</h1>
