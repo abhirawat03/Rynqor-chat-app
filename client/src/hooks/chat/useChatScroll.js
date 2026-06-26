@@ -38,8 +38,6 @@ export const useChatScroll = ({
 
     if (!lastMessage) return;
 
-    const isInitialScroll = lastScrolledMessageIdRef.current === null;
-
     if (lastMessage._id === lastScrolledMessageIdRef.current) {
       return;
     }
@@ -57,7 +55,7 @@ export const useChatScroll = ({
         virtuosoRef.current?.scrollToIndex({
           index: lastIndex,
           align: "end",
-          behavior: isInitialScroll ? "auto" : "smooth",
+          behavior: "auto",
         });
       });
     }

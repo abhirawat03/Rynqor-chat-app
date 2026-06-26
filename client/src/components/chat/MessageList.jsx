@@ -39,7 +39,7 @@ const MessageList = ({
           // Scroll immediately to the end of our reserved index range to show the latest messages first
           chatMessages.length > 0 ? 9999 : undefined
         }
-        followOutput={(isBottom) => (isBottom ? "smooth" : false)}
+        followOutput={(isBottom) => (isBottom ? "auto" : false)}
         startReached={onTopReached}
         atBottomStateChange={onBottomStateChange}
         overscan={1200}
