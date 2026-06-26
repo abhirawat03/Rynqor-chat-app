@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
-
 import { useState } from "react";
-
+import { Eye, EyeOff } from "lucide-react";
 import { useLoginMutation } from "../../hooks/auth/useLoginMutation.js";
 
 const Login = () => {
@@ -10,6 +9,7 @@ const Login = () => {
   const loginMutation = useLoginMutation();
 
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     login: "",
@@ -132,9 +132,9 @@ const Login = () => {
       </div>
 
       {/* PASSWORD */}
-      <div className="relative ">
+      <div className="relative">
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           id="password"
           name="password"
           autoComplete="current-password"
@@ -143,7 +143,7 @@ const Login = () => {
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder=" "
-          className={`w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl bg-background text-foreground focus:ring-4 focus:ring-accent/10 disabled:opacity-60 ${
+          className={`w-full px-4 pt-6 pb-3 pr-12 text-sm transition-all duration-200 border outline-none peer rounded-2xl bg-background text-foreground focus:ring-4 focus:ring-accent/10 disabled:opacity-60 ${
             touched.password &&
             (formData.password.length < 8 || !formData.password.trim())
               ? "border-red-500 focus:border-red-500"
@@ -157,6 +157,14 @@ const Login = () => {
         >
           Password
         </label>
+
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          className="absolute -translate-y-1/2 right-4 top-1/2 text-muted hover:text-foreground transition-colors duration-200"
+        >
+          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
 
         {touched.password &&
           (!formData.password.trim() ? (
