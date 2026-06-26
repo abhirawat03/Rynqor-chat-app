@@ -9,8 +9,8 @@ import {
 } from "../utils/generateTokens.js";
 
 import { RefreshToken } from "../models/refreshToken.model.js";
-
 import { verifyRefreshToken } from "../utils/verifyToken.js";
+import { sendEmail, getOtpTemplate } from "./email.service.js";
 
 // ==============================
 // Helper
@@ -302,10 +302,15 @@ const forgotPasswordService = async (email) => {
   user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
   await user.save();
 
-  // In local development, print the OTP clearly in console
-  console.log(
-    `\n📧 [${normalizedEmail}] PASSWORD RESET OTP: ${otp} (Expires in 10 mins)\n`,
-  );
+  // Send production-grade email asynchronously (runs in the background)
+  sendEmail({
+    to: user.email,
+    subject: "Rynqor Chat — Password Reset Verification Code",
+    text: `Hi ${user.fullName || user.username}, your password reset verification code is: ${otp}. It expires in 10 minutes.`,
+    html: getOtpTemplate(otp, user.fullName || user.username),
+  }).catch((err) => {
+    console.error("❌ Background email transmission failed:", err.message);
+  });
 
   return null;
 };
