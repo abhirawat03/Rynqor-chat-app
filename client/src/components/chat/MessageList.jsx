@@ -13,9 +13,8 @@ const MessageList = ({
   onTopReached,
   onBottomStateChange,
   isFetchingNextPage,
-  isGroup
+  isGroup,
 }) => {
-
   // React-virtuoso prepending requires allocating a virtual coordinate space so items prepended
   // at the top do not shift the current scroll position. We reserve 10,000 virtual slots at the top.
   const firstItemIndex = Math.max(0, 10000 - chatMessages.length);
@@ -24,14 +23,12 @@ const MessageList = ({
     return chatMessages.find(
       (msg) =>
         String(msg.senderId?._id || msg.senderId) !== String(currentUserId) &&
-        msg.status !== "read"
+        msg.status !== "read",
     )?._id;
   }, [chatMessages, currentUserId]);
 
   return (
-    <div
-      className="flex-1 min-h-0 transition-colors duration-300 bg-background"
-    >
+    <div className="flex-1 min-h-0 transition-colors duration-300 bg-background">
       <Virtuoso
         key={conversationId}
         ref={virtuosoRef}
@@ -40,46 +37,26 @@ const MessageList = ({
         className="h-full scrollbar-hide"
         initialTopMostItemIndex={
           // Scroll immediately to the end of our reserved index range to show the latest messages first
-          chatMessages.length > 0
-            ? 9999
-            : undefined
+          chatMessages.length > 0 ? 9999 : undefined
         }
-        followOutput={(isBottom) => isBottom ? "smooth" : false}
-
-        startReached={
-          onTopReached
-        }
-        atBottomStateChange={
-          onBottomStateChange
-        }
+        followOutput={(isBottom) => (isBottom ? "smooth" : false)}
+        startReached={onTopReached}
+        atBottomStateChange={onBottomStateChange}
         overscan={1200}
-        itemContent={(
-          index,
-          msg
-        ) => {
+        itemContent={(index, msg) => {
           const relativeIndex = index - firstItemIndex;
-          const prevMessage =
-            chatMessages[
-              relativeIndex - 1
-            ];
+          const prevMessage = chatMessages[relativeIndex - 1];
 
           const showDateSeparator =
             !prevMessage ||
-            getDateLabel(
-              prevMessage.createdAt
-            ) !==
-            getDateLabel(
-              msg.createdAt
-            );
+            getDateLabel(prevMessage.createdAt) !== getDateLabel(msg.createdAt);
 
-          const nextMessage =
-            chatMessages[
-              relativeIndex + 1
-            ];
+          const nextMessage = chatMessages[relativeIndex + 1];
 
           const isNextMessageFromSameSender =
             nextMessage &&
-            String(nextMessage.senderId?._id || nextMessage.senderId) === String(msg.senderId?._id || msg.senderId);
+            String(nextMessage.senderId?._id || nextMessage.senderId) ===
+              String(msg.senderId?._id || msg.senderId);
 
           const isNextOnSameDay =
             nextMessage &&
@@ -89,7 +66,8 @@ const MessageList = ({
 
           const isPrevMessageFromSameSender =
             prevMessage &&
-            String(prevMessage.senderId?._id || prevMessage.senderId) === String(msg.senderId?._id || msg.senderId);
+            String(prevMessage.senderId?._id || prevMessage.senderId) ===
+              String(msg.senderId?._id || msg.senderId);
 
           const hideName = isPrevMessageFromSameSender && !showDateSeparator;
 
@@ -98,11 +76,7 @@ const MessageList = ({
           return (
             <>
               {showDateSeparator && (
-                <DateSeparator
-                  label={getDateLabel(
-                    msg.createdAt
-                  )}
-                />
+                <DateSeparator label={getDateLabel(msg.createdAt)} />
               )}
 
               {showNewMessageBadge && (
@@ -115,21 +89,11 @@ const MessageList = ({
                 </div>
               )}
 
-              <div
-                className="w-full max-w-5xl px-3 pb-3 mx-auto"
-              >
+              <div className="w-full max-w-5xl px-3 pb-3 mx-auto">
                 <Message
                   message={msg}
-                  isOwn={
-                    (
-                      msg.senderId?._id ||
-                      msg.senderId
-                    ) ===
-                    currentUserId
-                  }
-                  syncState={
-                    msg.syncState
-                  }
+                  isOwn={(msg.senderId?._id || msg.senderId) === currentUserId}
+                  syncState={msg.syncState}
                   isGroup={isGroup}
                   hideAvatar={hideAvatar}
                   hideName={hideName}

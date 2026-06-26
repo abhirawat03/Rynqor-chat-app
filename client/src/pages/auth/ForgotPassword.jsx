@@ -48,8 +48,7 @@ const ForgotPassword = () => {
       toast.success("OTP sent to your email");
     } catch (err) {
       setError(
-        err.response?.data?.message ||
-        "Failed to send OTP. Please try again."
+        err.response?.data?.message || "Failed to send OTP. Please try again.",
       );
       if (import.meta.env.MODE !== "production") {
         console.error("Forgot password request failed:", err);
@@ -90,7 +89,9 @@ const ForgotPassword = () => {
 
     const complexityRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
     if (!complexityRegex.test(newPassword)) {
-      setError("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character");
+      setError(
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+      );
       return;
     }
 
@@ -109,7 +110,7 @@ const ForgotPassword = () => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        "Failed to reset password. Please try again."
+          "Failed to reset password. Please try again.",
       );
       if (import.meta.env.MODE !== "production") {
         console.error("Reset password failed:", err);
@@ -119,10 +120,17 @@ const ForgotPassword = () => {
     }
   };
 
-  const emailInvalid = touched.email && (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
-  const otpInvalid = touched.otp && (otp.trim().length !== 6 || !/^\d+$/.test(otp.trim()));
-  const newPasswordInvalid = touched.newPassword && (newPassword.length < 8 || !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/.test(newPassword));
-  const confirmPasswordInvalid = touched.confirmPassword && (confirmPassword !== newPassword);
+  const emailInvalid =
+    touched.email &&
+    (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+  const otpInvalid =
+    touched.otp && (otp.trim().length !== 6 || !/^\d+$/.test(otp.trim()));
+  const newPasswordInvalid =
+    touched.newPassword &&
+    (newPassword.length < 8 ||
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/.test(newPassword));
+  const confirmPasswordInvalid =
+    touched.confirmPassword && confirmPassword !== newPassword;
 
   if (success) {
     return (
@@ -144,7 +152,9 @@ const ForgotPassword = () => {
           </svg>
         </div>
         <div className="space-y-1">
-          <h2 className="text-xl font-bold text-foreground">Password Reset Complete</h2>
+          <h2 className="text-xl font-bold text-foreground">
+            Password Reset Complete
+          </h2>
           <p className="text-sm text-muted">
             Your password has been successfully updated.
           </p>
@@ -211,7 +221,9 @@ const ForgotPassword = () => {
             </label>
             {emailInvalid && (
               <p className="mt-1 ml-1 text-xs text-red-500">
-                {!email.trim() ? "Email address is required" : "Invalid email format"}
+                {!email.trim()
+                  ? "Email address is required"
+                  : "Invalid email format"}
               </p>
             )}
           </div>
@@ -246,7 +258,8 @@ const ForgotPassword = () => {
               Verify OTP
             </h1>
             <p className="mt-2 text-sm text-muted">
-              Enter the 6-digit OTP sent to <span className="font-semibold text-foreground">{email}</span>
+              Enter the 6-digit OTP sent to{" "}
+              <span className="font-semibold text-foreground">{email}</span>
             </p>
           </div>
 
@@ -306,7 +319,8 @@ const ForgotPassword = () => {
             </label>
             {newPasswordInvalid && (
               <p className="mt-1 ml-1 text-xs text-red-500">
-                Password must be at least 8 characters and contain uppercase, lowercase, number, and special character
+                Password must be at least 8 characters and contain uppercase,
+                lowercase, number, and special character
               </p>
             )}
           </div>
@@ -344,7 +358,12 @@ const ForgotPassword = () => {
           {/* SUBMIT BUTTON */}
           <button
             type="submit"
-            disabled={isPending || !otp.trim() || !newPassword || newPassword !== confirmPassword}
+            disabled={
+              isPending ||
+              !otp.trim() ||
+              !newPassword ||
+              newPassword !== confirmPassword
+            }
             className="w-full rounded-2xl cursor-pointer bg-accent px-5 py-3 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isPending ? "Resetting Password..." : "Reset Password"}

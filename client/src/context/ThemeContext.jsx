@@ -1,89 +1,41 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-const ThemeContext =
-  createContext();
+const ThemeContext = createContext();
 
-export const ThemeProvider = ({
-  children,
-}) => {
-
+export const ThemeProvider = ({ children }) => {
   // GET INITIAL MODE
   const getInitialMode = () => {
-
-    return (
-      localStorage.getItem(
-        "themeMode"
-      ) || "system"
-    );
-
+    return localStorage.getItem("themeMode") || "system";
   };
 
-  const [themeMode, setThemeMode] =
-    useState(getInitialMode);
+  const [themeMode, setThemeMode] = useState(getInitialMode);
 
   // APPLY THEME
-useEffect(() => {
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-  const mediaQuery =
-    window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    );
+    const applyTheme = () => {
+      const isDark =
+        themeMode === "dark" || (themeMode === "system" && mediaQuery.matches);
 
-  const applyTheme = () => {
+      document.documentElement.classList.toggle("dark", isDark);
 
-    const isDark =
-      themeMode === "dark" ||
-      (
-        themeMode === "system" &&
-        mediaQuery.matches
-      );
-
-    document.documentElement.classList.toggle(
-      "dark",
-      isDark
-    );
-
-    document.documentElement.style.colorScheme =
-      isDark
-        ? "dark"
-        : "light";
-
-  };
-
-  applyTheme();
-
-  localStorage.setItem(
-    "themeMode",
-    themeMode
-  );
-
-  if (
-    themeMode === "system"
-  ) {
-
-    mediaQuery.addEventListener(
-      "change",
-      applyTheme
-    );
-
-    return () => {
-
-      mediaQuery.removeEventListener(
-        "change",
-        applyTheme
-      );
-
+      document.documentElement.style.colorScheme = isDark ? "dark" : "light";
     };
 
-  }
+    applyTheme();
 
-}, [themeMode]);
+    localStorage.setItem("themeMode", themeMode);
+
+    if (themeMode === "system") {
+      mediaQuery.addEventListener("change", applyTheme);
+
+      return () => {
+        mediaQuery.removeEventListener("change", applyTheme);
+      };
+    }
+  }, [themeMode]);
 
   return (
     <ThemeContext.Provider
@@ -97,5 +49,4 @@ useEffect(() => {
   );
 };
 
-export const useTheme = () =>
-  useContext(ThemeContext);
+export const useTheme = () => useContext(ThemeContext);

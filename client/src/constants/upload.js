@@ -2,13 +2,7 @@
  * File upload configurations and constraints.
  */
 
-export const BLOCKED_EXTENSIONS = [
-  "exe",
-  "bat",
-  "apk",
-  "sh",
-  "msi",
-];
+export const BLOCKED_EXTENSIONS = ["exe", "bat", "apk", "sh", "msi"];
 
 export const ALLOWED_MIME_TYPES = [
   // IMAGES

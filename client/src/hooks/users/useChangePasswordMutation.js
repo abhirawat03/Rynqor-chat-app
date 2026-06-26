@@ -2,37 +2,22 @@ import { useMutation } from "@tanstack/react-query";
 
 import toast from "react-hot-toast";
 
-import {changePassword} from "../../services/userService.js";
+import { changePassword } from "../../services/userService.js";
 
-const useChangePasswordMutation =
-    () => {
+const useChangePasswordMutation = () => {
+  return useMutation({
+    mutationFn: changePassword,
 
-        return useMutation({
+    onSuccess: (data) => {
+      toast.success(data?.message || "Password changed successfully");
+    },
 
-            mutationFn:
-                changePassword,
+    onError: (error) => {
+      toast.error(
+        error?.response?.data?.message || "Failed to change password",
+      );
+    },
+  });
+};
 
-            onSuccess: (data) => {
-
-                toast.success(
-                    data?.message ||
-                    "Password changed successfully"
-                );
-
-            },
-
-            onError: (error) => {
-
-                toast.error(
-                    error?.response?.data?.message ||
-                    "Failed to change password"
-                );
-
-            },
-
-        });
-
-    };
-
-export default
-    useChangePasswordMutation;
+export default useChangePasswordMutation;

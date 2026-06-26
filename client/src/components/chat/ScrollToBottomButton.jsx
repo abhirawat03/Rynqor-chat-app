@@ -1,10 +1,6 @@
 import { FiArrowDown } from "react-icons/fi";
 
-const ScrollToBottomButton = ({
-  isAtBottom,
-  unreadCount,
-  onClick,
-}) => {
+const ScrollToBottomButton = ({ isAtBottom, unreadCount, onClick }) => {
   if (isAtBottom) {
     return null;
   }

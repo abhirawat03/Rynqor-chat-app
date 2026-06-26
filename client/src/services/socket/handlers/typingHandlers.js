@@ -1,9 +1,7 @@
-export const createTypingHandlers = ({
-  setTypingUsers,
-  typingTimeouts,
-}) => {
+// Handles incoming typing status changes with a fallback timeout to auto-clear typing states.
+export const createTypingHandlers = ({ setTypingUsers, typingTimeouts }) => {
   const onTyping = ({ userId, conversationId }) => {
-    // Add user to typing set immutably
+    // Track typing status in a Set per conversation
     setTypingUsers((prev) => {
       const next = { ...prev };
       const currentSet = next[conversationId] || new Set();
@@ -17,7 +15,7 @@ export const createTypingHandlers = ({
       clearTimeout(typingTimeouts.current[userId]);
     }
 
-    // Set a debounce timeout to automatically stop typing indicator after 3 seconds
+    // Fallback: clear status in 3s if stop_typing event is lost
     typingTimeouts.current[userId] = setTimeout(() => {
       setTypingUsers((prev) => {
         const next = { ...prev };
@@ -33,7 +31,6 @@ export const createTypingHandlers = ({
   };
 
   const onStopTyping = ({ userId, conversationId }) => {
-    // Remove user from typing set immutably
     setTypingUsers((prev) => {
       const next = { ...prev };
       if (next[conversationId]) {

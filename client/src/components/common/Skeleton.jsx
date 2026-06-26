@@ -46,18 +46,24 @@ export const MessageSkeleton = ({ isOwn = false }) => {
     <div className={`mb-3 flex ${isOwn ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-xs px-3 py-2.5 rounded-2xl shadow-sm border border-transparent ${
-          isOwn 
-            ? "bg-accent/8 dark:bg-accent/4" 
+          isOwn
+            ? "bg-accent/8 dark:bg-accent/4"
             : "border-border bg-surface/50 dark:bg-surface/30"
         }`}
         style={{ width: "240px" }}
       >
         {/* Text lines */}
-        <Skeleton className={`h-3.5 w-full rounded-md ${isOwn ? "bg-accent/15 dark:bg-accent/8" : ""}`} />
-        <Skeleton className={`mt-2 h-3.5 w-2/3 rounded-md ${isOwn ? "bg-accent/15 dark:bg-accent/8" : ""}`} />
+        <Skeleton
+          className={`h-3.5 w-full rounded-md ${isOwn ? "bg-accent/15 dark:bg-accent/8" : ""}`}
+        />
+        <Skeleton
+          className={`mt-2 h-3.5 w-2/3 rounded-md ${isOwn ? "bg-accent/15 dark:bg-accent/8" : ""}`}
+        />
         {/* Footer time */}
         <div className="mt-2 flex justify-end">
-          <Skeleton className={`h-2.5 w-8 rounded-md ${isOwn ? "bg-accent/10 dark:bg-accent/6" : ""}`} />
+          <Skeleton
+            className={`h-2.5 w-8 rounded-md ${isOwn ? "bg-accent/10 dark:bg-accent/6" : ""}`}
+          />
         </div>
       </div>
     </div>
@@ -112,7 +118,7 @@ export const SearchSkeleton = () => {
           <Skeleton className="h-8 w-36 rounded-md" />
           <Skeleton className="mt-2.5 h-3.5 w-60 rounded-md" />
         </div>
-        
+
         {/* Search Container Skeleton */}
         <div className="flex flex-col flex-1 overflow-hidden border rounded-3xl border-border bg-background">
           <div className="p-3 border-b shrink-0 border-border">
@@ -120,7 +126,10 @@ export const SearchSkeleton = () => {
           </div>
           <div className="flex-1 p-3 space-y-2.5">
             {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 rounded-2xl bg-surface/50">
+              <div
+                key={index}
+                className="flex items-center gap-3 p-3 rounded-2xl bg-surface/50"
+              >
                 <Skeleton className="h-11 w-11 rounded-full shrink-0 animate-pulse" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-32 rounded-md animate-pulse" />
@@ -145,14 +154,14 @@ export const SettingsSkeleton = () => {
           <Skeleton className="h-8 w-44 rounded-md" />
           <Skeleton className="mt-2.5 h-3.5 w-72 rounded-md" />
         </div>
-        
+
         {/* Form sections Skeletons */}
         <div className="mt-8 space-y-6">
           <div className="flex flex-col items-center gap-4">
             <Skeleton className="h-24 w-24 rounded-full animate-pulse" />
             <Skeleton className="h-8 w-28 rounded-xl animate-pulse" />
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="space-y-2">
@@ -166,5 +175,3 @@ export const SettingsSkeleton = () => {
     </div>
   );
 };
-
-

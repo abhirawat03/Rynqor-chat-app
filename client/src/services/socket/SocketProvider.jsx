@@ -1,452 +1,148 @@
-import {
-    useEffect,
-    useRef,
-    useState,
-    useCallback,
-    useMemo,
-} from "react";
-
-import {
-    useQueryClient,
-} from "@tanstack/react-query";
-
+// Manages the Socket.io lifecycle, event binding, and connection status alerts in React context.
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-import {
-    createSocket,
-    connectSocket,
-    disconnectSocket,
-} from "./socket";
+import { createSocket, connectSocket, disconnectSocket } from "./socket";
+import { SocketProviderContext } from "./SocketContext.jsx";
+import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
+import { createMessageHandlers } from "./handlers/messageHandlers";
+import { createTypingHandlers } from "./handlers/typingHandlers";
+import { createPresenceHandlers } from "./handlers/presenceHandlers";
 
-import {
-    SocketProviderContext,
-} from "./SocketContext.jsx";
+const SocketProvider = ({ children }) => {
+  const { data: user } = useCurrentUserQuery();
+  const currentUserId = user?._id;
 
-import {
-    useCurrentUserQuery,
-} from "../../hooks/auth/useCurrentUserQuery.js";
+  const queryClient = useQueryClient();
 
-import {
-    createMessageHandlers,
-} from "./handlers/messageHandlers";
+  const socketRef = useRef(null);
+  const typingTimeouts = useRef({});
+  const currentUserIdRef = useRef(null);
 
-import {
-    createTypingHandlers,
-} from "./handlers/typingHandlers";
+  const [typingUsers, setTypingUsers] = useState({});
+  const [presence, setPresence] = useState({});
+  const [isConnected, setIsConnected] = useState(true);
 
-import {
-    createPresenceHandlers,
-} from "./handlers/presenceHandlers";
+  // Transmit helpers (Client -> Server)
+  const emitTyping = useCallback((conversationId) => {
+    const socket = socketRef.current;
+    if (!socket?.connected) return;
+    socket.emit("typing", { conversationId });
+  }, []);
 
-const SocketProvider = ({
-    children,
-}) => {
+  const emitStopTyping = useCallback((conversationId) => {
+    const socket = socketRef.current;
+    if (!socket?.connected) return;
+    socket.emit("stop_typing", { conversationId });
+  }, []);
 
-    const {
-        data: user,
-    } = useCurrentUserQuery();
+  // Socket setup and subscription lifecycle
+  useEffect(() => {
+    if (!currentUserId) return;
 
-    const currentUserId =
-        user?._id;
-    
-    const queryClient =
-    useQueryClient();
+    currentUserIdRef.current = currentUserId;
 
-    const socketRef =
-        useRef(null);
+    const { onNewMessage, onMessageSent, onMessageFailed, onMessagesRead } =
+      createMessageHandlers({
+        queryClient,
+        currentUserIdRef,
+      });
 
-    const typingTimeouts =
-        useRef({});
+    const { onTyping, onStopTyping } = createTypingHandlers({
+      setTypingUsers,
+      typingTimeouts,
+    });
 
-    const currentUserIdRef =
-        useRef(null);
-
-    const [
-        typingUsers,
-        setTypingUsers,
-    ] = useState({});
-
-    const [
-        presence,
+    const { onOnlineUsers, onUserOnline, onUserOffline } =
+      createPresenceHandlers({
         setPresence,
-    ] = useState({});
+      });
 
-    const [
-        isConnected,
-        setIsConnected,
-    ] = useState(true);
+    const socket = createSocket();
+    socketRef.current = socket;
+    connectSocket();
 
-    // ---------------------------------------------------
-    // SOCKET HELPERS
-    // ---------------------------------------------------
+    const onConnect = () => {
+      setIsConnected(true);
+      toast.dismiss("socket-disconnected");
+      socket.emit("sync_state"); // Fetch current online users
+    };
 
-    const emitTyping =
-        useCallback(
-            (
-                conversationId
-            ) => {
+    const onDisconnect = () => {
+      setIsConnected(false);
+      toast.error("Disconnected from server", {
+        id: "socket-disconnected", // Prevent Toast notification spamming
+      });
+    };
 
-                const socket =
-                    socketRef.current;
+    const onConnectError = (error) => {
+      setIsConnected(false);
+      console.error("Socket error:", error.message);
+    };
 
-                if (
-                    !socket?.connected
-                ) {
-                    return;
-                }
+    // Auto-sync presence when tab becomes active again
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        socket.emit("sync_state");
+      }
+    };
 
-                socket.emit(
-                    "typing",
-                    {
-                        conversationId,
-                    }
-                );
-            },
-            []
-        );
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
-    const emitStopTyping =
-        useCallback(
-            (
-                conversationId
-            ) => {
-
-                const socket =
-                    socketRef.current;
-
-                if (
-                    !socket?.connected
-                ) {
-                    return;
-                }
-
-                socket.emit(
-                    "stop_typing",
-                    {
-                        conversationId,
-                    }
-                );
-            },
-            []
-        );
-
-    // ---------------------------------------------------
-    // SOCKET SETUP
-    // ---------------------------------------------------
-useEffect(() => {
-    console.log(
-        "SOCKET PROVIDER MOUNTED"
-    );
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("connect_error", onConnectError);
+    socket.on("new_message", onNewMessage);
+    socket.on("message_sent", onMessageSent);
+    socket.on("message_failed", onMessageFailed);
+    socket.on("messages_read", onMessagesRead);
+    socket.on("typing", onTyping);
+    socket.on("stop_typing", onStopTyping);
+    socket.on("online_users", onOnlineUsers);
+    socket.on("user_online", onUserOnline);
+    socket.on("user_offline", onUserOffline);
 
     return () => {
-        console.log(
-            "SOCKET PROVIDER UNMOUNTED"
-        );
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+
+      // Clean up typing fallback timers
+      Object.values(typingTimeouts.current).forEach(clearTimeout);
+      typingTimeouts.current = {};
+
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.off("connect_error", onConnectError);
+      socket.off("new_message", onNewMessage);
+      socket.off("message_sent", onMessageSent);
+      socket.off("message_failed", onMessageFailed);
+      socket.off("messages_read", onMessagesRead);
+      socket.off("typing", onTyping);
+      socket.off("stop_typing", onStopTyping);
+      socket.off("online_users", onOnlineUsers);
+      socket.off("user_online", onUserOnline);
+      socket.off("user_offline", onUserOffline);
+
+      disconnectSocket();
     };
-}, []);
+  }, [currentUserId, queryClient]);
 
-    useEffect(() => {
+  // Context value exposed to hooks and subcomponents
+  const value = useMemo(
+    () => ({
+      getSocket: () => socketRef.current,
+      isConnected,
+      typingUsers,
+      presence,
+      emitTyping,
+      emitStopTyping,
+    }),
+    [isConnected, typingUsers, presence, emitTyping, emitStopTyping],
+  );
 
-        if (
-            !currentUserId
-        ) {
-            return;
-        }
-
-        currentUserIdRef.current =
-            currentUserId;
-
-        const {
-            onNewMessage,
-            onMessageSent,
-            onMessageFailed,
-            onMessagesRead,
-        } =
-            createMessageHandlers({
-                queryClient,
-                currentUserIdRef,
-            });
-
-        const {
-            onTyping,
-            onStopTyping,
-        } =
-            createTypingHandlers({
-                setTypingUsers,
-                typingTimeouts,
-            });
-
-        const {
-            onOnlineUsers,
-            onUserOnline,
-            onUserOffline,
-        } =
-            createPresenceHandlers({
-                setPresence,
-            });
-
-        const socket =
-            createSocket();
-
-        socketRef.current =
-            socket;
-
-        connectSocket();
-
-        const onConnect =
-            () => {
-                setIsConnected(true);
-
-                toast.dismiss(
-                    "socket-disconnected"
-                );
-
-                if (
-                    import.meta.env
-                        .MODE !==
-                    "production"
-                ) {
-
-                    console.log(
-                        "✅ connected",
-                        socket.id
-                    );
-                }
-
-                socket.emit(
-                    "sync_state"
-                );
-            };
-
-        const onDisconnect =
-            () => {
-                setIsConnected(false);
-
-                toast.error(
-                    "Disconnected from server",
-                    {
-                        id: "socket-disconnected",
-                    }
-                );
-
-                if (
-                    import.meta.env
-                        .MODE !==
-                    "production"
-                ) {
-
-                    console.log(
-                        "❌ disconnected"
-                    );
-                }
-            };
-
-        const onConnectError =
-            (
-                error
-            ) => {
-                setIsConnected(false);
-
-                console.error(
-                    "Socket error:",
-                    error.message
-                );
-            };
-
-        const onVisibilityChange =
-            () => {
-
-                if (
-                    document.visibilityState ===
-                    "visible"
-                ) {
-
-                    socket.emit(
-                        "sync_state"
-                    );
-                }
-            };
-
-        document.addEventListener(
-            "visibilitychange",
-            onVisibilityChange
-        );
-
-        socket.on(
-            "connect",
-            onConnect
-        );
-
-        socket.on(
-            "disconnect",
-            onDisconnect
-        );
-
-        socket.on(
-            "connect_error",
-            onConnectError
-        );
-
-        socket.on(
-            "new_message",
-            onNewMessage
-        );
-
-        socket.on(
-            "message_sent",
-            onMessageSent
-        );
-
-        socket.on(
-            "message_failed",
-            onMessageFailed
-        );
-
-        socket.on(
-            "messages_read",
-            onMessagesRead
-        );
-
-        socket.on(
-            "typing",
-            onTyping
-        );
-
-        socket.on(
-            "stop_typing",
-            onStopTyping
-        );
-
-        socket.on(
-            "online_users",
-            onOnlineUsers
-        );
-
-        socket.on(
-            "user_online",
-            onUserOnline
-        );
-
-        socket.on(
-            "user_offline",
-            onUserOffline
-        );
-
-        return () => {
-
-            document.removeEventListener(
-                "visibilitychange",
-                onVisibilityChange
-            );
-
-            Object.values(
-                typingTimeouts.current
-            ).forEach(
-                clearTimeout
-            );
-
-            typingTimeouts.current =
-                {};
-
-            socket.off(
-                "connect",
-                onConnect
-            );
-
-            socket.off(
-                "disconnect",
-                onDisconnect
-            );
-
-            socket.off(
-                "connect_error",
-                onConnectError
-            );
-
-            socket.off(
-                "new_message",
-                onNewMessage
-            );
-
-            socket.off(
-                "message_sent",
-                onMessageSent
-            );
-
-            socket.off(
-                "message_failed",
-                onMessageFailed
-            );
-
-            socket.off(
-                "messages_read",
-                onMessagesRead
-            );
-
-            socket.off(
-                "typing",
-                onTyping
-            );
-
-            socket.off(
-                "stop_typing",
-                onStopTyping
-            );
-
-            socket.off(
-                "online_users",
-                onOnlineUsers
-            );
-
-            socket.off(
-                "user_online",
-                onUserOnline
-            );
-
-            socket.off(
-                "user_offline",
-                onUserOffline
-            );
-
-            disconnectSocket();
-        };
-
-    }, [
-        currentUserId,
-        queryClient,
-    ]);
-    
-    const value =
-        useMemo(
-            () => ({
-                getSocket:
-                    () =>
-                        socketRef.current,
-
-                isConnected,
-                typingUsers,
-                presence,
-
-                emitTyping,
-                emitStopTyping,
-            }),
-            [
-                isConnected,
-                typingUsers,
-                presence,
-
-                emitTyping,
-                emitStopTyping,
-            ]
-        );
-
-    return (
-        <SocketProviderContext
-            value={value}
-        >
-            {children}
-        </SocketProviderContext>
-    );
+  return (
+    <SocketProviderContext value={value}>{children}</SocketProviderContext>
+  );
 };
 
 export default SocketProvider;

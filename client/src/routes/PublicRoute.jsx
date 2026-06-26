@@ -1,40 +1,19 @@
-import {
-  Navigate,
-  Outlet,
-} from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-import {
-  useCurrentUserQuery,
-} from "../hooks/auth/useCurrentUserQuery.js";
+import { useCurrentUserQuery } from "../hooks/auth/useCurrentUserQuery.js";
 
+const PublicRoute = () => {
+  const { data: currentUser, isLoading } = useCurrentUserQuery();
 
-const PublicRoute =
-() => {
+  if (isLoading) {
+    return null;
+  }
 
-    const {
-      data: currentUser,
-      isLoading,
-    } = useCurrentUserQuery();
+  if (currentUser) {
+    return <Navigate to="/" replace />;
+  }
 
-    if (isLoading) {
-
-      return null;
-
-    }
-
-    if (currentUser) {
-
-      return (
-        <Navigate
-          to="/"
-          replace
-        />
-      );
-
-    }
-
-    return <Outlet />;
-
-  };
+  return <Outlet />;
+};
 
 export default PublicRoute;

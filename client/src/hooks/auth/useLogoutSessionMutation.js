@@ -5,18 +5,14 @@ const useLogoutSessionMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn:
-        logoutSession,
+    mutationFn: logoutSession,
 
     onSuccess: () => {
-
-        queryClient.invalidateQueries({
-            queryKey:
-                ["sessions"],
-        });
-
+      queryClient.invalidateQueries({
+        queryKey: ["sessions"],
+      });
     },
-});
+  });
 };
 
 export default useLogoutSessionMutation;

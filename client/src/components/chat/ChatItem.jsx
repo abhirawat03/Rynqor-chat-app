@@ -1,7 +1,8 @@
 import { memo } from "react";
 import { getRelativeTimeShort } from "../../utils/date.js";
 
-const ChatItem = memo(({
+const ChatItem = memo(
+  ({
     name,
     lastMessage,
     time,
@@ -11,100 +12,60 @@ const ChatItem = memo(({
     isActive,
     isTyping,
     isOnline,
-}) => {
-
+  }) => {
     // TIME
     const formattedTime = getRelativeTimeShort(time);
 
     // USER
-    const isMe =
-  String(senderId?._id || senderId) ===
-  String(currentUserId);
+    const isMe = String(senderId?._id || senderId) === String(currentUserId);
 
     // MEDIA LABELS
     const mediaLabels = {
-        image: "🖼 Photo",
-        video: "🎥 Video",
-        audio: "🎵 Audio",
-        file: "📄 Document",
+      image: "🖼 Photo",
+      video: "🎥 Video",
+      audio: "🎵 Audio",
+      file: "📄 Document",
     };
 
     // PREVIEW TEXT
     const getPreviewText = () => {
+      if (isTyping) {
+        return "Typing...";
+      }
 
-        if (isTyping) {
-            return "Typing...";
-        }
+      if (!lastMessage) {
+        return "No messages yet";
+      }
 
-        if (!lastMessage) {
-            return "No messages yet";
-        }
+      const prefix = isMe ? "You: " : "";
 
-        const prefix =
-            isMe ? "You: " : "";
+      const mediaType = lastMessage?.media?.[0]?.type;
 
-        const mediaType =
-            lastMessage?.media?.[0]?.type;
+      const mediaLabel = mediaLabels[mediaType] || "Attachment";
 
-        const mediaLabel =
-            mediaLabels[mediaType] ||
-            "Attachment";
+      // MEDIA
+      if (lastMessage.messageType === "media") {
+        return prefix + mediaLabel;
+      }
 
-        // MEDIA
-        if (
-            lastMessage.messageType ===
-            "media"
-        ) {
+      // MIXED
+      if (lastMessage.messageType === "mixed") {
+        const trimmedText = lastMessage.text?.trim()?.slice(0, 26);
 
-            return (
-                prefix + mediaLabel
-            );
+        const hasLongText = lastMessage.text?.length > 26;
 
-        }
-
-        // MIXED
-        if (
-            lastMessage.messageType ===
-            "mixed"
-        ) {
-
-            const trimmedText =
-                lastMessage.text
-                    ?.trim()
-                    ?.slice(0, 26);
-
-            const hasLongText =
-                lastMessage.text?.length >
-                26;
-
-            return (
-                prefix +
-                mediaLabel +
-                " • " +
-                trimmedText +
-                (
-                    hasLongText
-                        ? "..."
-                        : ""
-                )
-            );
-
-        }
-
-        // TEXT
         return (
-            prefix +
-            (
-                lastMessage.text ||
-                "Message"
-            )
+          prefix + mediaLabel + " • " + trimmedText + (hasLongText ? "..." : "")
         );
+      }
 
+      // TEXT
+      return prefix + (lastMessage.text || "Message");
     };
 
     return (
-        <div
-            className={`
+      <div
+        className={`
         group
         
         flex
@@ -123,32 +84,31 @@ const ChatItem = memo(({
         duration-200
         active:scale-[0.98]
 
-        ${isActive
-                    ? `
+        ${
+          isActive
+            ? `
               border-border
               bg-hover
             `
-                    : `
+            : `
               border-transparent
 
               bg-surface
 
               hover:bg-hover
             `
-                }
+        }
       `}
-        >
-
-            {/* AVATAR */}
-            <div
-                className="
+      >
+        {/* AVATAR */}
+        <div
+          className="
           relative
           shrink-0
         "
-            >
-
-                <div
-                    className="
+        >
+          <div
+            className="
             flex
             h-14
             w-14
@@ -165,16 +125,14 @@ const ChatItem = memo(({
 
             text-foreground
           "
-                >
-
-                    {avatar ? (
-
-                        <img
-                            src={avatar?.url}
-                            alt={name}
-                            loading="lazy"
-                            decoding="async"
-                            className="
+          >
+            {avatar ? (
+              <img
+                src={avatar?.url}
+                alt={name}
+                loading="lazy"
+                decoding="async"
+                className="
                 h-full
                 w-full
                 border-2
@@ -182,25 +140,16 @@ const ChatItem = memo(({
                 rounded-full
                 object-cover
               "
-                        />
+              />
+            ) : (
+              <span>{name?.charAt(0)?.toUpperCase() || "?"}</span>
+            )}
+          </div>
 
-                    ) : (
-
-                        <span>
-                            {name
-                                ?.charAt(0)
-                                ?.toUpperCase() || "?"}
-                        </span>
-
-                    )}
-
-                </div>
-
-                {/* ONLINE */}
-                {isOnline && (
-
-                    <div
-                        className="
+          {/* ONLINE */}
+          {isOnline && (
+            <div
+              className="
               absolute
               bottom-0
               right-0
@@ -215,67 +164,58 @@ const ChatItem = memo(({
 
               bg-green-500
             "
-                    />
+            />
+          )}
+        </div>
 
-                )}
-
-            </div>
-
-            {/* CONTENT */}
-            <div
-                className="
+        {/* CONTENT */}
+        <div
+          className="
           min-w-0
           flex-1
         "
-            >
-
-                <div
-                    className="
+        >
+          <div
+            className="
             flex
             items-center
             justify-between
             gap-2
           "
-                >
-
-                    {/* NAME */}
-                    <p
-                        className="
+          >
+            {/* NAME */}
+            <p
+              className="
               truncate
               text-sm
               font-medium
 
               text-foreground
             "
-                    >
-                        {name}
-                    </p>
+            >
+              {name}
+            </p>
+          </div>
 
-                </div>
-
-                {/* PREVIEW */}
-                <p
-                    className={`
+          {/* PREVIEW */}
+          <p
+            className={`
             mt-0.5
 
             truncate
 
             text-xs
 
-            ${isTyping
-                            ? "text-emerald-500"
-                            : "text-muted"
-                        }
+            ${isTyping ? "text-emerald-500" : "text-muted"}
           `}
-                >
-                    {getPreviewText()}
-                    {time && ` • ${formattedTime}`}
-                </p>
-
-            </div>
-
+          >
+            {getPreviewText()}
+            {time && ` • ${formattedTime}`}
+          </p>
         </div>
+      </div>
     );
-});
+  },
+);
 
 export default ChatItem;

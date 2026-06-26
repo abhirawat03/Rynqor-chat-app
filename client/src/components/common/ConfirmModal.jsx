@@ -16,7 +16,7 @@ const ConfirmModal = ({
   const isDanger = type === "danger";
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in"
       onClick={onClose}
     >
@@ -38,7 +38,9 @@ const ConfirmModal = ({
 
         {/* BODY */}
         <div className="p-6">
-          <p className="text-sm text-muted-foreground leading-relaxed">{message}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {message}
+          </p>
         </div>
 
         {/* FOOTER */}
@@ -54,8 +56,8 @@ const ConfirmModal = ({
             onClick={onConfirm}
             disabled={isLoading}
             className={`px-4 py-2 rounded-xl text-xs font-semibold text-white transition-colors duration-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-              isDanger 
-                ? "bg-red-500 hover:bg-red-600" 
+              isDanger
+                ? "bg-red-500 hover:bg-red-600"
                 : "bg-accent hover:opacity-90"
             }`}
           >

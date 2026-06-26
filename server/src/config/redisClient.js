@@ -5,7 +5,9 @@ let redisClient = null;
 
 export const initRedis = async () => {
   if (!REDIS_URL) {
-    console.warn("ℹ️ REDIS_URL is not set in environment. Skipping Redis initialization.");
+    console.warn(
+      "ℹ️ REDIS_URL is not set in environment. Skipping Redis initialization.",
+    );
     return null;
   }
 

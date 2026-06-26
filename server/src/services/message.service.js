@@ -3,90 +3,96 @@ import { Message } from "../models/message.model.js";
 import { Conversation } from "../models/conversation.model.js";
 import { getConversationByIdService } from "./conversation.service.js";
 
+// Orchestrates message creation and conversation updates within an atomic MongoDB transaction
+// to guarantee consistency (preventing orphaned messages or outdated conversation references).
 const sendMessageService = async (userId, payload) => {
-    const { conversationId, text = "", media = [] } = payload;
-    await getConversationByIdService(userId, conversationId);
-    let messageType = "text";
+  const { conversationId, text = "", media = [] } = payload;
+  await getConversationByIdService(userId, conversationId);
+  let messageType = "text";
 
-    if (media.length > 0 && text.trim()) {
-        messageType = "mixed";
-    }
-    else if (media.length > 0) {
-        messageType = "media";
-    }
+  if (media.length > 0 && text.trim()) {
+    messageType = "mixed";
+  } else if (media.length > 0) {
+    messageType = "media";
+  }
 
-    const session = await mongoose.startSession();
-    let message;
+  // Create a database session to execute writes atomically
+  const session = await mongoose.startSession();
+  let message;
 
-    try {
-        await session.withTransaction(async () => {
-            const [newMessage] = await Message.create(
-                [
-                    {
-                        _id: payload._id,
-                        conversationId,
-                        senderId: userId,
-                        text: text.trim() || "",
-                        media,
-                        messageType,
-                    },
-                ],
-                { session }
-            );
+  try {
+    // withTransaction automatically handles retry logic on transient errors and rolls back on failure
+    await session.withTransaction(async () => {
+      const [newMessage] = await Message.create(
+        [
+          {
+            _id: payload._id,
+            conversationId,
+            senderId: userId,
+            text: text.trim() || "",
+            media,
+            messageType,
+          },
+        ],
+        { session },
+      );
 
-            message = newMessage;
+      message = newMessage;
 
-            await Conversation.findByIdAndUpdate(
-                conversationId,
-                { lastMessage: message._id },
-                { session }
-            );
-        });
+      // Maintain referential integrity by linking the last message to the conversation
+      await Conversation.findByIdAndUpdate(
+        conversationId,
+        { lastMessage: message._id },
+        { session },
+      );
+    });
 
-        return message;
+    return message;
+  } catch (error) {
+    console.error("❌ Send message transaction failed, rolling back:", error);
+    throw error;
+  } finally {
+    // Release resources back to the connection pool
+    session.endSession();
+  }
+};
 
-    } catch (error) {
-        console.error("❌ Send message transaction failed, rolling back:", error);
-        throw error;
-    } finally {
-        session.endSession();
-    }
-}
-
+// Uses cursor-based pagination (based on ObjectId chronology) to avoid skip/limit offset gaps
+// and duplicate message items if new messages arrive during user scrolling.
 const getMessageService = async (userId, conversationId, cursor) => {
-    await getConversationByIdService(userId, conversationId);
+  await getConversationByIdService(userId, conversationId);
 
-    const query = {
-        conversationId
-    }
+  const query = {
+    conversationId,
+  };
 
-    if (cursor) {
-        query._id = { $lt: cursor }; 
-    }
-    const PAGE_SIZE = 20;
-    const messages = await Message.find(query)  
-        .sort({ _id: -1 })
-        .limit(PAGE_SIZE + 1)
-        .populate("senderId", "username fullName avatar")
-        .lean();
+  if (cursor) {
+    // MongoDB ObjectIds embed a timestamp, allowing safe chronological filtering
+    query._id = { $lt: cursor };
+  }
+  const PAGE_SIZE = 20;
+  const messages = await Message.find(query)
+    .sort({ _id: -1 })
+    // Request PAGE_SIZE + 1 to determine if there is a next page without a separate count query
+    .limit(PAGE_SIZE + 1)
+    .populate("senderId", "username fullName avatar")
+    .lean();
 
-    const hasMore =
-    messages.length > PAGE_SIZE;
+  const hasMore = messages.length > PAGE_SIZE;
 
-    if (hasMore) {
-        messages.pop();
-    }
+  // Trim the extra element used for the "hasMore" boundary check
+  if (hasMore) {
+    messages.pop();
+  }
 
-    const nextCursor =
-        messages.length > 0
-            ? messages[messages.length - 1]._id
-            : null;
+  const nextCursor =
+    messages.length > 0 ? messages[messages.length - 1]._id : null;
 
-    return {
-        messages: messages.reverse(),
-        nextCursor,
-        hasMore,
-    };
-}
+  return {
+    messages: messages.reverse(), // Restore standard forward chronological order for UI display
+    nextCursor,
+    hasMore,
+  };
+};
 
-export { sendMessageService, getMessageService }
+export { sendMessageService, getMessageService };

@@ -1,26 +1,19 @@
-import { useQuery }
-from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
-import { getSessions }
-from "../../services/authService";
+import { getSessions } from "../../services/authService";
 
-const useSessionsQuery =
-() => {
+const useSessionsQuery = () => {
+  return useQuery({
+    queryKey: ["sessions"],
 
-    return useQuery({
-        queryKey: ["sessions"],
+    queryFn: getSessions,
 
-        queryFn: getSessions,
+    staleTime: 1000 * 60, // 1 min
 
-        staleTime:
-            1000 * 60, // 1 min
+    gcTime: 1000 * 60 * 5,
 
-        gcTime:
-            1000 * 60 * 5,
-
-        refetchOnWindowFocus:
-            true,
-    });
+    refetchOnWindowFocus: true,
+  });
 };
 
 export default useSessionsQuery;

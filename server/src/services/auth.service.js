@@ -4,377 +4,265 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 
 import {
-    generateAccessToken,
-    generateRefreshToken
+  generateAccessToken,
+  generateRefreshToken,
 } from "../utils/generateTokens.js";
 
 import { RefreshToken } from "../models/refreshToken.model.js";
 
-import { verifyRefreshToken }
-    from "../utils/verifyToken.js";
-
+import { verifyRefreshToken } from "../utils/verifyToken.js";
 
 // ==============================
 // Helper
 // ==============================
 
 const hashToken = (token) => {
-    return crypto
-        .createHash("sha256")
-        .update(token)
-        .digest("hex");
+  return crypto.createHash("sha256").update(token).digest("hex");
 };
-
 
 // ==============================
 // Register
 // ==============================
 
 const registerService = async (
-    {
-        username,
-        email,
-        password,
-        fullName
-    },
-    deviceInfo
+  { username, email, password, fullName },
+  deviceInfo,
 ) => {
+  email = email.toLowerCase().trim();
+  username = username.toLowerCase().trim();
 
-    email = email.toLowerCase().trim();
-    username = username.toLowerCase().trim();
+  const existing = await User.findOne({
+    $or: [{ email }, { username }],
+  });
 
-    const existing = await User.findOne({
-        $or: [
-            { email },
-            { username }
-        ]
-    });
+  if (existing) {
+    throw new ApiError(400, "User already exists");
+  }
 
-    if (existing) {
-        throw new ApiError(
-            400,
-            "User already exists"
-        );
-    }
+  const user = await User.create({
+    fullName,
+    username,
+    email,
+    password,
+  });
 
-    const user = await User.create({
-        fullName,
-        username,
-        email,
-        password
-    });
+  const accessToken = generateAccessToken(user._id);
 
-    const accessToken =
-        generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
 
-    const refreshToken =
-        generateRefreshToken(user._id);
+  const hashedRefreshToken = hashToken(refreshToken);
 
-    const hashedRefreshToken =
-        hashToken(refreshToken);
+  const session = await RefreshToken.create({
+    user: user._id,
 
-    const session =
-        await RefreshToken.create({
-            user: user._id,
+    token: hashedRefreshToken,
 
-            token: hashedRefreshToken,
+    device: deviceInfo.device,
 
-            device:
-                deviceInfo.device,
+    ipAddress: deviceInfo.ipAddress,
 
-            ipAddress:
-                deviceInfo.ipAddress,
+    location: deviceInfo.location,
 
-            location:
-                deviceInfo.location,
+    userAgent: deviceInfo.userAgent,
 
-            userAgent:
-                deviceInfo.userAgent,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  });
 
-            expiresAt: new Date(
-                Date.now() +
-                30 * 24 * 60 * 60 * 1000
-            )
-        });
+  const sanitizedUser = {
+    _id: user._id,
+    username: user.username,
+    fullName: user.fullName,
+    email: user.email,
+    avatar: user.avatar,
+    bio: user.bio,
+  };
 
-    const sanitizedUser = {
-        _id: user._id,
-        username: user.username,
-        fullName: user.fullName,
-        email: user.email,
-        avatar: user.avatar,
-        bio: user.bio
-    };
-
-    return {
-        user: sanitizedUser,
-        accessToken,
-        refreshToken,
-        sessionId: session._id
-    };
+  return {
+    user: sanitizedUser,
+    accessToken,
+    refreshToken,
+    sessionId: session._id,
+  };
 };
-
 
 // ==============================
 // Login
 // ==============================
 
-const loginService = async (
-    { login, password },
-    deviceInfo
-) => {
+const loginService = async ({ login, password }, deviceInfo) => {
+  login = login.toLowerCase().trim();
 
-    login = login.toLowerCase().trim();
+  const user = await User.findOne({
+    $or: [{ email: login }, { username: login }],
+  }).select("+password");
 
-    const user =
-        await User.findOne({
-            $or: [
-                { email: login },
-                { username: login }
-            ]
-        }).select("+password");
+  if (!user) {
+    throw new ApiError(400, "Invalid credentials");
+  }
 
-    if (!user) {
-        throw new ApiError(
-            400,
-            "Invalid credentials"
-        );
-    }
+  const isMatch = await user.isPasswordCorrect(password);
 
-    const isMatch =
-        await user.isPasswordCorrect(password);
+  if (!isMatch) {
+    throw new ApiError(400, "Invalid credentials");
+  }
 
-    if (!isMatch) {
-        throw new ApiError(
-            400,
-            "Invalid credentials"
-        );
-    }
+  const accessToken = generateAccessToken(user._id);
 
-    const accessToken =
-        generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
 
-    const refreshToken =
-        generateRefreshToken(user._id);
+  const hashedRefreshToken = hashToken(refreshToken);
 
-    const hashedRefreshToken =
-        hashToken(refreshToken);
+  const session = await RefreshToken.create({
+    user: user._id,
 
-    const session =
-        await RefreshToken.create({
-            user: user._id,
+    token: hashedRefreshToken,
 
-            token: hashedRefreshToken,
+    device: deviceInfo.device,
 
-            device:
-                deviceInfo.device,
+    ipAddress: deviceInfo.ipAddress,
 
-            ipAddress:
-                deviceInfo.ipAddress,
+    location: deviceInfo.location,
 
-            location:
-                deviceInfo.location,
+    userAgent: deviceInfo.userAgent,
 
-            userAgent:
-                deviceInfo.userAgent,
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  });
 
-            expiresAt: new Date(
-                Date.now() +
-                30 * 24 * 60 * 60 * 1000
-            )
-        });
+  const sanitizedUser = {
+    _id: user._id,
+    username: user.username,
+    fullName: user.fullName,
+    email: user.email,
+    avatar: user.avatar,
+    bio: user.bio,
+  };
 
-    const sanitizedUser = {
-        _id: user._id,
-        username: user.username,
-        fullName: user.fullName,
-        email: user.email,
-        avatar: user.avatar,
-        bio: user.bio
-    };
-
-    return {
-        user: sanitizedUser,
-        accessToken,
-        refreshToken,
-        sessionId: session._id
-    };
+  return {
+    user: sanitizedUser,
+    accessToken,
+    refreshToken,
+    sessionId: session._id,
+  };
 };
-
 
 // ==============================
 // Refresh Access Token
 // ==============================
 
-const refreshAccessTokenService =
-async (incomingRefreshToken) => {
+const refreshAccessTokenService = async (incomingRefreshToken) => {
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Refresh token missing", "REFRESH_TOKEN_MISSING");
+  }
 
-    if (!incomingRefreshToken) {
-    throw new ApiError(
-        401,
-        "Refresh token missing",
-        "REFRESH_TOKEN_MISSING"
-    );
-}
+  const decoded = verifyRefreshToken(incomingRefreshToken);
 
-    const decoded =
-        verifyRefreshToken(
-            incomingRefreshToken
-        );
+  if (!decoded?._id) {
+    throw new ApiError(401, "Invalid refresh token", "REFRESH_TOKEN_INVALID");
+  }
 
-    if (!decoded?._id) {
-    throw new ApiError(
-        401,
-        "Invalid refresh token",
-        "REFRESH_TOKEN_INVALID"
-    );
-}
+  const user = await User.findById(decoded._id);
 
-    const user =
-        await User.findById(decoded._id);
+  if (!user) {
+    throw new ApiError(401, "User not found", "REFRESH_TOKEN_INVALID");
+  }
 
-    if (!user) {
-    throw new ApiError(
-        401,
-        "User not found",
-        "REFRESH_TOKEN_INVALID"
-    );
-}
+  const hashedIncomingToken = hashToken(incomingRefreshToken);
 
-    const hashedIncomingToken =
-        hashToken(incomingRefreshToken);
+  const storedToken = await RefreshToken.findOne({
+    token: hashedIncomingToken,
+    user: decoded._id,
+  });
 
-    const storedToken =
-        await RefreshToken.findOne({
-            token: hashedIncomingToken,
-            user: decoded._id
-        });
+  if (!storedToken) {
+    throw new ApiError(401, "Refresh token revoked", "REFRESH_TOKEN_REVOKED");
+  }
 
-    if (!storedToken) {
-    throw new ApiError(
-        401,
-        "Refresh token revoked",
-        "REFRESH_TOKEN_REVOKED"
-    );
-}
-
-    if (storedToken.expiresAt < new Date()) {
-
+  if (storedToken.expiresAt < new Date()) {
     await storedToken.deleteOne();
 
-    throw new ApiError(
-        401,
-        "Refresh token expired",
-        "REFRESH_TOKEN_EXPIRED"
-    );
-}
+    throw new ApiError(401, "Refresh token expired", "REFRESH_TOKEN_EXPIRED");
+  }
 
-    const accessToken =
-        generateAccessToken(user._id);
+  const accessToken = generateAccessToken(user._id);
 
-    const refreshToken =
-        generateRefreshToken(user._id);
+  const refreshToken = generateRefreshToken(user._id);
 
-    const hashedRefreshToken =
-        hashToken(refreshToken);
+  const hashedRefreshToken = hashToken(refreshToken);
 
-    storedToken.token =
-        hashedRefreshToken;
+  storedToken.token = hashedRefreshToken;
 
-    storedToken.lastUsedAt =
-        new Date();
+  storedToken.lastUsedAt = new Date();
 
-    storedToken.expiresAt =
-        new Date(
-            Date.now() +
-            30 * 24 * 60 * 60 * 1000
-        );
+  storedToken.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    await storedToken.save();
+  await storedToken.save();
 
-    return {
-        accessToken,
-        refreshToken,
-        sessionId: storedToken._id
-    };
+  return {
+    accessToken,
+    refreshToken,
+    sessionId: storedToken._id,
+  };
 };
-
 
 // ==============================
 // Logout
 // ==============================
 
-const logoutService = async (
-    refreshToken
-) => {
-
-    if (!refreshToken) {
-        return true;
-    }
-
-    const hashedRefreshToken =
-        hashToken(refreshToken);
-
-    await RefreshToken.deleteOne({
-        token: hashedRefreshToken
-    });
-
+const logoutService = async (refreshToken) => {
+  if (!refreshToken) {
     return true;
-};
+  }
 
+  const hashedRefreshToken = hashToken(refreshToken);
+
+  await RefreshToken.deleteOne({
+    token: hashedRefreshToken,
+  });
+
+  return true;
+};
 
 // ==============================
 // Logout Specific Session
 // ==============================
 
-const logoutSessionService =
-async (
-    userId,
-    sessionId
-) => {
+const logoutSessionService = async (userId, sessionId) => {
+  await RefreshToken.deleteOne({
+    _id: sessionId,
+    user: userId,
+  });
 
-    await RefreshToken.deleteOne({
-        _id: sessionId,
-        user: userId
-    });
-
-    return true;
+  return true;
 };
-
 
 // ==============================
 // Get Sessions
 // ==============================
 
-const getSessionsService =
-async (userId) => {
-
-    return await RefreshToken.find({
-        user: userId
-    })
-    .select(`
+const getSessionsService = async (userId) => {
+  return await RefreshToken.find({
+    user: userId,
+  })
+    .select(
+      `
         _id
         device
         location
         lastUsedAt
         createdAt
-    `)
+    `,
+    )
     .sort({
-        createdAt: -1
+      createdAt: -1,
     });
 };
-
 
 // ==============================
 // Current User
 // ==============================
 
-const getCurrentUserService =
-async (userId) => {
-
-    const user =
-        await User.findById(userId)
-        .select(`
+const getCurrentUserService = async (userId) => {
+  const user = await User.findById(userId).select(`
             username
             fullName
             email
@@ -382,88 +270,87 @@ async (userId) => {
             bio
         `);
 
-    if (!user) {
-        throw new ApiError(
-            400,
-            "Invalid credentials"
-        );
-    }
+  if (!user) {
+    throw new ApiError(400, "Invalid credentials");
+  }
 
-    return user;
+  return user;
 };
 
 const checkUsernameAvailabilityService = async (username) => {
-    if (!username) {
-        throw new ApiError(400, "Username is required");
-    }
-    const normalizedUsername = username.toLowerCase().trim();
-    const existing = await User.findOne({ username: normalizedUsername });
-    return !existing;
+  if (!username) {
+    throw new ApiError(400, "Username is required");
+  }
+  const normalizedUsername = username.toLowerCase().trim();
+  const existing = await User.findOne({ username: normalizedUsername });
+  return !existing;
 };
 
 const forgotPasswordService = async (email) => {
-    const normalizedEmail = email.toLowerCase().trim();
-    const user = await User.findOne({ email: normalizedEmail });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ email: normalizedEmail });
 
-    if (!user) {
-        throw new ApiError(404, "User not found with this email");
-    }
+  if (!user) {
+    throw new ApiError(404, "User not found with this email");
+  }
 
-    // Generate 6-digit numeric OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Set OTP and expiry (10 minutes)
-    user.resetOtp = otp;
-    user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
-    await user.save();
+  // Generate 6-digit numeric OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // In local development, print the OTP clearly in console
-    console.log(`\n📧 [${normalizedEmail}] PASSWORD RESET OTP: ${otp} (Expires in 10 mins)\n`);
+  // Set OTP and expiry (10 minutes)
+  user.resetOtp = otp;
+  user.resetOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
+  await user.save();
 
-    return null;
+  // In local development, print the OTP clearly in console
+  console.log(
+    `\n📧 [${normalizedEmail}] PASSWORD RESET OTP: ${otp} (Expires in 10 mins)\n`,
+  );
+
+  return null;
 };
 
 const resetPasswordService = async (email, otp, newPassword) => {
-    const normalizedEmail = email.toLowerCase().trim();
-    const user = await User.findOne({ email: normalizedEmail });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ email: normalizedEmail });
 
-    if (!user) {
-        throw new ApiError(404, "User not found");
-    }
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
 
-    if (!user.resetOtp || user.resetOtp !== otp) {
-        throw new ApiError(400, "Invalid or missing OTP");
-    }
+  if (!user.resetOtp || user.resetOtp !== otp) {
+    throw new ApiError(400, "Invalid or missing OTP");
+  }
 
-    if (!user.resetOtpExpires || user.resetOtpExpires < new Date()) {
-        // Clear expired OTP
-        user.resetOtp = null;
-        user.resetOtpExpires = null;
-        await user.save();
-        throw new ApiError(400, "OTP has expired");
-    }
-
-    // Set new password (will trigger the pre-save bcrypt hash middleware)
-    user.password = newPassword;
+  if (!user.resetOtpExpires || user.resetOtpExpires < new Date()) {
+    // Clear expired OTP
     user.resetOtp = null;
     user.resetOtpExpires = null;
     await user.save();
+    throw new ApiError(400, "OTP has expired");
+  }
 
-    // Revoke all active sessions for this user on password reset (production-grade security!)
-    await RefreshToken.deleteMany({ user: user._id });
+  // Set new password (will trigger the pre-save bcrypt hash middleware)
+  user.password = newPassword;
+  user.resetOtp = null;
+  user.resetOtpExpires = null;
+  await user.save();
 
-    return null;
+  // Revoke all active sessions for this user on password reset (production-grade security!)
+  await RefreshToken.deleteMany({ user: user._id });
+
+  return null;
 };
 
 export {
-    registerService,
-    loginService,
-    refreshAccessTokenService,
-    logoutService,
-    logoutSessionService,
-    getSessionsService,
-    getCurrentUserService,
-    checkUsernameAvailabilityService,
-    forgotPasswordService,
-    resetPasswordService
-};
+  registerService,
+  loginService,
+  refreshAccessTokenService,
+  logoutService,
+  logoutSessionService,
+  getSessionsService,
+  getCurrentUserService,
+  checkUsernameAvailabilityService,
+  forgotPasswordService,
+  resetPasswordService,
+};

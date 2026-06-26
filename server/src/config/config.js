@@ -4,7 +4,9 @@
 const getRequiredEnv = (key, defaultValue = undefined) => {
   const value = process.env[key] || defaultValue;
   if (value === undefined) {
-    console.error(`❌ CONFIG ERROR: "${key}" environment variable is required.`);
+    console.error(
+      `❌ CONFIG ERROR: "${key}" environment variable is required.`,
+    );
     process.exit(1); // Stop server immediately
   }
   return value;
@@ -38,4 +40,4 @@ export const REFRESH_TOKEN = {
   expiry: getRequiredEnv("REFRESH_TOKEN_EXPIRY", "7d"),
 };
 
-export const REDIS_URL = getRequiredEnv("REDIS_URL","");
+export const REDIS_URL = getRequiredEnv("REDIS_URL", "");

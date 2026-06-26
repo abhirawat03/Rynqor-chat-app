@@ -20,9 +20,13 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
   const { getSocket } = useSocket();
 
   const { data: currentUser } = useCurrentUserQuery();
-  const { data: searchResults = [], isLoading } = useSearchUsersQuery(userSearch.trim());
+  const { data: searchResults = [], isLoading } = useSearchUsersQuery(
+    userSearch.trim(),
+  );
 
-  const filteredSearchResults = searchResults.filter((u) => u._id !== currentUser?._id);
+  const filteredSearchResults = searchResults.filter(
+    (u) => u._id !== currentUser?._id,
+  );
 
   if (!isOpen) return null;
 
@@ -77,14 +81,16 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
-      <div 
+      <div
         className="w-full max-w-md bg-surface border border-border rounded-3xl shadow-xl flex flex-col max-h-[85vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">Create Group Chat</h2>
-          <button 
+          <h2 className="text-lg font-semibold text-foreground">
+            Create Group Chat
+          </h2>
+          <button
             onClick={onClose}
             className="p-1.5 rounded-full hover:bg-hover text-muted hover:text-foreground transition-colors duration-200"
           >
@@ -117,14 +123,14 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
               </label>
               <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 bg-surface-secondary border border-border border-dashed rounded-2xl">
                 {selectedUsers.map((user) => (
-                  <div 
+                  <div
                     key={user._id}
                     className="flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-full text-sm text-foreground select-none"
                   >
                     {user.avatar?.url ? (
-                      <img 
-                        src={user.avatar.url} 
-                        alt={user.fullName} 
+                      <img
+                        src={user.avatar.url}
+                        alt={user.fullName}
                         className="w-4 h-4 rounded-full object-cover"
                       />
                     ) : (
@@ -133,7 +139,7 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
                       </div>
                     )}
                     <span className="truncate max-w-20">{user.fullName}</span>
-                    <button 
+                    <button
                       onClick={() => handleRemoveUser(user._id)}
                       className="p-0.5 rounded-full hover:bg-hover text-muted hover:text-foreground transition-colors duration-200"
                     >
@@ -151,7 +157,10 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
               Add Members
             </label>
             <div className="relative">
-              <ImSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={14} />
+              <ImSearch
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+                size={14}
+              />
               <input
                 type="text"
                 placeholder="Search by name or username..."
@@ -172,26 +181,38 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
                   </div>
                 ) : filteredSearchResults.length > 0 ? (
                   filteredSearchResults.map((user) => {
-                    const isSelected = selectedUsers.some((u) => u._id === user._id);
+                    const isSelected = selectedUsers.some(
+                      (u) => u._id === user._id,
+                    );
                     return (
-                      <div 
+                      <div
                         key={user._id}
                         onClick={() => handleToggleUser(user)}
                         className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition-colors duration-200 ${
-                          isSelected ? "bg-hover border border-border" : "hover:bg-hover/50 border border-transparent"
+                          isSelected
+                            ? "bg-hover border border-border"
+                            : "hover:bg-hover/50 border border-transparent"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
                             {user.avatar?.url ? (
-                              <img src={user.avatar.url} alt={user.fullName} className="w-full h-full object-cover" />
+                              <img
+                                src={user.avatar.url}
+                                alt={user.fullName}
+                                className="w-full h-full object-cover"
+                              />
                             ) : (
                               user.fullName?.charAt(0).toUpperCase()
                             )}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">{user.fullName}</p>
-                            <p className="text-xs text-muted truncate">@{user.username}</p>
+                            <p className="text-sm font-medium text-foreground truncate">
+                              {user.fullName}
+                            </p>
+                            <p className="text-xs text-muted truncate">
+                              @{user.username}
+                            </p>
                           </div>
                         </div>
                         <input
@@ -204,7 +225,9 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
                     );
                   })
                 ) : (
-                  <p className="text-center py-4 text-sm text-muted">No users found</p>
+                  <p className="text-center py-4 text-sm text-muted">
+                    No users found
+                  </p>
                 )}
               </div>
             )}
@@ -223,7 +246,9 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
           <button
             onClick={handleCreate}
             className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-foreground rounded-xl text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-            disabled={isSubmitting || !groupName.trim() || selectedUsers.length < 2}
+            disabled={
+              isSubmitting || !groupName.trim() || selectedUsers.length < 2
+            }
           >
             {isSubmitting && (
               <div className="w-4 h-4 border-2 border-accent-foreground border-t-transparent rounded-full animate-spin" />

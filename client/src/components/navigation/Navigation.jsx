@@ -1,47 +1,27 @@
-import {
-  NavLink,
-} from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
-import {
-  IoMdChatbubbles,
-} from "react-icons/io";
+import { IoMdChatbubbles } from "react-icons/io";
 
-import {
-  ImSearch,
-} from "react-icons/im";
+import { ImSearch } from "react-icons/im";
 
-import {
-  BsPersonCircle,
-} from "react-icons/bs";
+import { BsPersonCircle } from "react-icons/bs";
 
-import {
-  useCurrentUserQuery,
-} from "../../hooks/auth/useCurrentUserQuery.js";
+import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
 
 const Navigation = () => {
-  const {
-    data: currentUser,
-  } = useCurrentUserQuery();
+  const { data: currentUser } = useCurrentUserQuery();
 
   const tabs = [
     {
       label: "Chats",
       path: "/",
-      icon: (
-        <IoMdChatbubbles
-          size={24}
-        />
-      ),
+      icon: <IoMdChatbubbles size={24} />,
     },
 
     {
       label: "Search",
       path: "/search",
-      icon: (
-        <ImSearch
-          size={22}
-        />
-      ),
+      icon: <ImSearch size={22} />,
     },
 
     {
@@ -72,19 +52,13 @@ const Navigation = () => {
       );
     }
 
-    return (
-      <BsPersonCircle
-        size={24}
-      />
-    );
+    return <BsPersonCircle size={24} />;
   };
 
   return (
     <>
       {/* MOBILE NAV */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around transition-colors duration-300 border-t h-14 border-border bg-surface backdrop-blur-xl md:hidden"
-      >
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around transition-colors duration-300 border-t h-14 border-border bg-surface backdrop-blur-xl md:hidden">
         {tabs.map((tab) => (
           <NavLink
             key={tab.path}
@@ -109,9 +83,7 @@ const Navigation = () => {
       </div>
 
       {/* DESKTOP SIDEBAR */}
-      <div
-        className="hidden transition-colors duration-300 border-r border-border bg-surface md:flex md:w-20 md:flex-col md:items-center md:gap-6 md:py-6"
-      >
+      <div className="hidden transition-colors duration-300 border-r border-border bg-surface md:flex md:w-20 md:flex-col md:items-center md:gap-6 md:py-6">
         {tabs.map((tab) => (
           <NavLink
             key={tab.path}

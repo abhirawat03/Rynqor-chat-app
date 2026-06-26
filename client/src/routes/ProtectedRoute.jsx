@@ -1,40 +1,21 @@
-import {
-  Navigate,
-  Outlet,
-} from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 
-import {
-  useCurrentUserQuery,
-} from "../hooks/auth/useCurrentUserQuery.js";
+import { useCurrentUserQuery } from "../hooks/auth/useCurrentUserQuery.js";
 
-const ProtectedRoute =
-  () => {
+const ProtectedRoute = () => {
+  const { data: currentUser, isLoading } = useCurrentUserQuery();
 
-    const {
-      data: currentUser,
-      isLoading,
-    } = useCurrentUserQuery();
+  if (isLoading) {
+    return null;
 
-    if (isLoading) {
+    // or splash loader
+  }
 
-      return null;
+  if (!currentUser) {
+    return <Navigate to="/auth" replace />;
+  }
 
-      // or splash loader
-    }
-
-    if (!currentUser) {
-
-      return (
-        <Navigate
-          to="/auth"
-          replace
-        />
-      );
-
-    }
-
-    return <Outlet />;
-
-  };
+  return <Outlet />;
+};
 
 export default ProtectedRoute;

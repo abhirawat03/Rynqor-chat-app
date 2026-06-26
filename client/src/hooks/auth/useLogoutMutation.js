@@ -15,13 +15,10 @@ const useLogoutMutation = () => {
       window.location.href = "/auth";
     },
     onError: () => {
-
       queryClient.clear();
 
-      window.location.href =
-        "/auth";
-
-    }
+      window.location.href = "/auth";
+    },
   });
 };
 

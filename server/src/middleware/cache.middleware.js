@@ -31,7 +31,8 @@ export const cacheMiddleware = (prefix, ttlSeconds = 300) => {
         res.json = originalJson; // Restore standard handler
 
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          redisClient.setEx(key, ttlSeconds, JSON.stringify(body))
+          redisClient
+            .setEx(key, ttlSeconds, JSON.stringify(body))
             .catch((err) => console.error("Redis setEx error:", err.message));
         }
 

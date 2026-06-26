@@ -3,7 +3,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-
   /* LIGHT */
 
   --color-background: #f5f7fb;
@@ -23,13 +22,12 @@
 /* DARK */
 
 .dark {
-
   --color-background: #0f172a;
   --color-surface: #111827;
   --color-surface-secondary: #1e293b;
 
   --color-foreground: #f8fafc;
-  --color-muted: #cbd5e1;;
+  --color-muted: #cbd5e1;
 
   --color-border: #334155;
 
@@ -39,12 +37,12 @@
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; 
+  display: none;
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none; 
-  scrollbar-width: none;     
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 html,
@@ -66,4 +64,3 @@ html.dark {
 [data-virtuoso-scroller="true"] {
   overflow-anchor: none;
 }
-

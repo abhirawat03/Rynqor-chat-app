@@ -1,20 +1,12 @@
-import {
-  Outlet,
-  useMatch,
-} from "react-router-dom";
+import { Outlet, useMatch } from "react-router-dom";
 import ChatsPage from "../pages/chat/ChatsPage.jsx";
 import { ErrorBoundary } from "../components/common/ErrorBoundary.jsx";
 
 const ChatLayout = () => {
-
-  const isChatRoute =
-    useMatch("/chat/:conversationId");
+  const isChatRoute = useMatch("/chat/:conversationId");
 
   return (
-    <div
-      className="flex flex-1 min-h-0 overflow-hidden transition-colors duration-300 bg-background"
-    >
-
+    <div className="flex flex-1 min-h-0 overflow-hidden transition-colors duration-300 bg-background">
       {/* SIDEBAR */}
       <aside
         className={`
@@ -44,11 +36,9 @@ const ChatLayout = () => {
           }
         `}
       >
-
         <ErrorBoundary>
           <ChatsPage />
         </ErrorBoundary>
-
       </aside>
 
       {/* CHAT AREA */}
@@ -65,20 +55,13 @@ const ChatLayout = () => {
           transition-colors
           duration-300
 
-          ${
-            !isChatRoute
-              ? "hidden md:flex"
-              : "flex"
-          }
+          ${!isChatRoute ? "hidden md:flex" : "flex"}
         `}
       >
-
         <ErrorBoundary>
           <Outlet />
         </ErrorBoundary>
-
       </main>
-
     </div>
   );
 };

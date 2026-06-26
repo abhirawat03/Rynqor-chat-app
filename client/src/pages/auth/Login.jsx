@@ -1,207 +1,115 @@
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useState } from "react";
 
-import { useLoginMutation }
-  from "../../hooks/auth/useLoginMutation.js";
+import { useLoginMutation } from "../../hooks/auth/useLoginMutation.js";
 
 const Login = () => {
+  const navigate = useNavigate();
 
-  const navigate =
-    useNavigate();
+  const loginMutation = useLoginMutation();
 
-  const loginMutation =
-    useLoginMutation();
+  const [error, setError] = useState("");
 
-  const [error, setError] =
-    useState("");
+  const [formData, setFormData] = useState({
+    login: "",
+    password: "",
+  });
 
-  const [formData, setFormData] =
-    useState({
-      login: "",
-      password: "",
-    });
+  const [touched, setTouched] = useState({
+    login: false,
+    password: false,
+  });
 
-  const [touched, setTouched] =
-    useState({
-      login: false,
-      password: false,
-    });
-
-  const isFormValid =
-    formData.login.trim() &&
-    formData.password.length >= 8;
+  const isFormValid = formData.login.trim() && formData.password.length >= 8;
 
   // INPUT CHANGE
 
-  const handleChange = (
-    e
-  ) => {
-
+  const handleChange = (e) => {
     setFormData({
       ...formData,
 
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
 
     setTouched((prev) => ({
       ...prev,
       [e.target.name]: true,
     }));
-
   };
 
-  const handleBlur = (
-    e
-  ) => {
-
+  const handleBlur = (e) => {
     setTouched((prev) => ({
       ...prev,
       [e.target.name]: true,
     }));
-
   };
 
   // SUBMIT
 
-  const handleSubmit = (
-    e
-  ) => {
-
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    const {
-      login,
-      password,
-    } = formData;
+    const { login, password } = formData;
 
-    if (
-      !login.trim() ||
-      !password.trim()
-    ) {
-
-      setError(
-        "All fields are required"
-      );
+    if (!login.trim() || !password.trim()) {
+      setError("All fields are required");
 
       return;
-
     }
 
-    if (
-      password.length < 8
-    ) {
-
-      setError(
-        "Password must be at least 8 characters"
-      );
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
 
       return;
-
     }
 
     setError("");
 
-    loginMutation.mutate(
-      formData,
-      {
+    loginMutation.mutate(formData, {
+      onSuccess: () => {
+        navigate("/");
+      },
 
-        onSuccess: () => {
-
-          navigate("/");
-
-        },
-
-        onError: (
-          error
-        ) => {
-
-          setError(
-            error.response?.data
-              ?.message ||
-              "Login failed"
-          );
-
-        },
-
-      }
-    );
-
+      onError: (error) => {
+        setError(error.response?.data?.message || "Login failed");
+      },
+    });
   };
 
   return (
     <form
-      onSubmit={
-        handleSubmit
-      }
+      onSubmit={handleSubmit}
       className="p-6 space-y-4 transition-colors duration-300 border shadow-xl rounded-3xl border-border bg-surface/90 backdrop-blur-xl sm:p-6 2xl:p-8"
     >
-
       {/* ERROR */}
       {error && (
-
-        <div
-          className="px-4 py-3 text-sm text-red-500 border rounded-2xl border-red-500/20 bg-red-500/10"
-        >
+        <div className="px-4 py-3 text-sm text-red-500 border rounded-2xl border-red-500/20 bg-red-500/10">
           {error}
         </div>
-
       )}
 
       {/* HEADER */}
-      <div
-        className="text-center "
-      >
-
-        <h1
-          className="text-3xl font-bold tracking-tight text-foreground"
-        >
+      <div className="text-center ">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Welcome back
         </h1>
 
-        <p
-          className="mt-2 text-sm text-muted"
-        >
-          Login to continue chatting
-        </p>
-
+        <p className="mt-2 text-sm text-muted">Login to continue chatting</p>
       </div>
 
       {/* LOGIN */}
-      <div
-        className="relative "
-      >
-
+      <div className="relative ">
         <input
           type="text"
-
           id="login"
           name="login"
-
           autoComplete="username"
-
-          disabled={
-            loginMutation.isPending
-          }
-
-          value={
-            formData.login
-          }
-
-          onChange={
-            handleChange
-          }
-
-          onBlur={
-            handleBlur
-          }
-
+          disabled={loginMutation.isPending}
+          value={formData.login}
+          onChange={handleChange}
+          onBlur={handleBlur}
           placeholder=" "
-
           className={`w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl bg-background text-foreground focus:ring-4 focus:ring-accent/10 disabled:opacity-60 ${
             touched.login && !formData.login.trim()
               ? "border-red-500 focus:border-red-500"
@@ -221,42 +129,23 @@ const Login = () => {
             Username or email is required
           </p>
         )}
-
       </div>
 
       {/* PASSWORD */}
-      <div
-        className="relative "
-      >
-
+      <div className="relative ">
         <input
           type="password"
-
           id="password"
           name="password"
-
           autoComplete="current-password"
-
-          disabled={
-            loginMutation.isPending
-          }
-
-          value={
-            formData.password
-          }
-
-          onChange={
-            handleChange
-          }
-
-          onBlur={
-            handleBlur
-          }
-
+          disabled={loginMutation.isPending}
+          value={formData.password}
+          onChange={handleChange}
+          onBlur={handleBlur}
           placeholder=" "
-
           className={`w-full px-4 pt-6 pb-3 text-sm transition-all duration-200 border outline-none peer rounded-2xl bg-background text-foreground focus:ring-4 focus:ring-accent/10 disabled:opacity-60 ${
-            touched.password && (formData.password.length < 8 || !formData.password.trim())
+            touched.password &&
+            (formData.password.length < 8 || !formData.password.trim())
               ? "border-red-500 focus:border-red-500"
               : "border-border focus:border-accent"
           }`}
@@ -269,8 +158,8 @@ const Login = () => {
           Password
         </label>
 
-        {touched.password && (
-          !formData.password.trim() ? (
+        {touched.password &&
+          (!formData.password.trim() ? (
             <p className="mt-1 ml-1 text-xs text-red-500">
               Password is required
             </p>
@@ -278,33 +167,23 @@ const Login = () => {
             <p className="mt-1 ml-1 text-xs text-red-500">
               Password must be at least 8 characters
             </p>
-          ) : null
-        )}
-
+          ) : null)}
       </div>
 
       {/* FORGOT */}
-      <div
-        className="text-right "
-      >
-
+      <div className="text-right ">
         <Link
           to="/auth/forgot-password"
           className="text-sm transition-opacity duration-200 text-accent hover:opacity-80"
         >
           Forgot password?
         </Link>
-
       </div>
 
       {/* BUTTON */}
       <button
         type="submit"
-
-        disabled={
-          loginMutation.isPending || !isFormValid
-        }
-
+        disabled={loginMutation.isPending || !isFormValid}
         className="
           w-full
 
@@ -334,34 +213,21 @@ const Login = () => {
           disabled:opacity-70
         "
       >
-
-        {loginMutation.isPending
-          ? "Logging in..."
-          : "Login"}
-
+        {loginMutation.isPending ? "Logging in..." : "Login"}
       </button>
 
       {/* FOOTER */}
-      <div
-        className="text-center "
-      >
-
-        <p
-          className="text-sm text-muted"
-        >
+      <div className="text-center ">
+        <p className="text-sm text-muted">
           Don&apos;t have an account?
-
           <Link
             to="/auth/signup"
             className="ml-1 font-medium transition-opacity duration-200 text-accent hover:opacity-80"
           >
             Create one
           </Link>
-
         </p>
-
       </div>
-
     </form>
   );
 };

@@ -4,24 +4,19 @@ const SearchCard = ({
   fullName,
   bio,
   onClick,
-  isLoading
+  isLoading,
 }) => {
-
   const firstLetter =
-    fullName
-      ?.charAt(0)
-      ?.toUpperCase() ||
-    username
-      ?.charAt(0)
-      ?.toUpperCase() ||
+    fullName?.charAt(0)?.toUpperCase() ||
+    username?.charAt(0)?.toUpperCase() ||
     "?";
 
   return (
     <button
-  type="button"
-  onClick={onClick}
-  disabled={isLoading}
-  className={`
+      type="button"
+      onClick={onClick}
+      disabled={isLoading}
+      className={`
     group
 
     flex
@@ -55,15 +50,10 @@ const SearchCard = ({
           `
     }
   `}
->
-
+    >
       {/* AVATAR */}
-      <div
-        className="flex items-center justify-center w-12 h-12 overflow-hidden text-lg font-semibold rounded-full shrink-0 bg-surface-secondary text-foreground"
-      >
-
+      <div className="flex items-center justify-center w-12 h-12 overflow-hidden text-lg font-semibold rounded-full shrink-0 bg-surface-secondary text-foreground">
         {avatar ? (
-
           <img
             src={avatar.url}
             alt={fullName}
@@ -71,43 +61,22 @@ const SearchCard = ({
             decoding="async"
             className="object-cover w-full h-full "
           />
-
         ) : (
-
           firstLetter
-
         )}
-
       </div>
 
       {/* INFO */}
-      <div
-        className="flex-1 min-w-0 "
-      >
-
+      <div className="flex-1 min-w-0 ">
         {/* NAME */}
-        <p
-          className="text-sm font-semibold truncate text-foreground"
-        >
+        <p className="text-sm font-semibold truncate text-foreground">
           {fullName}
         </p>
 
         {/* USERNAME */}
-        <p
-          className="text-sm truncate text-muted"
-        >
-          @{username}
-        </p>
-        {bio && (
-          <p
-            className="mt-1 text-xs line-clamp-2 text-muted"
-          >
-            {bio}
-          </p>
-        )}
-
+        <p className="text-sm truncate text-muted">@{username}</p>
+        {bio && <p className="mt-1 text-xs line-clamp-2 text-muted">{bio}</p>}
       </div>
-
     </button>
   );
 };

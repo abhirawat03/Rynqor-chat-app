@@ -70,4 +70,3 @@ export const getRelativeTimeShort = (date) => {
   }
   return `${diffYears}y`;
 };
-

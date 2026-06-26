@@ -1,133 +1,104 @@
 import { useMessagesQuery } from "../../hooks/messages/useMessagesQuery.js";
 import { useSocket } from "../../services/socket/useSocket.js";
-import {
-    useQueryClient,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { updateMessagesCache } from "../../services/socket/helpers/updateMessagesCache.js";
 
-export const useChatMessages = ({
-    conversationId,
-    currentUserId,
-}) => {
-    const {
-        getSocket,
-    } = useSocket();
+export const useChatMessages = ({ conversationId, currentUserId }) => {
+  const { getSocket } = useSocket();
 
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    const { data: messagesData, isLoading: messagesLoading, fetchNextPage, hasNextPage, isFetchingNextPage} = useMessagesQuery(conversationId);
+  const {
+    data: messagesData,
+    isLoading: messagesLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMessagesQuery(conversationId);
 
-    const chatMessages =
-        messagesData?.pages
-            ? [...messagesData.pages].reverse().flatMap((page) => page.messages)
-            : [];
-const sendMessage = (
-        text,
-        media = []
-    ) => {
+  const chatMessages = messagesData?.pages
+    ? [...messagesData.pages].reverse().flatMap((page) => page.messages)
+    : [];
+  const sendMessage = (text, media = []) => {
+    const trimmed = text.trim();
 
-        const trimmed =
-            text.trim();
+    if (!trimmed && media.length === 0) {
+      return;
+    }
 
-        if (
-            !trimmed &&
-            media.length === 0
-        ) {
-            return;
-        }
+    const socket = getSocket();
 
-        const socket =
-            getSocket();
+    // -----------------------------------
+    // OFFLINE MESSAGE
+    // -----------------------------------
 
-        // -----------------------------------
-        // OFFLINE MESSAGE
-        // -----------------------------------
+    if (!socket?.connected) {
+      const failedMessage = {
+        _id: crypto.randomUUID(),
 
-        if (
-            !socket?.connected
-        ) {
+        conversationId,
 
-            const failedMessage = {
-                _id:
-                    crypto.randomUUID(),
+        text: trimmed,
 
-                conversationId,
+        media,
 
-                text: trimmed,
+        senderId: currentUserId,
 
-                media,
+        createdAt: new Date().toISOString(),
 
-                senderId:
-                    currentUserId,
+        syncState: "failed",
+      };
 
-                createdAt:
-                    new Date().toISOString(),
+      updateMessagesCache({
+        queryClient,
+        conversationId,
 
-                syncState:
-                    "failed",
-            };
+        updater: (messages) => [...messages, failedMessage],
+      });
 
-            updateMessagesCache({
-    queryClient,
-    conversationId,
+      return;
+    }
 
-    updater: (messages) => [
-        ...messages,
-        failedMessage,
-    ],
-});
+    // -----------------------------------
+    // OPTIMISTIC MESSAGE
+    // -----------------------------------
 
-            return;
-        }
+    const clientTempId = crypto.randomUUID();
 
-        // -----------------------------------
-        // OPTIMISTIC MESSAGE
-        // -----------------------------------
+    const tempMessage = {
+      _id: clientTempId,
 
-        const clientTempId =
-            crypto.randomUUID();
+      clientTempId,
 
-        const tempMessage = {
-            _id:
-                clientTempId,
+      conversationId,
 
-            clientTempId,
+      text: trimmed,
 
-            conversationId,
+      media,
 
-            text: trimmed,
+      senderId: currentUserId,
 
-            media,
+      createdAt: new Date().toISOString(),
 
-            senderId:
-                currentUserId,
-
-            createdAt:
-                new Date().toISOString(),
-
-            syncState:
-                "sending",
-        };
-
-        updateMessagesCache({
-    queryClient,
-    conversationId,
-
-    updater: (messages) => [
-        ...messages,
-        tempMessage,
-    ],
-});
-
-        return clientTempId;
+      syncState: "sending",
     };
 
-    return {
-        chatMessages,
-        sendMessage,
-        messagesLoading,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-    }
-}
+    updateMessagesCache({
+      queryClient,
+      conversationId,
+
+      updater: (messages) => [...messages, tempMessage],
+    });
+
+    return clientTempId;
+  };
+
+  return {
+    chatMessages,
+    sendMessage,
+    messagesLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  };
+};

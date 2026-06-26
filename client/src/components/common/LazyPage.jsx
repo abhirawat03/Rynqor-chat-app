@@ -20,7 +20,5 @@ export const PageLoader = () => (
 );
 
 export const LazyPage = ({ children, fallback }) => (
-  <Suspense fallback={fallback || <PageLoader />}>
-    {children}
-  </Suspense>
+  <Suspense fallback={fallback || <PageLoader />}>{children}</Suspense>
 );

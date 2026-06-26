@@ -1,18 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import {
-  StrictMode,
-  lazy,
-} from "react";
+import { StrictMode, lazy } from "react";
 
 import { createRoot } from "react-dom/client";
 
 import "./index.css";
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-  NavLink,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider, NavLink } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -36,17 +29,13 @@ import Login from "./pages/auth/Login.jsx";
 import Signup from "./pages/auth/Signup.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 
-const ProfilePage = lazy(
-  () => import("./pages/profile/ProfilePage.jsx")
-);
+const ProfilePage = lazy(() => import("./pages/profile/ProfilePage.jsx"));
 
 const ConversationPage = lazy(
-  () => import("./pages/chat/ConversationPage.jsx")
+  () => import("./pages/chat/ConversationPage.jsx"),
 );
 
-const SearchPage = lazy(
-  () => import("./pages/search/SearchPage.jsx")
-);
+const SearchPage = lazy(() => import("./pages/search/SearchPage.jsx"));
 
 /* ROUTES */
 import PublicRoute from "./routes/PublicRoute.jsx";
@@ -55,206 +44,168 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 
 import GlobalErrorBoundary from "./components/app/GlobalErrorBoundary.jsx";
 import { LazyPage } from "./components/common/LazyPage.jsx";
-import { ConversationSkeleton, SearchSkeleton, SettingsSkeleton } from "./components/common/Skeleton.jsx";
+import {
+  ConversationSkeleton,
+  SearchSkeleton,
+  SettingsSkeleton,
+} from "./components/common/Skeleton.jsx";
 import { ErrorBoundary } from "./components/common/ErrorBoundary.jsx";
 import { BsFillChatLeftFill } from "react-icons/bs";
 
-
-
 // APPLY THEME BEFORE REACT LOADS
 (() => {
+  const savedTheme = localStorage.getItem("themeMode") || "system";
 
-  const savedTheme =
-    localStorage.getItem(
-      "themeMode"
-    ) || "system";
-
-  const systemDark =
-    window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
+  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const isDark =
-    savedTheme === "dark" ||
-    (
-      savedTheme === "system" &&
-      systemDark
-    );
+    savedTheme === "dark" || (savedTheme === "system" && systemDark);
 
-  document.documentElement.classList.toggle(
-    "dark",
-    isDark
-  );
+  document.documentElement.classList.toggle("dark", isDark);
 
-  document.documentElement.style.colorScheme =
-    isDark
-      ? "dark"
-      : "light";
-
+  document.documentElement.style.colorScheme = isDark ? "dark" : "light";
 })();
 
-const queryClient =
-  new QueryClient();
+const queryClient = new QueryClient();
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <App>
+        <ProtectedRoute />
+      </App>
+    ),
+    errorElement: <GlobalErrorBoundary />,
 
+    children: [
+      {
+        element: <AppLayout />,
 
-const router =
-  createBrowserRouter([
-    {
-      path: "/",
-      element: (
-        <App>
-          <ProtectedRoute />
-        </App>
-      ),
-      errorElement: <GlobalErrorBoundary />,
+        children: [
+          {
+            element: <ChatLayout />,
 
-      children: [
-        {
-          element: <AppLayout />,
+            children: [
+              {
+                index: true,
 
-          children: [
+                element: (
+                  <div className="hidden flex-1 flex-col items-center justify-center bg-background md:flex select-none">
+                    <div className="flex flex-col items-center max-w-sm p-6 text-center">
+                      {/* Solid modern chat icon */}
+                      <BsFillChatLeftFill
+                        size={56}
+                        className="text-foreground/95 dark:text-foreground/90 mb-5"
+                      />
 
-            {
-              element: <ChatLayout />,
+                      <h2 className="text-xl font-normal text-foreground mb-1">
+                        Your messages
+                      </h2>
 
-              children: [
+                      <p className="text-sm text-muted mb-6 max-w-70 leading-relaxed">
+                        Send photos and messages to a friend or group.
+                      </p>
 
-                {
-                  index: true,
-
-                  element: (
-                    <div className="hidden flex-1 flex-col items-center justify-center bg-background md:flex select-none">
-                      <div className="flex flex-col items-center max-w-sm p-6 text-center">
-                        {/* Solid modern chat icon */}
-                        <BsFillChatLeftFill size={56} className="text-foreground/95 dark:text-foreground/90 mb-5" />
-                        
-                        <h2 className="text-xl font-normal text-foreground mb-1">
-                          Your messages
-                        </h2>
-                        
-                        <p className="text-sm text-muted mb-6 max-w-70 leading-relaxed">
-                          Send photos and messages to a friend or group.
-                        </p>
-                        
-                        {/* Instagram-style filled button */}
-                        <NavLink
-                          to="/search"
-                          className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
-                        >
-                          Send message
-                        </NavLink>
-                      </div>
+                      {/* Instagram-style filled button */}
+                      <NavLink
+                        to="/search"
+                        className="px-4 py-1.5 text-sm font-semibold rounded-lg bg-accent text-accent-foreground hover:bg-accent-hover transition-colors"
+                      >
+                        Send message
+                      </NavLink>
                     </div>
-                  ),
-                },
+                  </div>
+                ),
+              },
 
-                {
-                  path: "chat/:conversationId",
+              {
+                path: "chat/:conversationId",
 
-                  element: (
-                    <LazyPage fallback={<ConversationSkeleton />}>
-                      <ConversationPage />
-                    </LazyPage>
-                  ),
-                },
+                element: (
+                  <LazyPage fallback={<ConversationSkeleton />}>
+                    <ConversationPage />
+                  </LazyPage>
+                ),
+              },
+            ],
+          },
 
-              ],
-            },
+          {
+            path: "search",
 
-            {
-              path: "search",
+            element: (
+              <LazyPage fallback={<SearchSkeleton />}>
+                <SearchPage />
+              </LazyPage>
+            ),
+          },
 
-              element: (
-                <LazyPage fallback={<SearchSkeleton />}>
-                  <SearchPage />
-                </LazyPage>
-              ),
-            },
+          {
+            path: "profile",
 
-            {
-              path: "profile",
+            element: (
+              <LazyPage fallback={<SettingsSkeleton />}>
+                <ProfilePage />
+              </LazyPage>
+            ),
+          },
+        ],
+      },
+    ],
+  },
 
-              element: (
-                <LazyPage fallback={<SettingsSkeleton />}>
-                  <ProfilePage />
-                </LazyPage>
-              ),
-            },
+  /* PUBLIC */
+  {
+    path: "/auth",
 
-          ],
-        },
-      ],
-    },
+    element: (
+      <App>
+        <PublicRoute />
+      </App>
+    ),
+    errorElement: <GlobalErrorBoundary />,
 
-    /* PUBLIC */
-    {
-      path: "/auth",
+    children: [
+      {
+        element: <AuthLayout />,
 
-      element: (
-        <App>
-          <PublicRoute />
-        </App>
-      ),
-      errorElement: <GlobalErrorBoundary />,
+        children: [
+          {
+            index: true,
 
-      children: [
-        {
-          element: <AuthLayout />,
+            element: <Login />,
+          },
 
-          children: [
+          {
+            path: "signup",
 
-            {
-              index: true,
+            element: <Signup />,
+          },
 
-              element: <Login />,
-            },
+          {
+            path: "forgot-password",
 
-            {
-              path: "signup",
+            element: <ForgotPassword />,
+          },
+        ],
+      },
+    ],
+  },
+]);
 
-              element: <Signup />,
-            },
-
-            {
-              path: "forgot-password",
-
-              element: <ForgotPassword />,
-            },
-
-          ],
-        },
-      ],
-    },
-  ]);
-
-createRoot(
-  document.getElementById("root")
-).render(
-
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-
-    <QueryClientProvider
-      client={queryClient}
-    >
-
+    <QueryClientProvider client={queryClient}>
       <SocketProvider>
-
         <ThemeProvider>
-
           <ErrorBoundary>
-            <RouterProvider
-              router={router}
-            />
+            <RouterProvider router={router} />
           </ErrorBoundary>
 
           <Toaster />
-
         </ThemeProvider>
-
       </SocketProvider>
-
     </QueryClientProvider>
-
-  </StrictMode>
+  </StrictMode>,
 );

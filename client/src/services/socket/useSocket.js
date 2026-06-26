@@ -1,11 +1,11 @@
 import { useSocketContext } from "./SocketContext";
 
 export const useSocket = () => {
-    const ctx = useSocketContext();
+  const ctx = useSocketContext();
 
-    if (!ctx) {
-        throw new Error("Socket not initialized");
-    }
+  if (!ctx) {
+    throw new Error("Socket not initialized");
+  }
 
-    return ctx;
+  return ctx;
 };
