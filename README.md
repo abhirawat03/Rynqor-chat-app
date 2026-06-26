@@ -1,479 +1,256 @@
-# Rynqor — Real-time Chat Application
+# 🌐 Rynqor — Real-time MERN Chat Application
 
-## Overview
-
-Rynqor is a full-stack real-time chat application built with the MERN stack, Socket.IO, and React Query. It supports instant messaging, conversation management, user presence, typing indicators, read receipts, media sharing, and optimistic UI updates for a smooth chat experience.
-
-The application uses MongoDB for persistence, Socket.IO for realtime communication, and Cloudinary for media storage.
+Rynqor is a high-performance, real-time MERN chat application built with **React 19**, **Express 5**, **MongoDB**, **Redis**, and **Socket.IO**. Designed with an optimistic-first UI, it supports instantaneous messaging, conversation management, user presence tracking, live typing indicators, read receipts, and media attachments with automatic database transaction guarantees.
 
 ---
 
-## Features
+## 🚀 Key System Features
 
-### Authentication
-
-* User registration and login
-* JWT access token authentication
-* Refresh token rotation
-* Protected API routes
-* Session management
-
-### Real-Time Messaging
-
-* Instant message delivery with Socket.IO
-* Optimistic message sending
-* Delivery acknowledgements
-* Failed message handling
-* Persistent message history
-
-### Conversations
-
-* One-to-one conversations
-* Automatic conversation creation
-* Last message tracking
-* Conversation sorting by activity
-* Conversation metadata synchronization
-
-### Presence System
-
-* Online/offline user tracking
-* Live presence updates
-* Initial online user synchronization
-* Reconnect state synchronization
-
-### Typing Indicators
-
-* Realtime typing status
-* Automatic typing timeout cleanup
-* Conversation-specific typing events
-
-### Read Receipts
-
-* Message read tracking
-* Realtime read receipt updates
-* Read status synchronization across participants
-
-### Media Support
-
-* Image uploads
-* Video uploads
-* Audio uploads
-* File attachments
-* Cloudinary integration
-
-### Frontend Features
-
-* React Query caching
-* Socket state management
-* Optimistic UI updates
-* Infinite message hydration support
-* Responsive chat interface
-* Lazy-loaded media
+- **Optimistic-First Messaging:** Interactive chat interfaces showing real-time delivery statuses (sending, sent, read, failed) with automatic local cache rollback upon network or server socket failures.
+- **Horizontal Scaling with Redis:** Integrated Socket.IO Redis Adapter to scale WebSocket connections across multiple server instances or nodes, allowing multi-tab presence tracking.
+- **Atomic Database Transactions:** Multi-document write safety utilizing MongoDB Sessions/Transactions ensuring referential integrity when inserting new messages and updating conversation activity trackers.
+- **Automated Silent Token Rotation:** HTTP-Only Cookie-based authentication protecting route middleware with silent JWT access-token refresh loops.
+- **Virtualized High-Volume Feeds:** Dynamic inverted virtual scroll rendering for historical message logs using `react-virtuoso` to eliminate DOM bottlenecks.
+- **Zero-Paint Flicker Themes:** Instant custom theme hydration supporting dark/light mode switches mapped to system preferences without layout shifting.
 
 ---
 
-## Architecture
+## 🛠️ Technology Stack
 
-### Frontend
+### Frontend (Client)
+- **Framework:** React 19.2 (Concurrent Rendering)
+- **Build Engine:** Vite 8.0 (ESM-only dev server)
+- **Styling:** Tailwind CSS v4.0 (Utility-first native CSS compilation)
+- **Server Cache State:** TanStack React Query v5.99 (Invalidations and optimistic mutations)
+- **Real-Time Client:** Socket.IO Client v4.8
+- **Virtualization:** React Virtuoso v4.18
 
-#### Core Technologies
+### Backend (Server)
+- **App Framework:** Express v5.2 (Native Promise-based route handlers)
+- **Database driver:** Mongoose v9.3 (Object Document Mapping with strict schemas)
+- **WebSocket Server:** Socket.IO v4.8
+- **Scaling Service:** Redis client v6.0 with `@socket.io/redis-adapter`
+- **Media Hosting:** Cloudinary SDK v2.9
+- **Validation Engine:** Zod v4.4 (Runtime request schema validations)
 
-* React 19
-* Vite
-* TailwindCSS
-* React Router
-* TanStack React Query
-* Socket.IO Client
+---
 
-#### Important Files
+## 📂 Core Codebase Architecture
 
-```txt
-client/src/
+```text
+Rynqor/
+├── client/                     # Frontend Application
+│   ├── src/
+│   │   ├── components/         # Modals, app headers, virtual lists, inputs
+│   │   ├── constants/          # Shared constraints (upload size bounds, MIME types)
+│   │   ├── context/            # Global context providers (ThemeContext)
+│   │   ├── hooks/              # Query and mutation custom React hooks
+│   │   ├── layouts/            # Panel layout wrappers (AppLayout, ChatLayout)
+│   │   ├── pages/              # Routing page controllers (Chats, Profiles, Search)
+│   │   ├── routes/             # Authentication guards (Protected and Public routes)
+│   │   └── services/           # Socket instance, cache updates, Axios intercepts
 │
-├── main.jsx
-│
-├── services/
-│   └── socket/
-│       ├── socket.js
-│       ├── SocketProvider.jsx
-│       ├── SocketContext.jsx
-│       ├── useSocket.js
-│       ├── handlers/
-│       │   ├── messageHandlers.js
-│       │   ├── typingHandlers.js
-│       │   └── presenceHandlers.js
-│       └── helpers/
-│           └── conversationHelpers.js
-│
-├── hooks/
-│   ├── auth/
-│   ├── conversations/
-│   └── messages/
-│
-├── pages/
-│   ├── chats/
-│   └── chat/
-│
-└── components/
+└── server/                     # Backend API & WebSocket Gateway
+    ├── src/
+    │   ├── config/             # DB connectivity, Redis clients, configuration setups
+    │   ├── controllers/        # Express handlers (Auth, Messages, Users, Conversations)
+    │   ├── middleware/         # Multer uploads, validation hooks, security headers, JWT verifiers
+    │   ├── models/             # Mongoose schemas (User, RefreshToken, Conversation, Message)
+    │   ├── routes/             # API routing endpoints
+    │   ├── schemas/            # Zod verification objects
+    │   ├── services/           # DB transaction business logic
+    │   ├── socket/             # Socket connection authorizations and rate limit handlers
+    │   └── utils/              # Token encoders, Cloudinary helpers, parser formatters
 ```
 
 ---
 
-### Backend
+## ⚡ System Event Flows
 
-#### Core Technologies
+### 1. Send Message Sequence
+This sequence details how Rynqor achieves instant message rendering in the UI while guaranteeing transaction safety on the database.
 
-* Node.js
-* Express 5
-* MongoDB
-* Mongoose
-* Socket.IO
-* JWT
-* Cloudinary
-* Multer
+```mermaid
+sequenceDiagram
+    autonumber
+    actor ClientA as Client A (Sender)
+    participant SocketServer as Socket.IO Server
+    participant DB as MongoDB
+    actor ClientB as Client B (Recipient)
 
-#### Important Files
+    ClientA->>ClientA: Add message optimistically (status: "sending")
+    ClientA->>SocketServer: Emit "send_message" { payload }
+    
+    SocketServer->>SocketServer: Verify socket room membership
+    SocketServer->>ClientA: Emit "message_sent" (acknowledgment)
+    ClientA->>ClientA: Update status to "sent" (removes spinner)
+    
+    SocketServer->>ClientB: Emit "new_message" { message, conversation }
+    
+    rect rgb(230, 240, 255)
+        note right of SocketServer: Asynchronous DB Persistence
+        SocketServer->>DB: Message.create() inside Session transaction
+        SocketServer->>DB: Conversation.findByIdAndUpdate(lastMessage pointer)
+    end
+```
 
-```txt
-server/src/
-│
-├── index.js
-├── app.js
-│
-├── socket/
-│   ├── index.js
-│   └── handlers.js
-│
-├── controllers/
-├── services/
-├── models/
-├── routes/
-├── middleware/
-│
-├── config/
-│   ├── config.js
-│   └── db.js
-│
-└── utils/
+### 2. Multi-Tab Presence Synchronization
+How the presence engine tracks active tabs across multiple browser instances using Redis key storage.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as User Tab
+    participant Server as Server Node
+    participant Redis as Redis Cache
+    participant Broadcast as Other Users
+
+    Client->>Server: Connect (Handshake + JWT Validation)
+    alt Using Redis Cluster (Multi-Node Scaling)
+        Server->>Redis: Check if user wasOnline (sIsMember "online_users")
+        Server->>Redis: Store socket instance (sAdd "user:sockets:userId")
+        Server->>Redis: Mark user active (sAdd "online_users")
+        Server->>Client: Emit "online_users" [active list]
+        opt First tab/device active
+            Server->>Broadcast: Broadcast "user_online" { userId }
+        end
+    else Single Instance Development Fallback
+        Server->>Server: Register in local Map memory
+        Server->>Client: Emit "online_users" [active list]
+        Server->>Broadcast: Broadcast "user_online" { userId }
+    end
 ```
 
 ---
 
-## Realtime Flow
+## 📊 Database Model Schemas
 
-### Sending Messages
-
-```txt
-Client
-   │
-   ├─ Optimistic message added
-   │
-   ├─ send_message
-   ▼
-Socket Server
-   │
-   ├─ Save Message
-   ├─ Update Conversation.lastMessage
-   └─ Update Conversation.updatedAt
-   │
-   ├─ message_sent → sender
-   └─ new_message → recipients
+```mermaid
+erDiagram
+    USER ||--o{ REFRESH_TOKEN : owns
+    USER ||--o{ MESSAGE : sends
+    CONVERSATION ||--|{ USER : includes
+    CONVERSATION ||--o| MESSAGE : "links lastMessage"
+    MESSAGE ||--|| USER : "sent by"
+    MESSAGE ||--|| CONVERSATION : "belongs to"
 ```
 
-### Read Receipts
-
-```txt
-mark_read
-    │
-    ▼
-Server updates messages
-    │
-    ▼
-messages_read
-    │
-    ▼
-All participants updated
-```
-
-### Typing Indicators
-
-```txt
-typing
-    │
-    ▼
-Server
-    │
-    ▼
-Other participants
-
-stop_typing
-    │
-    ▼
-Server
-    │
-    ▼
-Other participants
-```
-
----
-
-## Socket Events
-
-### Client → Server
-
-| Event             | Purpose                |
-| ----------------- | ---------------------- |
-| join_conversation | Join conversation room |
-| send_message      | Send a message         |
-| typing            | User started typing    |
-| stop_typing       | User stopped typing    |
-| mark_read         | Mark messages as read  |
-| sync_state        | Request presence sync  |
-
----
-
-### Server → Client
-
-| Event          | Purpose                |
-| -------------- | ---------------------- |
-| message_sent   | Sender acknowledgement |
-| new_message    | Incoming message       |
-| message_failed | Delivery failure       |
-| messages_read  | Read receipt update    |
-| typing         | User typing            |
-| stop_typing    | User stopped typing    |
-| online_users   | Initial presence sync  |
-| user_online    | User came online       |
-| user_offline   | User went offline      |
-
----
-
-## Database Models
-
-### User
-
+### 1. User Model
 ```js
 {
-  username: String,
-  fullName: String,
-  email: String,
-  password: String,
+  username: { type: String, unique: true, index: true },
+  fullName: { type: String, required: true },
+  email: { type: String, unique: true, index: true },
+  password: { type: String, required: true, select: false },
   avatar: {
     url: String,
     publicId: String
   },
-  bio: String,
+  bio: { type: String, default: "" },
   createdAt: Date,
   updatedAt: Date
 }
 ```
 
-#### Notes
-
-* Passwords are hashed using bcrypt before storage.
-* Email and username are unique.
-* Password field is excluded from queries by default.
-
----
-
-### RefreshToken
-
+### 2. RefreshToken Model
+Stores device fingerprinting and allows revocation of specific devices remotely.
 ```js
 {
-  user: ObjectId,
-  token: String,
-  device: String,
-  location: String,
-  ipAddress: String,
-  userAgent: String,
-  lastUsedAt: Date,
-  expiresAt: Date,
-  createdAt: Date,
-  updatedAt: Date
+  user: { type: ObjectId, ref: "User", required: true },
+  token: { type: String, required: true, index: true },
+  device: { type: String },
+  location: { type: String },
+  ipAddress: { type: String },
+  userAgent: { type: String },
+  lastUsedAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date, required: true } // MongoDB TTL indexing
 }
 ```
 
-#### Notes
-
-* Supports multi-device authentication.
-* Automatically expires using MongoDB TTL indexing.
-* Stores session metadata for security and session management.
-
----
-
-### Conversation
-
+### 3. Conversation Model
 ```js
 {
-  participants: [ObjectId],
-  type: "direct" | "self",
-  lastMessage: ObjectId,
+  participants: [{ type: ObjectId, ref: "User", index: true }],
+  type: { type: String, enum: ["direct", "self"], default: "direct" },
+  lastMessage: { type: ObjectId, ref: "Message" },
   createdAt: Date,
   updatedAt: Date
 }
 ```
 
-#### Notes
-
-* `direct` represents one-to-one conversations.
-* `self` represents personal note/self-chat conversations.
-* `lastMessage` references the latest Message document.
-* Indexed by participants for faster conversation lookups.
-
----
-
-### Message
-
+### 4. Message Model
 ```js
 {
-  conversationId: ObjectId,
-  senderId: ObjectId,
-
-  text: String,
-
-  messageType:
-    "text" |
-    "media" |
-    "mixed",
-
-  media: [
-    {
-      url: String,
-      publicId: String,
-
-      type:
-        "image" |
-        "video" |
-        "audio" |
-        "file",
-
-      name: String,
-      size: Number
-    }
-  ],
-
-  status:
-    "sent" |
-    "read",
-
+  conversationId: { type: ObjectId, ref: "Conversation", required: true, index: true },
+  senderId: { type: ObjectId, ref: "User", required: true },
+  text: { type: String },
+  messageType: { type: String, enum: ["text", "media", "mixed"], required: true },
+  media: [{
+    url: { type: String, required: true },
+    publicId: { type: String, required: true },
+    type: { type: String, enum: ["image", "video", "audio", "file"], required: true },
+    name: { type: String, required: true },
+    size: { type: Number, required: true }
+  }],
+  status: { type: String, enum: ["sent", "read"], default: "sent" },
   createdAt: Date,
   updatedAt: Date
 }
 ```
 
-#### Notes
-
-* `text` messages contain only text.
-* `media` messages contain only attachments.
-* `mixed` messages contain both text and attachments.
-* Indexed by `conversationId` and `createdAt` for efficient message retrieval and pagination.
-
 ---
 
-### Relationships
+## 🛠️ Environment Variables Configuration
 
-```txt
-User
- ├── RefreshToken[]
- ├── Conversation[]
- └── Message[]
-
-Conversation
- ├── participants -> User[]
- └── lastMessage -> Message
-
-Message
- ├── senderId -> User
- └── conversationId -> Conversation
-
-RefreshToken
- └── user -> User
-```
-
-
----
-
-## Environment Variables
+Create a `.env` file in your `/server` directory:
 
 ```env
 PORT=8000
+MONGODB_URL=mongodb+srv://<user>:<password>@cluster.mongodb.net
+DB_NAME=rynqor-chat
 
-MONGODB_URL=mongodb_url
-DB_NAME=
-
-ACCESS_TOKEN_SECRET=your_secret
+ACCESS_TOKEN_SECRET=your_jwt_access_secret_key
 ACCESS_TOKEN_EXPIRY=15m
 
-REFRESH_TOKEN_SECRET=your_secret
+REFRESH_TOKEN_SECRET=your_jwt_refresh_secret_key
 REFRESH_TOKEN_EXPIRY=7d
 
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# Optional Redis scaling settings
+REDIS_URL=redis://localhost:6379
 ```
 
 ---
 
-## Local Development
+## 💻 Local Development Setup
 
-### Install Dependencies
-
+### 1. Install Dependencies
+Run the install command in both directories:
 ```bash
-cd server
-npm install
-
-cd ../client
-npm install
+# In Root
+cd server && npm install
+cd ../client && npm install
 ```
 
-### Run Backend
+### 2. Start Application Services
+To run client and server in parallel local watch environments:
 
+**Start Server Node:**
 ```bash
 cd server
 npm run dev
 ```
 
-### Run Frontend
-
+**Start Client Bundler:**
 ```bash
 cd client
 npm run dev
 ```
 
----
-
-## Default Development URLs
-
-Frontend:
-
-```txt
-http://localhost:5173
-```
-
-Backend:
-
-```txt
-http://localhost:8000
-```
-
-API Base:
-
-```txt
-http://localhost:8000/api/v1
-```
-
----
-
-## Current Capabilities
-
-* JWT Authentication
-* Realtime Messaging
-* Optimistic UI
-* Presence Tracking
-* Typing Indicators
-* Read Receipts
-* Media Sharing
-* React Query Integration
-* Conversation Persistence
-* Socket Reconnection Handling
-* Cloudinary Upload Support
+### 3. Ports & API Mapping
+- **Frontend App Client:** `http://localhost:5173`
+- **Backend API Server:** `http://localhost:8000`
+- **API Endpoint Namespace:** `http://localhost:8000/api/v1`
