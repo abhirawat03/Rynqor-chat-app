@@ -1,87 +1,108 @@
-# Rynqor Chat Client
+# 📱 Rynqor Chat Client
 
-This is the frontend client for **Rynqor**, a real-time, high-performance MERN chat application. The client is built with **React 19**, **Vite**, **Tailwind CSS v4**, and **TanStack React Query v5** for robust server-state caching and synchronization.
-
----
-
-## 🚀 Key Features
-
-- **Real-time Synchronization:** Built-in Socket.IO state listeners, visibility handlers, and custom presence tracking.
-- **Virtual List Rendering:** Inverted infinite scroll for chat feeds using `react-virtuoso` to render large chat histories without DOM lag.
-- **Resilient Layout Boundaries:** Panel-level `ErrorBoundary` protection ensuring a component crash doesn't break app-wide navigation.
-- **Theme System:** System-synchronized dark/light mode with CSS Custom Properties and zero-flicker client-side hydration.
-- **Centralized Constraint Validation:** Shared file upload rules to prevent invalid or oversized uploads before they reach the server.
+The frontend client for **Rynqor**—a MERN real-time chat application. Built with **React 19**, **Vite**, **Tailwind CSS v4**, and **TanStack React Query v5** to deliver a responsive, performant, and resilient user experience.
 
 ---
 
-## 📂 Codebase Architecture
+## 🚀 Key Architectural Features
 
-The application is structured logically to separate layout, state, routing, and data services:
+- **Real-Time Synchronized Gateway:** Implements a single-instance Socket.IO connection wrapped in a React Context, automatically synchronizing user presence, message receipt, typing states, and handling tab-visibility state syncing.
+- **Optimistic UI Engine:** Messages appear instantly in the chat view with a `sending` state. In case of socket delivery failure, the UI rolls back automatically and labels the message as `failed`.
+- **Inverted Virtualized Feeds:** Implements `react-virtuoso` for smooth, lag-free scrolling through thousands of messages, using inverse scrolling behavior for instant bottom pinning.
+- **Resilient Panel Boundaries:** Utilizes panel-level React `ErrorBoundary` wrappers to prevent isolated component crashes from disrupting root-level navigation.
+- **Zero-Flicker Themes:** Synchronizes system theme preferences (dark/light mode) with CSS Custom Properties and direct class injection, eliminating paint flashes during initial page load.
+- **Client-Side File Safeguards:** Validates media uploads (file size bounds, blacklisted MIME types, extensions) on the client before network transmission.
+
+---
+
+## 🛠️ Technology Stack
+
+| Library / Tool | Version | Purpose |
+| :--- | :--- | :--- |
+| **React** | 19.0.0 | Component rendering & concurrent features |
+| **Vite** | 6.0.0 | High-performance bundling & HMR dev server |
+| **Tailwind CSS** | v4.0 | Modern utility-first CSS styling engine |
+| **TanStack Query** | v5.0 | Server-state caching, synchronization, & optimistic mutations |
+| **Socket.io Client**| v4.8 | Low-latency bi-directional WebSocket connection |
+| **React Virtuoso** | v4.7 | Efficient rendering of large virtualized message histories |
+
+---
+
+## 📂 Directory Layout & Modules
 
 ```text
-src/
-├── components/          # Reusable UI components
-│   ├── app/             # Global shell controls (AppHeader, connection banners)
-│   ├── chat/            # Chat-specific views (MessageList, MessageInput, Message)
-│   └── common/          # Layout utilities (ErrorBoundary, skeletons, lazy-loader)
+client/src/
+├── components/          # Modular, reusable UI components
+│   ├── app/             # Application shell controls (headers, disconnect overlays)
+│   ├── chat/            # Chat interfaces (message lists, text inputs, message bubbles)
+│   └── common/          # Layout wrappers (error boundaries, loading skeletons, modal dialogs)
 │
 ├── constants/           # Global client constraints
 │   └── upload.js        # File limits, size bounds, and blocked extensions
 │
-├── context/             # Global React contexts (ThemeContext)
+├── context/             # React Context definitions
+│   └── ThemeContext.jsx # Light/dark mode configuration and OS synchronization
 │
-├── hooks/               # Domain-specific React Query hooks (auth, messages, chats)
+├── hooks/               # Domain-specific React Query / Mutation wrappers
+│   ├── auth/            # Authenticated user profiles, session query hooks
+│   ├── conversations/   # Chat room management, direct messaging hook pipelines
+│   └── messages/        # Paginated message retrieval and media upload mutations
 │
 ├── layouts/             # Multi-panel shell layouts (AppLayout, ChatLayout)
 │
-├── pages/               # Top-level page controllers (ProfilePage, SearchPage, ChatsPage)
+├── pages/               # Top-level route pages (Chats, Profiles, UserSearch)
 │
-├── routes/              # Route shielding middleware (ProtectedRoute, PublicRoute)
+├── routes/              # Client routing and Route Shield middleware
+│   ├── ProtectedRoute   # Rejects unauthenticated connections
+│   └── PublicRoute      # Redirects logged-in users away from auth gates
 │
-└── services/            # API integration & real-time connection state
-    ├── api.js           # Deduplicated silent token refresh Axios interceptor
-    └── socket/          # Socket.io client setup, event handlers, and cache helpers
+└── services/            # API client layers and real-time gateways
+    ├── api.js           # Axios interceptor for automated, silent token rotation
+    └── socket/          # Socket initialization, event handler hooks, and query cache invalidations
 ```
 
 ---
 
-## ⚡ Data Flow & Caching (TanStack Query)
+## ⚡ Client-Side Data & Caching Pipeline
 
-Rynqor utilizes a **Three-Tier Data Architecture**:
-`UI Component` ➔ `Custom hook (Query/Mutation)` ➔ `REST/Socket API Service`
+Rynqor separates network requests from component UI elements using a three-tier architecture:
+`UI Component` ➔ `Custom Hook (Query/Mutation)` ➔ `REST/Socket API Service`
 
-### Server State Synchronizations:
+### TanStack Query Cache Structure
 
-- **Conversations (`["conversations"]`):** Cached list of active chats, updated optimistically on new messages and ordered by latest activity.
-- **Messages (`["messages", conversationId]`):** Virtualized infinite scroll query using scroll parameters (`pageParam`).
-- **Optimistic UI Updates:** Socket message acknowledgements run silent cache replacements (`updateMessagesCache`) to show delivered/sending statuses instantly.
+- **Active Conversations (`["conversations"]`):** Keeps track of all open chat threads. New socket messages trigger cache invalidations, re-sorting conversations dynamically by the latest message timestamp.
+- **Paginated Message Feed (`["messages", conversationId]`):** Uses cursor-based pagination parameters (`pageParam`) to request subsequent pages as the user scrolls up.
+- **Cache Handlers:** When messages are sent/received, helper modules (`updateMessagesCache.js`, `updateConversationCache.js`) manipulate the TanStack cache directly, avoiding expensive full-page refetches.
 
 ---
 
-## 🛠️ Local Development & Scripts
+## 💻 Local Development & Configuration
 
-From the `client/` subdirectory, you can manage the build and code quality using the following scripts:
+### Prerequisites
+Ensure you have the backend server up and running, and the necessary ports exposed.
 
-### Run Development Server
-
-Launches the Vite dev server locally at `http://localhost:5173`.
-
+### Install Client Dependencies
+From the root workspace folder, or the `/client` directory:
 ```bash
-npm run dev
+cd client
+npm install
 ```
 
-### Build Production Bundle
+### Script Directory
 
-Compiles and tree-shakes the application into optimized static assets under the `/dist` directory.
-
-```bash
-npm run build
-```
-
-### Code Linter
-
-Runs ESLint constraints to check file formats, dependency trees, and syntax styling.
-
-```bash
-npm run lint
-```
+- **Run Dev Server:** Launches the local hot-reloading development server.
+  ```bash
+  npm run dev
+  ```
+- **Code Quality Check:** Runs ESLint rules checking code styles and React hook usage.
+  ```bash
+  npm run lint
+  ```
+- **Compile Production Bundle:** Compiles and minifies assets to `/dist` for hosting.
+  ```bash
+  npm run build
+  ```
+- **Preview Production Build:** Locally previews the production assets.
+  ```bash
+  npm run preview
+  ```
