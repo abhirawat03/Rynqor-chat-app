@@ -39,9 +39,15 @@ Api.interceptors.response.use(
 
       try {
         if (!refreshPromise) {
-          refreshPromise = Api.post("/auth/refresh-token").finally(() => {
-            refreshPromise = null;
-          });
+          refreshPromise = axios
+            .post(
+              `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/refresh-token`,
+              {},
+              { withCredentials: true },
+            )
+            .finally(() => {
+              refreshPromise = null;
+            });
         }
 
         await refreshPromise;
