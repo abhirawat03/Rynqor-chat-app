@@ -5,6 +5,7 @@ import { IoClose } from "react-icons/io5";
 import { useState } from "react";
 
 import { useUserQuery } from "../../hooks/users/useUserQuery.js";
+import { formatLastSeen } from "../../utils/date.js";
 
 import useConversationMedia from "../../hooks/conversations/useConversationMediaQuery.js";
 
@@ -170,11 +171,14 @@ const UserProfilePage = ({
             {/* USERNAME */}
             <p className="mt-1 text-sm text-muted">@{user.username}</p>
 
-            {/* STATUS */}
-            {isOnline && (
+            {isOnline ? (
               <div className="flex items-center gap-2 mt-3 text-sm text-green-500 ">
                 <div className="w-2 h-2 bg-green-500 rounded-full " />
                 Online
+              </div>
+            ) : (
+              <div className="mt-3 text-sm text-muted">
+                {formatLastSeen(user?.lastSeen)}
               </div>
             )}
           </div>

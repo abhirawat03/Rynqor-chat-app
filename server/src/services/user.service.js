@@ -6,7 +6,7 @@ import { formatName } from "../utils/format.js";
 
 const getUserService = async (userId) => {
   const user = await User.findById(userId)
-    .select("username fullName avatar bio")
+    .select("username fullName avatar bio lastSeen")
     .lean();
 
   if (!user) throw new ApiError(404, "User not found");

@@ -88,6 +88,8 @@ const ConversationPage = () => {
 
   const isOnline = (!isGroup && presence?.[userId]?.online) || false;
 
+  const lastSeen = presence?.[userId]?.lastSeen || otherUser?.lastSeen;
+
   const typingUserIds = typingUsers[conversationId]
     ? Array.from(typingUsers[conversationId]).filter(
         (id) => id !== currentUserId,
@@ -232,6 +234,7 @@ duration-300
           name={conversation?.name}
           avatar={conversation?.avatar}
           isOnline={isOnline}
+          lastSeen={lastSeen}
           isSelf={conversation?.type === "self"}
           isGroup={isGroup}
           profileId={

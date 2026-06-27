@@ -2,10 +2,12 @@ import { useNavigate } from "react-router-dom";
 
 import { FaCircle } from "react-icons/fa";
 import { IoInformationCircle } from "react-icons/io5";
+import { formatLastSeen } from "../../utils/date.js";
 
 const ChatHeader = ({
   name,
   isOnline,
+  lastSeen,
   avatar,
   isSelf,
   isGroup,
@@ -120,7 +122,7 @@ const ChatHeader = ({
                   <span>Online</span>
                 </>
               ) : (
-                <span>Offline</span>
+                <span>{formatLastSeen(lastSeen)}</span>
               )}
             </div>
           )}
