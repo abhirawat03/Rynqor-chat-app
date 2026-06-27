@@ -107,8 +107,16 @@ export const formatLastSeen = (date) => {
   }
 
   // Older
-  const day = past.getDate().toString().padStart(2, "0");
-  const month = (past.getMonth() + 1).toString().padStart(2, "0");
+  const day = past.getDate();
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+  const month = months[past.getMonth()];
   const year = past.getFullYear();
-  return `last seen ${day}/${month}/${year}`;
+
+  if (year === now.getFullYear()) {
+    return `last seen on ${day} ${month}`;
+  }
+  return `last seen on ${day} ${month} ${year}`;
 };
