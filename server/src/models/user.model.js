@@ -97,4 +97,7 @@ userSchema.index(
   },
 );
 
+// Index for optimizing prefix search queries on fullName
+userSchema.index({ fullName: 1 });
+
 export const User = mongoose.model("User", userSchema);
