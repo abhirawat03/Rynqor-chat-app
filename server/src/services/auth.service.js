@@ -54,7 +54,7 @@ const registerService = async (
 
   // Generate cryptographically secure 6-digit verification code if required
   const otp = EMAIL_VERIFICATION_REQUIRED ? crypto.randomInt(100000, 1000000).toString() : null;
-  const otpExpires = EMAIL_VERIFICATION_REQUIRED ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null; // 24 hour expiry
+  const otpExpires = EMAIL_VERIFICATION_REQUIRED ? new Date(Date.now() + 10 * 60 * 1000) : null; // 10 minute expiry
 
   const user = await User.create({
     fullName,
@@ -71,7 +71,7 @@ const registerService = async (
     sendEmail({
       to: user.email,
       subject: "Verify your Rynqor account",
-      text: `Your verification code is: ${otp}. This code expires in 24 hours.`,
+      text: `Your verification code is: ${otp}. This code expires in 10 minutes.`,
       html: getVerificationTemplate(otp, user.fullName),
     }).catch((err) => {
       console.error("❌ Failed to send registration verification email:", err.message);
@@ -467,7 +467,7 @@ const resendVerificationService = async ({ email }) => {
   }
 
   const otp = crypto.randomInt(100000, 1000000).toString();
-  const otpExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
   user.verificationOtp = otp;
   user.verificationOtpExpires = otpExpires;
@@ -477,7 +477,7 @@ const resendVerificationService = async ({ email }) => {
   sendEmail({
     to: user.email,
     subject: "Verify your Rynqor account",
-    text: `Your verification code is: ${otp}. This code expires in 24 hours.`,
+    text: `Your verification code is: ${otp}. This code expires in 10 minutes.`,
     html: getVerificationTemplate(otp, user.fullName),
   }).catch((err) => {
     console.error("❌ Failed to resend verification email:", err.message);

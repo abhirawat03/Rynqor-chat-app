@@ -147,6 +147,11 @@ erDiagram
     publicId: String
   },
   bio: { type: String, default: "" },
+  isVerified: { type: Boolean, default: false },         // email verification status
+  verificationOtp: { type: String },                    // 6-digit crypto OTP
+  verificationOtpExpires: { type: Date },               // 10-minute expiry
+  resetOtp: { type: String },                           // password reset OTP
+  resetOtpExpires: { type: Date },                      // 10-minute expiry
   createdAt: Date,
   updatedAt: Date
 }
@@ -206,6 +211,8 @@ Create a `.env` file in your `/server` directory:
 
 ```env
 PORT=8000
+CLIENT_URL=http://localhost:5173
+
 MONGODB_URL=mongodb+srv://<user>:<password>@cluster.mongodb.net
 DB_NAME=rynqor-chat
 
@@ -219,8 +226,13 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-# Optional Redis scaling settings
+# Optional: Redis for presence tracking and Socket.IO scaling
 REDIS_URL=redis://localhost:6379
+
+# Optional: Email verification (powered by Resend)
+RESEND_API_KEY=re_your_resend_api_key
+SMTP_FROM=Rynqor Chat <noreply@yourdomain.com>
+EMAIL_VERIFICATION_REQUIRED=false   # set to true to enforce email verification on signup
 ```
 
 ---
