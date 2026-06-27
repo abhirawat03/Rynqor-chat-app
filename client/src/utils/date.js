@@ -75,36 +75,40 @@ export const formatLastSeen = (date) => {
   if (!date) return "Offline";
   const now = new Date();
   const past = new Date(date);
-  const diffMs = now - past;
 
-  if (diffMs < 0) return "Last seen just now";
+  // Time format: e.g. "4:32 PM"
+  let hours = past.getHours();
+  const minutes = past.getMinutes().toString().padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12; // 0 hour should be 12
+  const timeStr = `${hours}:${minutes} ${ampm}`;
+
+  const diffMs = now - past;
+  if (diffMs < 0) return "last seen recently";
 
   const diffSecs = Math.floor(diffMs / 1000);
   const diffMins = Math.floor(diffSecs / 60);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
 
   if (diffMins < 1) {
-    return "Last seen just now";
-  }
-  if (diffMins < 60) {
-    return `Last seen ${diffMins}m ago`;
-  }
-  if (diffHours < 24) {
-    return `Last seen ${diffHours}h ago`;
-  }
-  if (diffDays === 1) {
-    return "Last seen yesterday";
-  }
-  if (diffDays < 7) {
-    return `Last seen ${diffDays}d ago`;
+    return "last seen recently";
   }
 
-  const day = past.getDate();
-  const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-  ];
-  const month = months[past.getMonth()];
-  return `Last seen on ${day} ${month}`;
+  // Today
+  if (now.toDateString() === past.toDateString()) {
+    return `last seen today at ${timeStr}`;
+  }
+
+  // Yesterday
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+  if (yesterday.toDateString() === past.toDateString()) {
+    return `last seen yesterday at ${timeStr}`;
+  }
+
+  // Older
+  const day = past.getDate().toString().padStart(2, "0");
+  const month = (past.getMonth() + 1).toString().padStart(2, "0");
+  const year = past.getFullYear();
+  return `last seen ${day}/${month}/${year}`;
 };
