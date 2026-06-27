@@ -1,4 +1,3 @@
-// Registers and manages real-time socket events for messages, typing, presence, and session state.
 import mongoose from "mongoose";
 import { sendMessageService } from "../services/message.service.js";
 import { getConversationByIdService } from "../services/conversation.service.js";
@@ -6,6 +5,7 @@ import { getUserService } from "../services/user.service.js";
 import { getRedisClient } from "../config/redisClient.js";
 import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
+import { User } from "../models/user.model.js";
 
 // Fallbacks for when Redis client is offline/unavailable
 const localOnlineUsers = new Map();
@@ -270,6 +270,8 @@ export const registerHandlers = async (io, socket) => {
   // DISCONNECT & PRESENCE CLEANUP
   // ---------------------------------------------------
   socket.on("disconnect", async () => {
+    const lastSeen = new Date();
+
     if (redisClient) {
       try {
         await redisClient.sRem(`user:sockets:${userId}`, socket.id);
@@ -281,9 +283,12 @@ export const registerHandlers = async (io, socket) => {
           await redisClient.del(`user:sockets:${userId}`);
           socketLimits.delete(userId);
 
+          // Persist lastSeen to DB so it survives server restarts
+          await User.findByIdAndUpdate(userId, { lastSeen });
+
           socket.broadcast.emit("user_offline", {
             userId,
-            lastSeen: new Date(),
+            lastSeen,
           });
         }
       } catch (err) {
@@ -297,9 +302,12 @@ export const registerHandlers = async (io, socket) => {
           localOnlineUsers.delete(userId);
           socketLimits.delete(userId);
 
+          // Persist lastSeen to DB
+          await User.findByIdAndUpdate(userId, { lastSeen });
+
           socket.broadcast.emit("user_offline", {
             userId,
-            lastSeen: new Date(),
+            lastSeen,
           });
         }
       }

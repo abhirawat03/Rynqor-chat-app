@@ -44,6 +44,7 @@ const convoSchema = new Schema(
   { timestamps: true },
 );
 
-convoSchema.index({ participants: 1 });
+// Compound index: filter by participant + sort by most recent in a single index scan
+convoSchema.index({ participants: 1, updatedAt: -1 });
 
 export const Conversation = mongoose.model("Conversation", convoSchema);

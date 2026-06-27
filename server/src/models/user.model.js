@@ -68,14 +68,10 @@ const userSchema = new Schema(
       type: Date,
       default: null,
     },
-    // isOnline:{
-    //     type:Boolean,
-    //     default:false,
-    // },
-    // lastSeen:{
-    //     type:Date,
-    //     default:null,
-    // },
+    lastSeen: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true },
 );
@@ -90,5 +86,15 @@ userSchema.pre("save", async function () {
 userSchema.methods.isPasswordCorrect = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// Auto-delete unverified users after their OTP expires.
+// partialFilterExpression ensures verified users are never touched by this TTL.
+userSchema.index(
+  { verificationOtpExpires: 1 },
+  {
+    expireAfterSeconds: 0,
+    partialFilterExpression: { isVerified: false },
+  },
+);
 
 export const User = mongoose.model("User", userSchema);
