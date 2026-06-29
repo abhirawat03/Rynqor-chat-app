@@ -5,7 +5,7 @@ import { Message } from "../models/message.model.js";
 import cloudinary from "cloudinary";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
-const USER_PUBLIC_FIELDS = "_id username fullName avatar lastSeen";
+const USER_PUBLIC_FIELDS = "_id username fullName avatar lastSeen isDeleted";
 const createConversationService = async (userId, receiverId) => {
   const isSelfChat = userId.toString() === receiverId.toString();
   // if(userId === receiverId) throw new ApiError(400, "Cannot chat with yourself");

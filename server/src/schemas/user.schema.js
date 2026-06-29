@@ -70,9 +70,18 @@ const searchUsersSchema = z.object({
     .strict(),
 });
 
+const deleteAccountSchema = z.object({
+  body: z
+    .object({
+      password: z.string().min(1, "Password is required"),
+    })
+    .strict(),
+});
+
 export {
   getUserSchema,
   updateProfileSchema,
   changePasswordSchema,
   searchUsersSchema,
+  deleteAccountSchema,
 };

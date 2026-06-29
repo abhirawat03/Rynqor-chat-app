@@ -130,6 +130,11 @@ const loginService = async ({ login, password }, deviceInfo) => {
     throw new ApiError(400, "Invalid credentials");
   }
 
+  // Treat deleted accounts as non-existent to avoid leaking state
+  if (user.isDeleted) {
+    throw new ApiError(400, "Invalid credentials");
+  }
+
   const isMatch = await user.isPasswordCorrect(password);
 
   if (!isMatch) {

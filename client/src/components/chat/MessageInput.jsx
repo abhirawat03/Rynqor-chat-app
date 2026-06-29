@@ -10,7 +10,7 @@ import { useUploadMessageMediaMutation } from "../../hooks/messages/useUploadMes
 import { updateMessagesCache } from "../../services/socket/helpers/updateMessagesCache.js";
 import { BLOCKED_EXTENSIONS, ALLOWED_MIME_TYPES } from "../../constants/upload.js";
 
-const MessageInput = ({ onSend }) => {
+const MessageInput = ({ onSend, isDeleted = false }) => {
   const uploadMutation = useUploadMessageMediaMutation();
   const queryClient = useQueryClient();
 
@@ -207,6 +207,17 @@ const MessageInput = ({ onSend }) => {
       handleSend();
     }
   };
+
+  if (isDeleted) {
+    return (
+      <div className="shrink-0 border-t border-border bg-surface/90 px-4 py-3">
+        <div className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-surface-secondary px-4 py-3 text-sm text-muted">
+          <span>🚫</span>
+          <span>You can't reply to this conversation</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-0 transition-colors duration-300 border-t shrink-0 border-border bg-surface/90 backdrop-blur-xl">

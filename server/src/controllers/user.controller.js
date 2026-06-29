@@ -1,6 +1,7 @@
 import {
   changePasswordService,
   deleteAvatarService,
+  deleteAccountService,
   getUserService,
   searchUserService,
   updateAvatarService,
@@ -58,6 +59,26 @@ const searchUsers = async (req, res) => {
     .json(new ApiResponse(200, users, "Users fetched successfully"));
 };
 
+const deleteAccount = async (req, res) => {
+  const { password } = req.body;
+
+  await deleteAccountService(req.user?._id, password);
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    path: "/",
+  };
+
+  return res
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .clearCookie("sessionId", cookieOptions)
+    .status(200)
+    .json(new ApiResponse(200, null, "Account deleted successfully"));
+};
+
 export {
   getUser,
   updateProfile,
@@ -65,4 +86,5 @@ export {
   deleteAvatar,
   changePassword,
   searchUsers,
+  deleteAccount,
 };

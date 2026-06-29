@@ -86,6 +86,8 @@ const ConversationPage = () => {
 
   const userId = isGroup ? "" : otherUser?._id?.toString();
 
+  const isOtherUserDeleted = !isGroup && (otherUser?.isDeleted ?? false);
+
   const isOnline = (!isGroup && presence?.[userId]?.online) || false;
 
   const lastSeen = presence?.[userId]?.lastSeen || otherUser?.lastSeen;
@@ -237,6 +239,7 @@ duration-300
           lastSeen={lastSeen}
           isSelf={conversation?.type === "self"}
           isGroup={isGroup}
+          isDeleted={isOtherUserDeleted}
           profileId={
             conversation?.type === "self"
               ? currentUserId
@@ -284,7 +287,7 @@ duration-300
         />
 
         {/* INPUT */}
-        <MessageInput onSend={sendMessage} />
+        <MessageInput onSend={sendMessage} isDeleted={isOtherUserDeleted} />
       </div>
       {showProfile && (
         <div className="absolute inset-0 z-50 flex bg-background xl:static xl:z-auto xl:bg-transparent">

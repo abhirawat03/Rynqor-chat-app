@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import cloudinary from "cloudinary";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { formatName } from "../utils/format.js";
+import { RefreshToken } from "../models/refreshToken.model.js";
 
 const getUserService = async (userId) => {
   const user = await User.findById(userId)
@@ -122,6 +123,9 @@ const changePasswordService = async (userId, oldPassword, newPassword) => {
 
   await user.save();
 
+  // Revoke ALL active sessions — forces re-login on every device after password change.
+  await RefreshToken.deleteMany({ user: userId });
+
   return null;
 };
 
@@ -129,6 +133,7 @@ const searchUserService = async (search, currentUserId) => {
   const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
   const query = {
+    isDeleted: { $ne: true },
     $or: [
       { username: { $regex: `^${escapedSearch}`, $options: "i" } },
       { fullName: { $regex: `^${escapedSearch}`, $options: "i" } },
@@ -153,6 +158,42 @@ const searchUserService = async (search, currentUserId) => {
   }));
 };
 
+const deleteAccountService = async (userId, password) => {
+  const user = await User.findById(userId).select("+password avatar");
+  if (!user) throw new ApiError(404, "User not found");
+
+  const isPasswordValid = await user.isPasswordCorrect(password);
+  if (!isPasswordValid) throw new ApiError(400, "Incorrect password");
+
+  // 1. Delete Cloudinary avatar (non-blocking) — no longer needed
+  if (user.avatar?.publicId) {
+    cloudinary.uploader
+      .destroy(user.avatar.publicId)
+      .catch((err) => console.error("Avatar deletion failed on account delete:", err));
+  }
+
+  // 2. Revoke all active sessions across all devices
+  await RefreshToken.deleteMany({ user: userId });
+
+  // 3. Anonymize the user document (Instagram-style soft delete)
+  //    — Conversations and messages are preserved but show "Deleted Account"
+  await User.findByIdAndUpdate(userId, {
+    $set: {
+      fullName: "Deleted Account",
+      username: `deleted_${userId}`,
+      email: `deleted_${userId}@deleted.local`,
+      bio: "",
+      avatar: null,
+      isDeleted: true,
+      resetOtp: null,
+      resetOtpExpires: null,
+      verificationOtp: null,
+      verificationOtpExpires: null,
+      lastSeen: null,
+    },
+  });
+};
+
 export {
   getUserService,
   updateProfileService,
@@ -160,4 +201,5 @@ export {
   deleteAvatarService,
   changePasswordService,
   searchUserService,
+  deleteAccountService,
 };

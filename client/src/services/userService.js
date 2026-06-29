@@ -30,6 +30,11 @@ const searchUsers = async (query) => {
   return res.data.data;
 };
 
+const deleteAccount = async (payload) => {
+  const res = await Api.delete("/users/account", { data: payload });
+  return res.data;
+};
+
 export {
   getUser,
   updateProfile,
@@ -37,4 +42,5 @@ export {
   deleteAvatar,
   changePassword,
   searchUsers,
+  deleteAccount,
 };

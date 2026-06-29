@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   changePassword,
+  deleteAccount,
   deleteAvatar,
   getUser,
   searchUsers,
@@ -13,6 +14,7 @@ import { handleSingleUpload } from "../middleware/upload.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 import {
   changePasswordSchema,
+  deleteAccountSchema,
   getUserSchema,
   searchUsersSchema,
   updateProfileSchema,
@@ -35,6 +37,9 @@ router
 router
   .route("/change-password")
   .patch(authLimiter, validate(changePasswordSchema), changePassword);
+router
+  .route("/account")
+  .delete(authLimiter, validate(deleteAccountSchema), deleteAccount);
 router
   .route("/:id")
   .get(validate(getUserSchema), cacheMiddleware("users", 300), getUser);

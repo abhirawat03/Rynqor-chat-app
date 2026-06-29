@@ -11,6 +11,7 @@ const ChatHeader = ({
   avatar,
   isSelf,
   isGroup,
+  isDeleted = false,
   profileId,
   onOpenProfile,
 }) => {
@@ -50,11 +51,15 @@ const ChatHeader = ({
       </button>
       <button
         onClick={() => {
-          if (profileId) {
+          if (profileId && !isDeleted) {
             onOpenProfile();
           }
         }}
-        className="flex items-center flex-1 min-w-0 gap-3 text-left cursor-pointer lg:pointer-events-none lg:cursor-default"
+        className={`flex items-center flex-1 min-w-0 gap-3 text-left ${
+          isDeleted
+            ? "pointer-events-none cursor-default"
+            : "cursor-pointer lg:pointer-events-none lg:cursor-default"
+        }`}
       >
         {/* AVATAR */}
         <div className="relative flex items-center justify-center overflow-hidden text-sm font-bold rounded-full h-11 w-11 shrink-0 bg-surface-secondary text-foreground">
@@ -110,7 +115,9 @@ const ChatHeader = ({
               text-muted
             "
             >
-              {isOnline ? (
+              {isDeleted ? (
+                <span className="italic text-muted/60">Account deleted</span>
+              ) : isOnline ? (
                 <>
                   <FaCircle
                     className="
@@ -129,8 +136,8 @@ const ChatHeader = ({
         </div>
       </button>
 
-      {/* INFO BUTTON */}
-      {profileId && (
+      {/* INFO BUTTON — hidden for deleted accounts */}
+      {profileId && !isDeleted && (
         <button
           type="button"
           onClick={onOpenProfile}
