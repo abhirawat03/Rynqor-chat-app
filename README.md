@@ -1,74 +1,116 @@
 # 🌐 Rynqor — Real-time MERN Chat Application
 
-Rynqor is a high-performance, real-time MERN chat application built with **React 19**, **Express 5**, **MongoDB**, **Redis**, and **Socket.IO**. Designed with an optimistic-first UI, it supports instantaneous messaging, conversation management, user presence tracking, live typing indicators, read receipts, and media attachments with automatic database transaction guarantees.
+Rynqor is a high-performance, real-time MERN chat application built with **React 19**, **Express 5**, **MongoDB**, **Redis**, and **Socket.IO**. Designed with an optimistic-first UI, it supports instantaneous messaging, group and direct conversations, live typing indicators, read receipts, media attachments, user presence tracking, session management, and Instagram-style soft account deletion.
 
 ---
 
 ## 🚀 Key System Features
 
-- **Optimistic-First Messaging:** Interactive chat interfaces showing real-time delivery statuses (sending, sent, read, failed) with automatic local cache rollback upon network or server socket failures.
-- **Horizontal Scaling with Redis:** Integrated Socket.IO Redis Adapter to scale WebSocket connections across multiple server instances or nodes, allowing multi-tab presence tracking.
-- **Atomic Database Transactions:** Multi-document write safety utilizing MongoDB Sessions/Transactions ensuring referential integrity when inserting new messages and updating conversation activity trackers.
-- **Automated Silent Token Rotation:** HTTP-Only Cookie-based authentication protecting route middleware with silent JWT access-token refresh loops.
-- **Virtualized High-Volume Feeds:** Dynamic inverted virtual scroll rendering for historical message logs using `react-virtuoso` to eliminate DOM bottlenecks.
-- **Zero-Paint Flicker Themes:** Instant custom theme hydration supporting dark/light mode switches mapped to system preferences without layout shifting.
+- **Optimistic-First Messaging** — Messages appear instantly with live status indicators (`sending → sent → read`) and automatic rollback on failure.
+- **Group & Direct Conversations** — Create direct chats, self-note chats, and named group conversations with admin roles.
+- **Horizontal Scaling with Redis** — Socket.IO Redis Adapter scales WebSocket connections across multiple server nodes with multi-tab presence tracking.
+- **Atomic DB Transactions** — MongoDB sessions/transactions guarantee referential integrity when writing messages and updating conversation activity pointers.
+- **Silent JWT Rotation** — HTTP-Only cookie-based auth with automatic access-token refresh loops; zero user interruption.
+- **Session Management** — Per-device refresh token tracking with remote logout support. Password change force-revokes all active sessions.
+- **Email Verification** — OTP-based email verification via Resend (togglable per environment). Unverified accounts auto-expire via MongoDB TTL index.
+- **Forgot/Reset Password** — Secure 6-digit OTP flow; resets revoke all active sessions.
+- **Instagram-Style Soft Delete** — Deleted accounts are anonymized (name → "Deleted Account", placeholder email/username), sessions revoked, avatar removed. Conversation history is preserved for other participants. Deleted accounts cannot log in and are hidden from search.
+- **Virtualized Message Feeds** — Infinite-scroll message history via `react-virtuoso` with no DOM bottlenecks.
+- **Media Attachments** — Upload images, video, audio, and files; Cloudinary-backed with per-type MIME/extension validation.
+- **System Messages** — Server-emitted notices rendered as pill labels (e.g. group events).
+- **Zero-Flicker Theming** — Dark/light mode hydrated before React mounts, synced to system preference.
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend (Client)
-- **Framework:** React 19.2 (Concurrent Rendering)
-- **Build Engine:** Vite 8.0 (ESM-only dev server)
-- **Styling:** Tailwind CSS v4.0 (Utility-first native CSS compilation)
-- **Server Cache State:** TanStack React Query v5.99 (Invalidations and optimistic mutations)
-- **Real-Time Client:** Socket.IO Client v4.8
-- **Virtualization:** React Virtuoso v4.18
+### Frontend
+| Library | Version | Role |
+|---|---|---|
+| React | 19.x | UI framework (Concurrent Rendering) |
+| Vite | 8.x | Build engine (ESM-only dev server) |
+| Tailwind CSS | v4.x | Utility-first native CSS |
+| TanStack Query | v5.x | Server cache, optimistic mutations |
+| Socket.IO Client | v4.8 | Real-time WebSocket client |
+| React Virtuoso | v4.x | Virtualized message list |
+| React Router | v7.x | Client-side routing |
 
-### Backend (Server)
-- **App Framework:** Express v5.2 (Native Promise-based route handlers)
-- **Database driver:** Mongoose v9.3 (Object Document Mapping with strict schemas)
-- **WebSocket Server:** Socket.IO v4.8
-- **Scaling Service:** Redis client v6.0 with `@socket.io/redis-adapter`
-- **Media Hosting:** Cloudinary SDK v2.9
-- **Validation Engine:** Zod v4.4 (Runtime request schema validations)
+### Backend
+| Library | Version | Role |
+|---|---|---|
+| Express | v5.x | HTTP server (native async handlers) |
+| Mongoose | v9.x | MongoDB ODM with strict schemas |
+| Socket.IO | v4.8 | WebSocket server |
+| Redis / `@socket.io/redis-adapter` | v6.x | Multi-node presence scaling |
+| Cloudinary SDK | v2.x | Media storage and delivery |
+| Zod | v4.x | Runtime request validation |
+| bcryptjs | — | Password hashing |
+| Multer | — | Multipart file handling |
+| Resend | — | Transactional email (OTP) |
 
 ---
 
-## 📂 Core Codebase Architecture
+## 📂 Codebase Architecture
 
 ```text
 Rynqor/
-├── client/                     # Frontend Application
-│   ├── src/
-│   │   ├── components/         # Modals, app headers, virtual lists, inputs
-│   │   ├── constants/          # Shared constraints (upload size bounds, MIME types)
-│   │   ├── context/            # Global context providers (ThemeContext)
-│   │   ├── hooks/              # Query and mutation custom React hooks
-│   │   ├── layouts/            # Panel layout wrappers (AppLayout, ChatLayout)
-│   │   ├── pages/              # Routing page controllers (Chats, Profiles, Search)
-│   │   ├── routes/             # Authentication guards (Protected and Public routes)
-│   │   └── services/           # Socket instance, cache updates, Axios intercepts
+├── client/                        # React Frontend
+│   └── src/
+│       ├── components/
+│       │   ├── app/               # SplashScreen, GlobalErrorBoundary
+│       │   ├── chat/              # ChatHeader, ChatItem, Message, MessageInput,
+│       │   │                      #   MessageList, MessageMedia, TypingIndicator,
+│       │   │                      #   CreateGroupModal, ScrollToBottomButton
+│       │   ├── common/            # Skeleton loaders, ErrorBoundary, LazyPage
+│       │   ├── navigation/        # Sidebar / nav components
+│       │   └── search/            # User search UI
+│       ├── constants/             # Upload limits, MIME types
+│       ├── context/               # ThemeContext
+│       ├── hooks/
+│       │   ├── auth/              # useCurrentUserQuery, useLoginMutation,
+│       │   │                      #   useLogoutMutation, useSessionsQuery, ...
+│       │   ├── chat/              # useChatMessages, useChatScroll, useReadReceipts
+│       │   ├── conversations/     # useConversationByIdQuery, useConversationsQuery, ...
+│       │   ├── messages/          # useUploadMessageMediaMutation
+│       │   └── users/             # useUserQuery, useUpdateProfileMutation,
+│       │                          #   useChangePasswordMutation, useDeleteAccountMutation, ...
+│       ├── layouts/               # AppLayout, ChatLayout, AuthLayout
+│       ├── pages/
+│       │   ├── auth/              # Login, Signup, ForgotPassword, VerifyEmail
+│       │   ├── chat/              # ChatsPage, ConversationPage
+│       │   ├── profile/           # ProfilePage, UserProfilePage, GroupProfilePage
+│       │   └── search/            # SearchPage
+│       ├── routes/                # ProtectedRoute, PublicRoute
+│       └── services/
+│           ├── api.js             # Axios instance with refresh interceptor
+│           ├── authService.js
+│           ├── userService.js
+│           ├── conversationService.js
+│           ├── messageService.js
+│           └── socket/            # SocketProvider, useSocket, cache update helpers
 │
-└── server/                     # Backend API & WebSocket Gateway
-    ├── src/
-    │   ├── config/             # DB connectivity, Redis clients, configuration setups
-    │   ├── controllers/        # Express handlers (Auth, Messages, Users, Conversations)
-    │   ├── middleware/         # Multer uploads, validation hooks, security headers, JWT verifiers
-    │   ├── models/             # Mongoose schemas (User, RefreshToken, Conversation, Message)
-    │   ├── routes/             # API routing endpoints
-    │   ├── schemas/            # Zod verification objects
-    │   ├── services/           # DB transaction business logic
-    │   ├── socket/             # Socket connection authorizations and rate limit handlers
-    │   └── utils/              # Token encoders, Cloudinary helpers, parser formatters
+└── server/                        # Express + Socket.IO Backend
+    └── src/
+        ├── config/                # DB, Redis, env config
+        ├── constants/             # Shared server constants
+        ├── controllers/           # auth, user, conversation, message
+        ├── middleware/            # verifyJwt, validate (Zod), multer upload,
+        │                          #   rateLimiter, cache, handleSingleUpload
+        ├── models/                # User, RefreshToken, Conversation, Message
+        ├── routes/                # auth, user, conversation, message
+        ├── schemas/               # Zod schemas for all endpoints
+        ├── services/              # Business logic (auth, user, conversation,
+        │                          #   message, email)
+        ├── socket/                # Socket connection handlers, presence engine
+        └── utils/                 # ApiError, ApiResponse, generateTokens,
+                                   #   cloudinary, getDeviceInfo, format
 ```
 
 ---
 
 ## ⚡ System Event Flows
 
-### 1. Send Message Sequence
-This sequence details how Rynqor achieves instant message rendering in the UI while guaranteeing transaction safety on the database.
+### 1. Send Message (Optimistic + Async Persistence)
 
 ```mermaid
 sequenceDiagram
@@ -80,22 +122,19 @@ sequenceDiagram
 
     ClientA->>ClientA: Add message optimistically (status: "sending")
     ClientA->>SocketServer: Emit "send_message" { payload }
-    
     SocketServer->>SocketServer: Verify socket room membership
-    SocketServer->>ClientA: Emit "message_sent" (acknowledgment)
-    ClientA->>ClientA: Update status to "sent" (removes spinner)
-    
+    SocketServer->>ClientA: Emit "message_sent" (ACK)
+    ClientA->>ClientA: Update status to "sent"
     SocketServer->>ClientB: Emit "new_message" { message, conversation }
-    
+
     rect rgb(230, 240, 255)
-        note right of SocketServer: Asynchronous DB Persistence
-        SocketServer->>DB: Message.create() inside Session transaction
-        SocketServer->>DB: Conversation.findByIdAndUpdate(lastMessage pointer)
+        note right of SocketServer: Async DB Persistence (non-blocking)
+        SocketServer->>DB: Message.create() in Mongo Session transaction
+        SocketServer->>DB: Conversation.findByIdAndUpdate(lastMessage)
     end
 ```
 
 ### 2. Multi-Tab Presence Synchronization
-How the presence engine tracks active tabs across multiple browser instances using Redis key storage.
 
 ```mermaid
 sequenceDiagram
@@ -106,112 +145,205 @@ sequenceDiagram
     participant Broadcast as Other Users
 
     Client->>Server: Connect (Handshake + JWT Validation)
-    alt Using Redis Cluster (Multi-Node Scaling)
-        Server->>Redis: Check if user wasOnline (sIsMember "online_users")
-        Server->>Redis: Store socket instance (sAdd "user:sockets:userId")
-        Server->>Redis: Mark user active (sAdd "online_users")
+    alt Redis Cluster (Multi-Node)
+        Server->>Redis: sIsMember "online_users"
+        Server->>Redis: sAdd "user:sockets:userId"
+        Server->>Redis: sAdd "online_users"
         Server->>Client: Emit "online_users" [active list]
-        opt First tab/device active
+        opt First tab for this user
             Server->>Broadcast: Broadcast "user_online" { userId }
         end
-    else Single Instance Development Fallback
-        Server->>Server: Register in local Map memory
+    else Single-Node Dev Fallback
+        Server->>Server: Register in local Map
         Server->>Client: Emit "online_users" [active list]
         Server->>Broadcast: Broadcast "user_online" { userId }
     end
 ```
 
+### 3. Account Deletion (Soft Delete)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant API as Express API
+    participant DB as MongoDB
+    participant CDN as Cloudinary
+
+    User->>API: DELETE /api/v1/users/account { password }
+    API->>DB: Verify password hash
+    API->>CDN: destroy(avatar.publicId) [non-blocking]
+    API->>DB: RefreshToken.deleteMany — revoke all sessions
+    API->>DB: User.findByIdAndUpdate → anonymize (isDeleted: true)
+    API->>User: 200 OK + clear auth cookies
+    Note over DB: Conversations and messages preserved,<br/>sender shown as "Deleted Account"
+```
+
 ---
 
-## 📊 Database Model Schemas
+## 📊 Database Models
 
 ```mermaid
 erDiagram
-    USER ||--o{ REFRESH_TOKEN : owns
+    USER ||--o{ REFRESH_TOKEN : "owns (per device)"
     USER ||--o{ MESSAGE : sends
-    CONVERSATION ||--|{ USER : includes
+    CONVERSATION }|--|{ USER : "has participants"
     CONVERSATION ||--o| MESSAGE : "links lastMessage"
-    MESSAGE ||--|| USER : "sent by"
     MESSAGE ||--|| CONVERSATION : "belongs to"
 ```
 
-### 1. User Model
+### User
 ```js
 {
-  username: { type: String, unique: true, index: true },
-  fullName: { type: String, required: true },
-  email: { type: String, unique: true, index: true },
-  password: { type: String, required: true, select: false },
-  avatar: {
-    url: String,
-    publicId: String
-  },
-  bio: { type: String, default: "" },
-  isVerified: { type: Boolean, default: false },         // email verification status
-  verificationOtp: { type: String },                    // 6-digit crypto OTP
-  verificationOtpExpires: { type: Date },               // 10-minute expiry
-  resetOtp: { type: String },                           // password reset OTP
-  resetOtpExpires: { type: Date },                      // 10-minute expiry
-  createdAt: Date,
-  updatedAt: Date
+  username:               String,   // unique, 3-30 chars, alphanumeric + underscore
+  fullName:               String,   // required
+  email:                  String,   // unique, lowercase
+  password:               String,   // bcrypt hashed, select: false
+  avatar:                 { url: String, publicId: String } | null,
+  bio:                    String,   // max 160 chars
+  isVerified:             Boolean,  // email verification gate
+  isDeleted:              Boolean,  // soft-delete flag (Instagram-style)
+  verificationOtp:        String,   // 6-digit crypto OTP
+  verificationOtpExpires: Date,     // MongoDB TTL auto-purges unverified users
+  resetOtp:               String,
+  resetOtpExpires:        Date,
+  lastSeen:               Date,
 }
 ```
 
-### 2. RefreshToken Model
-Stores device fingerprinting and allows revocation of specific devices remotely.
+### RefreshToken
 ```js
 {
-  user: { type: ObjectId, ref: "User", required: true },
-  token: { type: String, required: true, index: true },
-  device: { type: String },
-  location: { type: String },
-  ipAddress: { type: String },
-  userAgent: { type: String },
-  lastUsedAt: { type: Date, default: Date.now },
-  expiresAt: { type: Date, required: true } // MongoDB TTL indexing
+  user:       ObjectId,  // ref: User
+  token:      String,    // SHA-256 hashed
+  device:     String,
+  location:   String,
+  ipAddress:  String,
+  userAgent:  String,
+  lastUsedAt: Date,
+  expiresAt:  Date,      // MongoDB TTL index (30 days)
 }
 ```
 
-### 3. Conversation Model
+### Conversation
 ```js
 {
-  participants: [{ type: ObjectId, ref: "User", index: true }],
-  type: { type: String, enum: ["direct", "self"], default: "direct" },
-  lastMessage: { type: ObjectId, ref: "Message" },
-  createdAt: Date,
-  updatedAt: Date
+  participants: [ObjectId],  // ref: User — compound index with updatedAt
+  type:         "direct" | "self" | "group",
+  name:         String,      // group display name
+  avatar:       { url: String, publicId: String },
+  admins:       [ObjectId],  // ref: User — group admins
+  lastMessage:  ObjectId,    // ref: Message
 }
 ```
 
-### 4. Message Model
+### Message
 ```js
 {
-  conversationId: { type: ObjectId, ref: "Conversation", required: true, index: true },
-  senderId: { type: ObjectId, ref: "User", required: true },
-  text: { type: String },
-  messageType: { type: String, enum: ["text", "media", "mixed"], required: true },
+  conversationId: ObjectId,  // ref: Conversation — compound index with _id desc
+  senderId:       ObjectId,  // ref: User
+  text:           String,
+  messageType:    "text" | "media" | "mixed" | "system",
   media: [{
-    url: { type: String, required: true },
-    publicId: { type: String, required: true },
-    type: { type: String, enum: ["image", "video", "audio", "file"], required: true },
-    name: { type: String, required: true },
-    size: { type: Number, required: true }
+    url:       String,
+    publicId:  String,
+    type:      "image" | "video" | "audio" | "file",
+    name:      String,
+    size:      Number,
   }],
-  status: { type: String, enum: ["sent", "read"], default: "sent" },
-  createdAt: Date,
-  updatedAt: Date
+  status: "sent" | "read",
 }
 ```
 
 ---
 
-## 🛠️ Environment Variables Configuration
+## 🔌 API Reference
 
-Create a `.env` file in your `/server` directory:
+### Auth — `/api/v1/auth`
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `POST` | `/register` | — | Register new account |
+| `POST` | `/login` | — | Login, sets HttpOnly cookies |
+| `POST` | `/verify-email` | — | Verify email OTP |
+| `POST` | `/resend-verification` | — | Resend verification OTP |
+| `GET` | `/check-username` | — | Check username availability |
+| `POST` | `/forgot-password` | — | Send password-reset OTP |
+| `POST` | `/reset-password` | — | Reset password + revoke all sessions |
+| `POST` | `/refresh-token` | — | Rotate access/refresh token pair |
+| `GET` | `/current-user` | ✅ | Get authenticated user profile |
+| `POST` | `/logout` | ✅ | Logout current session |
+| `GET` | `/sessions` | ✅ | List all active device sessions |
+| `POST` | `/logout-session/:sessionId` | ✅ | Remote logout a specific session |
+
+### Users — `/api/v1/users`
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `GET` | `/search?search=` | ✅ | Search users by name or username |
+| `PATCH` | `/profile` | ✅ | Update fullName / username / bio |
+| `PATCH` | `/avatar` | ✅ | Upload new avatar |
+| `DELETE` | `/avatar` | ✅ | Remove current avatar |
+| `PATCH` | `/change-password` | ✅ | Change password + revoke all sessions |
+| `DELETE` | `/account` | ✅ | Soft-delete account (password confirm) |
+| `GET` | `/:id` | ✅ | Get public user profile (Redis-cached) |
+
+### Conversations — `/api/v1/conversations`
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `GET` | `/` | ✅ | List all conversations |
+| `POST` | `/` | ✅ | Create direct or self conversation |
+| `GET` | `/:id` | ✅ | Get single conversation |
+| `POST` | `/group` | ✅ | Create group conversation |
+| `PATCH` | `/group/:id` | ✅ | Update group info |
+| `DELETE` | `/:id` | ✅ | Delete conversation |
+
+### Messages — `/api/v1/messages`
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `GET` | `/:conversationId` | ✅ | Paginated message history |
+| `POST` | `/media` | ✅ | Upload media attachment |
+
+---
+
+## 🌐 Socket.IO Events
+
+| Direction | Event | Payload |
+|---|---|---|
+| Client → Server | `send_message` | `{ conversationId, text, media, clientTempId }` |
+| Client → Server | `join_conversation` | `conversationId` |
+| Client → Server | `typing` | `conversationId` |
+| Client → Server | `stop_typing` | `conversationId` |
+| Client → Server | `mark_read` | `{ conversationId, messageIds }` |
+| Server → Client | `new_message` | `{ message, conversation }` |
+| Server → Client | `message_sent` | `{ clientTempId, message }` |
+| Server → Client | `messages_read` | `{ conversationId, messageIds }` |
+| Server → Client | `user_typing` | `{ userId, conversationId }` |
+| Server → Client | `user_stop_typing` | `{ userId, conversationId }` |
+| Server → Client | `user_online` | `{ userId }` |
+| Server → Client | `user_offline` | `{ userId, lastSeen }` |
+| Server → Client | `online_users` | `string[]` |
+
+---
+
+## 🔒 Security Highlights
+
+- **HttpOnly Cookies** — Access, refresh, and session tokens are never accessible to JavaScript.
+- **Rate Limiting** — Auth and upload routes are protected by per-IP rate limiters.
+- **Force Logout on Password Change** — All active sessions across all devices are revoked on password change or reset.
+- **Soft Delete Guard** — Deleted accounts cannot log in and are excluded from all search results.
+- **Zod Validation** — Every request body, query, and param is validated against strict schemas before reaching controllers.
+- **JWT Verification on Socket** — WebSocket handshake validates the access token; unauthenticated connections are rejected immediately.
+- **MongoDB TTL Index** — Unverified users are automatically purged after their OTP expires; no manual cleanup needed.
+
+---
+
+## 🛠️ Environment Variables
+
+Create a `.env` file in the `/server` directory:
 
 ```env
 PORT=8000
 CLIENT_URL=http://localhost:5173
+NODE_ENV=development
 
 MONGODB_URL=mongodb+srv://<user>:<password>@cluster.mongodb.net
 DB_NAME=rynqor-chat
@@ -220,49 +352,48 @@ ACCESS_TOKEN_SECRET=your_jwt_access_secret_key
 ACCESS_TOKEN_EXPIRY=15m
 
 REFRESH_TOKEN_SECRET=your_jwt_refresh_secret_key
-REFRESH_TOKEN_EXPIRY=7d
+REFRESH_TOKEN_EXPIRY=30d
 
 CLOUDINARY_CLOUD_NAME=your_cloudinary_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-# Optional: Redis for presence tracking and Socket.IO scaling
+# Optional: Redis for presence tracking and Socket.IO horizontal scaling
 REDIS_URL=redis://localhost:6379
 
-# Optional: Email verification (powered by Resend)
+# Optional: Email (Resend) — set to true to enforce OTP verification on signup
 RESEND_API_KEY=re_your_resend_api_key
-SMTP_FROM=Rynqor Chat <noreply@yourdomain.com>
-EMAIL_VERIFICATION_REQUIRED=false   # set to true to enforce email verification on signup
+SMTP_FROM=Rynqor <noreply@yourdomain.com>
+EMAIL_VERIFICATION_REQUIRED=false
 ```
 
 ---
 
-## 💻 Local Development Setup
+## 💻 Local Development
 
 ### 1. Install Dependencies
-Run the install command in both directories:
 ```bash
-# In Root
 cd server && npm install
 cd ../client && npm install
 ```
 
-### 2. Start Application Services
-To run client and server in parallel local watch environments:
+### 2. Start Development Servers
 
-**Start Server Node:**
+**Backend:**
 ```bash
 cd server
 npm run dev
 ```
 
-**Start Client Bundler:**
+**Frontend:**
 ```bash
 cd client
 npm run dev
 ```
 
-### 3. Ports & API Mapping
-- **Frontend App Client:** `http://localhost:5173`
-- **Backend API Server:** `http://localhost:8000`
-- **API Endpoint Namespace:** `http://localhost:8000/api/v1`
+### 3. Ports
+| Service | URL |
+|---|---|
+| Frontend | `http://localhost:5173` |
+| Backend API | `http://localhost:8000` |
+| API namespace | `http://localhost:8000/api/v1` |
