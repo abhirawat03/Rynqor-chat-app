@@ -720,7 +720,7 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
               type="button"
               disabled={isLeaving || isDeletingGroup}
               onClick={handleLeaveGroup}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold border border-red-500/20 text-red-500 hover:bg-red-500/10 active:scale-[0.98] transition-all cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold border border-red-500/20 text-red-500 hover:bg-red-500/10 active:scale-[0.98] transition-all cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed outline-none focus:outline-none"
             >
               {isLeaving ? "Leaving..." : "Leave Group"}
             </button>
@@ -729,7 +729,7 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
                 type="button"
                 disabled={isLeaving || isDeletingGroup}
                 onClick={handleDeleteGroup}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold bg-red-500 text-white hover:bg-red-600 active:scale-[0.98] transition-all cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed outline-none focus:outline-none"
               >
                 {isDeletingGroup ? "Deleting..." : "Delete Group"}
               </button>

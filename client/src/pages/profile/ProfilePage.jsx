@@ -629,7 +629,7 @@ const ProfilePage = () => {
             <button
               type="button"
               onClick={sessionsModal.onOpen}
-              className="flex items-center justify-between px-5 py-4 transition-all duration-200 border cursor-pointer rounded-2xl border-border bg-background hover:bg-hover"
+              className="flex items-center justify-between px-5 py-4 transition-all duration-200 border cursor-pointer rounded-2xl border-border bg-background hover:bg-hover outline-none focus:outline-none"
             >
               <div className="text-left ">
                 <p className="text-sm font-medium ">Manage Devices</p>
@@ -647,7 +647,7 @@ const ProfilePage = () => {
               <button
                 type="button"
                 onClick={passwordModal.onOpen}
-                className="flex items-center justify-center gap-2 px-5 py-3 transition-all duration-200 border cursor-pointer rounded-2xl border-border bg-background hover:bg-hover"
+                className="flex items-center justify-center gap-2 px-5 py-3 transition-all duration-200 border cursor-pointer rounded-2xl border-border bg-background hover:bg-hover outline-none focus:outline-none"
               >
                 <IoLockClosed size={18} />
                 Change Password
@@ -657,7 +657,7 @@ const ProfilePage = () => {
                 type="button"
                 onClick={() => logoutMutation()}
                 disabled={isLoggingOut}
-                className="flex items-center justify-center gap-2 px-5 py-3 transition-all duration-200 border cursor-pointer rounded-2xl hover:bg-hover border-border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                className="flex items-center justify-center gap-2 px-5 py-3 transition-all duration-200 border cursor-pointer rounded-2xl hover:bg-hover border-border bg-background text-foreground disabled:cursor-not-allowed disabled:opacity-70 outline-none focus:outline-none"
               >
                 <IoLogOut size={18} />
 
@@ -678,7 +678,7 @@ const ProfilePage = () => {
           <button
             type="button"
             onClick={deleteAccountModal.onOpen}
-            className="flex items-center gap-2 px-5 py-3 mt-6 text-sm font-medium text-red-500 transition-all duration-200 border cursor-pointer rounded-2xl border-red-500/30 bg-red-500/5 hover:bg-red-500/10 active:scale-[0.98]"
+            className="flex items-center gap-2 px-5 py-3 mt-6 text-sm font-medium text-red-500 transition-all duration-200 border cursor-pointer rounded-2xl border-red-500/30 bg-red-500/5 hover:bg-red-500/10 active:scale-[0.98] outline-none focus:outline-none"
           >
             <IoTrash size={16} />
             Delete Account

@@ -213,7 +213,7 @@ const ChatsPage = () => {
       {/* FLOATING ACTION BUTTON */}
       <button
         onClick={() => setIsGroupModalOpen(true)}
-        className="absolute bottom-20 md:bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 rounded-full shadow-lg bg-accent text-accent-foreground hover:bg-accent-hover hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer"
+        className="absolute bottom-20 md:bottom-6 right-6 z-40 flex items-center justify-center w-12 h-12 rounded-full shadow-lg bg-accent text-accent-foreground hover:bg-accent-hover hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer outline-none focus:outline-none"
         title="Create Group Chat"
       >
         <FiUsers size={20} />
