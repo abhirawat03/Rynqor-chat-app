@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { NavLink } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { IoMdChatbubbles } from "react-icons/io";
 import { FiUsers, FiSearch, FiX } from "react-icons/fi";
 
@@ -14,6 +14,8 @@ import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
 import { useSocket } from "../../services/socket/useSocket.js";
 
 const ChatsPage = () => {
+  const navigate = useNavigate();
+  const { conversationId } = useParams();
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -186,25 +188,23 @@ const ChatsPage = () => {
               : Boolean(userId && typingUsers?.[chat._id]?.has(userId));
 
             return (
-              <NavLink
+              <div
                 key={chat._id}
-                to={`/chat/${chat._id}`}
+                onClick={() => navigate(`/chat/${chat._id}`)}
                 className="block cursor-pointer"
               >
-                {({ isActive }) => (
-                  <ChatItem
-                    isActive={isActive}
-                    name={chat.name}
-                    lastMessage={chat.lastMessage}
-                    currentUserId={currentUserId}
-                    isTyping={isTyping}
-                    isOnline={isOnline}
-                    time={chat.updatedAt || chat.lastMessage?.createdAt || ""}
-                    avatar={chat.avatar}
-                    senderId={chat.lastMessage?.senderId}
-                  />
-                )}
-              </NavLink>
+                <ChatItem
+                  isActive={chat._id === conversationId}
+                  name={chat.name}
+                  lastMessage={chat.lastMessage}
+                  currentUserId={currentUserId}
+                  isTyping={isTyping}
+                  isOnline={isOnline}
+                  time={chat.updatedAt || chat.lastMessage?.createdAt || ""}
+                  avatar={chat.avatar}
+                  senderId={chat.lastMessage?.senderId}
+                />
+              </div>
             );
           })
         )}
