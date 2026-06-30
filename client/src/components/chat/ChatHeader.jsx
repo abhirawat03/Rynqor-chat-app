@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaCircle } from "react-icons/fa";
 import { IoInformationCircle } from "react-icons/io5";
 import { formatLastSeen } from "../../utils/date.js";
+import Avatar from "../common/Avatar.jsx";
 
 const ChatHeader = ({
   name,
@@ -61,17 +62,14 @@ const ChatHeader = ({
             : "cursor-pointer lg:pointer-events-none lg:cursor-default"
         }`}
       >
-        {/* AVATAR */}
-        <div className="relative flex items-center justify-center overflow-hidden text-sm font-bold rounded-full h-11 w-11 shrink-0 bg-surface-secondary text-foreground">
-          {avatar ? (
-            <img
-              src={avatar?.url}
-              alt={name}
-              className="object-cover w-full h-full border-2 rounded-full border-border"
-            />
-          ) : (
-            <span>{name?.charAt(0)?.toUpperCase() || "?"}</span>
-          )}
+        <div className="relative shrink-0">
+          <Avatar
+            avatar={avatar}
+            name={name}
+            size="lg"
+            isGroup={isGroup}
+            className="border-2 border-border"
+          />
 
           {/* ONLINE DOT */}
           {/* {!isSelf &&

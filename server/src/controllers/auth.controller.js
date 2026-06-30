@@ -15,19 +15,7 @@ import {
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { getDeviceInfo } from "../utils/getDeviceInfo.js";
-
-// Base security configurations for session cookies.
-// - httpOnly: blocks client-side script access (mitigating XSS extraction).
-// - secure: forces transmission over encrypted TLS/HTTPS connections only.
-// - sameSite: Lax in local dev, None in production to allow cross-origin requests.
-const cookieOptions = {
-  httpOnly: true,
-
-  secure: process.env.NODE_ENV === "production",
-
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-  path: "/",
-};
+import { setAuthCookies, clearAuthCookies } from "../utils/cookie.js";
 
 // Creates a new user profile, issues a short-lived access JWT, and initiates a persistent session with device tracking.
 const register = async (req, res) => {
@@ -55,22 +43,9 @@ const login = async (req, res) => {
     deviceInfo,
   );
 
+  setAuthCookies(res, { accessToken, refreshToken, sessionId });
+
   return res
-    .cookie("accessToken", accessToken, {
-      ...cookieOptions,
-
-      maxAge: 15 * 60 * 1000,
-    })
-    .cookie("refreshToken", refreshToken, {
-      ...cookieOptions,
-
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
-    .cookie("sessionId", sessionId.toString(), {
-      ...cookieOptions,
-
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
     .status(200)
     .json(new ApiResponse(200, user, "Login Successful"));
 };
@@ -82,20 +57,9 @@ const refreshAccessToken = async (req, res) => {
   const { accessToken, refreshToken, sessionId } =
     await refreshAccessTokenService(incomingRefreshToken);
 
-  return res
-    .cookie("accessToken", accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000,
-    })
-    .cookie("refreshToken", refreshToken, {
-      ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
-    .cookie("sessionId", sessionId.toString(), {
-      ...cookieOptions,
+  setAuthCookies(res, { accessToken, refreshToken, sessionId });
 
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
+  return res
     .status(200)
     .json(new ApiResponse(200, null, "Access token refreshed"));
 };
@@ -105,10 +69,9 @@ const logout = async (req, res) => {
 
   await logoutService(refreshToken);
 
+  clearAuthCookies(res);
+
   return res
-    .clearCookie("accessToken", cookieOptions)
-    .clearCookie("refreshToken", cookieOptions)
-    .clearCookie("sessionId", cookieOptions)
     .status(200)
     .json(new ApiResponse(200, null, "Logout successful"));
 };
@@ -189,19 +152,9 @@ const verifyEmail = async (req, res) => {
   const { user, accessToken, refreshToken, sessionId } =
     await verifyEmailService(req.body, deviceInfo);
 
+  setAuthCookies(res, { accessToken, refreshToken, sessionId });
+
   return res
-    .cookie("accessToken", accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60 * 1000,
-    })
-    .cookie("refreshToken", refreshToken, {
-      ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
-    .cookie("sessionId", sessionId.toString(), {
-      ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    })
     .status(200)
     .json(
       new ApiResponse(

@@ -8,6 +8,8 @@ import useSearchUsersQuery from "../../hooks/users/useSearchUsersQuery.js";
 import { createGroupConversation } from "../../services/conversationService.js";
 import { useSocket } from "../../services/socket/useSocket.js";
 import { useCurrentUserQuery } from "../../hooks/auth/useCurrentUserQuery.js";
+import Avatar from "../common/Avatar.jsx";
+import Modal from "../common/Modal.jsx";
 
 const CreateGroupModal = ({ isOpen, onClose }) => {
   const [groupName, setGroupName] = useState("");
@@ -80,184 +82,154 @@ const CreateGroupModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
-      <div
-        className="w-full max-w-md bg-surface border border-border rounded-3xl shadow-xl flex flex-col max-h-[85vh] overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">
-            Create Group Chat
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-hover text-muted hover:text-foreground transition-colors duration-200"
-          >
-            <IoClose size={20} />
-          </button>
+    <Modal isOpen={isOpen} onClose={onClose} title="Create Group Chat" size="md">
+      {/* BODY */}
+      <div className="space-y-4 -mt-2 mb-6">
+        {/* GROUP NAME */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+            Group Name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g., Design Team, Weekend Plans..."
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            className="w-full px-4 py-2.5 bg-surface-secondary border border-border rounded-2xl text-foreground text-sm placeholder-muted focus:outline-hidden focus:border-accent transition-colors duration-200"
+            maxLength={40}
+          />
         </div>
 
-        {/* BODY */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {/* GROUP NAME */}
+        {/* SELECTED USERS CHIPS */}
+        {selectedUsers.length > 0 && (
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-muted uppercase tracking-wider">
-              Group Name
+              Participants ({selectedUsers.length})
             </label>
+            <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 bg-surface-secondary border border-border border-dashed rounded-2xl">
+              {selectedUsers.map((user) => (
+                <div
+                  key={user._id}
+                  className="flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-full text-sm text-foreground select-none"
+                >
+                  <Avatar
+                    avatar={user.avatar}
+                    name={user.fullName}
+                    size="xs"
+                  />
+                  <span className="truncate max-w-20">{user.fullName}</span>
+                  <button
+                    onClick={() => handleRemoveUser(user._id)}
+                    className="p-0.5 rounded-full hover:bg-hover text-muted hover:text-foreground transition-colors duration-200"
+                  >
+                    <IoClose size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SEARCH USERS */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-muted uppercase tracking-wider">
+            Add Members
+          </label>
+          <div className="relative">
+            <ImSearch
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
+              size={14}
+            />
             <input
               type="text"
-              placeholder="e.g., Design Team, Weekend Plans..."
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              className="w-full px-4 py-2.5 bg-surface-secondary border border-border rounded-2xl text-foreground text-sm placeholder-muted focus:outline-hidden focus:border-accent transition-colors duration-200"
-              maxLength={40}
+              placeholder="Search by name or username..."
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-surface-secondary border border-border rounded-2xl text-foreground text-sm placeholder-muted focus:outline-hidden focus:border-accent transition-colors duration-200"
             />
           </div>
+        </div>
 
-          {/* SELECTED USERS CHIPS */}
-          {selectedUsers.length > 0 && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-muted uppercase tracking-wider">
-                Participants ({selectedUsers.length})
-              </label>
-              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 bg-surface-secondary border border-border border-dashed rounded-2xl">
-                {selectedUsers.map((user) => (
-                  <div
-                    key={user._id}
-                    className="flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-full text-sm text-foreground select-none"
-                  >
-                    {user.avatar?.url ? (
-                      <img
-                        src={user.avatar.url}
-                        alt={user.fullName}
-                        className="w-4 h-4 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] font-bold">
-                        {user.fullName?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <span className="truncate max-w-20">{user.fullName}</span>
-                    <button
-                      onClick={() => handleRemoveUser(user._id)}
-                      className="p-0.5 rounded-full hover:bg-hover text-muted hover:text-foreground transition-colors duration-200"
+        {/* SEARCH RESULTS */}
+        <div className="space-y-1">
+          {userSearch.trim() && (
+            <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
+              {isLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : filteredSearchResults.length > 0 ? (
+                filteredSearchResults.map((user) => {
+                  const isSelected = selectedUsers.some(
+                    (u) => u._id === user._id,
+                  );
+                  return (
+                    <div
+                      key={user._id}
+                      onClick={() => handleToggleUser(user)}
+                      className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition-colors duration-200 ${
+                        isSelected
+                          ? "bg-hover border border-border"
+                          : "hover:bg-hover/50 border border-transparent"
+                      }`}
                     >
-                      <IoClose size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar
+                          avatar={user.avatar}
+                          name={user.fullName}
+                          size="md"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">
+                            {user.fullName}
+                          </p>
+                          <p className="text-xs text-muted truncate">
+                            @{user.username}
+                          </p>
+                        </div>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}} // Handled by onClick of parent
+                        className="w-4 h-4 rounded border-border text-accent focus:ring-accent/30 cursor-pointer"
+                      />
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-center py-4 text-sm text-muted">
+                  No users found
+                </p>
+              )}
             </div>
           )}
-
-          {/* SEARCH USERS */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted uppercase tracking-wider">
-              Add Members
-            </label>
-            <div className="relative">
-              <ImSearch
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-                size={14}
-              />
-              <input
-                type="text"
-                placeholder="Search by name or username..."
-                value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-surface-secondary border border-border rounded-2xl text-foreground text-sm placeholder-muted focus:outline-hidden focus:border-accent transition-colors duration-200"
-              />
-            </div>
-          </div>
-
-          {/* SEARCH RESULTS */}
-          <div className="space-y-1">
-            {userSearch.trim() && (
-              <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
-                {isLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : filteredSearchResults.length > 0 ? (
-                  filteredSearchResults.map((user) => {
-                    const isSelected = selectedUsers.some(
-                      (u) => u._id === user._id,
-                    );
-                    return (
-                      <div
-                        key={user._id}
-                        onClick={() => handleToggleUser(user)}
-                        className={`flex items-center justify-between p-2.5 rounded-2xl cursor-pointer transition-colors duration-200 ${
-                          isSelected
-                            ? "bg-hover border border-border"
-                            : "hover:bg-hover/50 border border-transparent"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
-                            {user.avatar?.url ? (
-                              <img
-                                src={user.avatar.url}
-                                alt={user.fullName}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              user.fullName?.charAt(0).toUpperCase()
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">
-                              {user.fullName}
-                            </p>
-                            <p className="text-xs text-muted truncate">
-                              @{user.username}
-                            </p>
-                          </div>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => {}} // Handled by onClick of parent
-                          className="w-4 h-4 rounded border-border text-accent focus:ring-accent/30 cursor-pointer"
-                        />
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-center py-4 text-sm text-muted">
-                    No users found
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* FOOTER */}
-        <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-3 bg-surface-secondary">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border border-border rounded-xl text-sm font-medium text-foreground hover:bg-hover transition-colors duration-200"
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleCreate}
-            className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-foreground rounded-xl text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-            disabled={
-              isSubmitting || !groupName.trim() || selectedUsers.length < 2
-            }
-          >
-            {isSubmitting && (
-              <div className="w-4 h-4 border-2 border-accent-foreground border-t-transparent rounded-full animate-spin" />
-            )}
-            Create Group
-          </button>
         </div>
       </div>
-    </div>
+
+      {/* FOOTER */}
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-border -mx-6 -mb-6 px-6 py-4 bg-surface-secondary">
+        <button
+          onClick={onClose}
+          className="px-4 py-2 border border-border rounded-xl text-sm font-medium text-foreground hover:bg-hover transition-colors duration-200"
+          disabled={isSubmitting}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleCreate}
+          className="px-4 py-2 bg-accent hover:bg-accent-hover text-accent-foreground rounded-xl text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+          disabled={
+            isSubmitting || !groupName.trim() || selectedUsers.length < 2
+          }
+        >
+          {isSubmitting && (
+            <div className="w-4 h-4 border-2 border-accent-foreground border-t-transparent rounded-full animate-spin" />
+          )}
+          Create Group
+        </button>
+      </div>
+    </Modal>
   );
 };
 

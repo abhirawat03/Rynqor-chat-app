@@ -1,6 +1,8 @@
 import { BsPeopleFill } from "react-icons/bs";
 
 import { IoClose, IoCamera } from "react-icons/io5";
+import { useDisclosure } from "../../hooks/useDisclosure.js";
+import Modal from "../../components/common/Modal.jsx";
 
 import {
   Pencil,
@@ -190,7 +192,7 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
     });
   };
 
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const avatarModal = useDisclosure();
 
   const [selectedMedia, setSelectedMedia] = useState(null);
 
@@ -311,7 +313,7 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
                 type="button"
                 onClick={() => {
                   if (group?.avatar?.url) {
-                    setShowAvatarModal(true);
+                    avatarModal.onOpen();
                   }
                 }}
                 className="
@@ -838,91 +840,24 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
       </div>
 
       {/* AVATAR MODAL */}
-      {showAvatarModal && (
-        <div
-          onClick={() => setShowAvatarModal(false)}
-          className="
-            fixed
-            inset-0
-            z-100
-
-            flex
-            items-center
-            justify-center
-
-            bg-black/90
-
-            p-4
-
-            backdrop-blur-sm
-          "
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative overflow-hidden shadow-2xl rounded-3xl"
-          >
-            <img
-              src={group?.avatar?.url}
-              alt={group?.name}
-              className="
-                max-h-[90vh]
-                max-w-[90vw]
-
-                object-contain
-              "
-            />
-          </div>
-        </div>
-      )}
+      <Modal isOpen={avatarModal.isOpen} onClose={avatarModal.onClose} raw>
+        <img
+          src={group?.avatar?.url}
+          alt={group?.name}
+          className="max-h-[90vh] max-w-[90vw] object-contain"
+        />
+      </Modal>
 
       {/* MEDIA MODAL */}
-      {selectedMedia && (
-        <div
-          onClick={() => setSelectedMedia(null)}
-          className="
-      fixed
-      inset-0
-      z-120
-
-      flex
-      items-center
-      justify-center
-
-      bg-black/90
-
-      p-4
-
-      backdrop-blur-sm
-    "
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="
-        relative
-
-        max-h-[90vh]
-        max-w-[90vw]
-
-        overflow-hidden
-
-        rounded-3xl
-
-        bg-background
-
-        shadow-2xl
-      "
-          >
+      <Modal isOpen={!!selectedMedia} onClose={() => setSelectedMedia(null)} raw>
+        {selectedMedia && (
+          <>
             {/* IMAGE */}
             {selectedMedia.type === "image" && (
               <img
                 src={selectedMedia.url}
                 alt={selectedMedia.name}
-                className="
-            max-h-[90vh]
-            max-w-[90vw]
-
-            object-contain
-          "
+                className="max-h-[90vh] max-w-[90vw] object-contain"
               />
             )}
 
@@ -932,44 +867,22 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
                 src={selectedMedia.url}
                 controls
                 autoPlay
-                className="
-            max-h-[90vh]
-            max-w-[90vw]
-          "
+                className="max-h-[90vh] max-w-[90vw]"
               />
             )}
 
             {/* AUDIO */}
             {selectedMedia.type === "audio" && (
-              <div
-                className="
-            flex
-            min-w-[320px]
-            flex-col
-            gap-4
-
-            p-6
-          "
-              >
+              <div className="flex min-w-[320px] flex-col gap-4 p-6 bg-background">
                 <p className="text-sm font-medium text-foreground">
                   {selectedMedia.name}
                 </p>
-
-                <audio controls autoPlay src={selectedMedia.url} />
+                <audio controls autoPlay src={selectedMedia.url} className="w-full" />
               </div>
             )}
-
-            {/* CLOSE */}
-            <button
-              type="button"
-              onClick={() => setSelectedMedia(null)}
-              className="absolute flex items-center justify-center w-10 h-10 text-xl text-white transition-all duration-200 rounded-full cursor-pointer right-3 top-3 bg-black/50 backdrop-blur-md hover:bg-black/70"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
 
       {/* CONFIRMATION DIALOG MODAL */}
       <ConfirmModal

@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { getRelativeTimeShort } from "../../utils/date.js";
+import Avatar from "../common/Avatar.jsx";
 
 const ChatItem = memo(
   ({
@@ -107,44 +108,12 @@ const ChatItem = memo(
           shrink-0
         "
         >
-          <div
-            className="
-            flex
-            h-14
-            w-14
-            items-center
-            justify-center
-
-            overflow-hidden
-            rounded-full
-
-            bg-surface-secondary
-
-            text-sm
-            font-semibold
-
-            text-foreground
-          "
-          >
-            {avatar ? (
-              <img
-                src={avatar?.url}
-                alt={name}
-                loading="lazy"
-                decoding="async"
-                className="
-                h-full
-                w-full
-                border-2
-                border-border
-                rounded-full
-                object-cover
-              "
-              />
-            ) : (
-              <span>{name?.charAt(0)?.toUpperCase() || "?"}</span>
-            )}
-          </div>
+          <Avatar
+            avatar={avatar}
+            name={name}
+            size="xl"
+            className="border-2 border-border"
+          />
 
           {/* ONLINE */}
           {isOnline && (

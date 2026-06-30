@@ -1,9 +1,8 @@
 import { Conversation } from "../models/conversation.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { formatName } from "../utils/format.js";
+import { formatName, formatConversation } from "../utils/format.js";
 import { Message } from "../models/message.model.js";
-import cloudinary from "cloudinary";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 
 const USER_PUBLIC_FIELDS = "_id username fullName avatar lastSeen isDeleted";
 const createConversationService = async (userId, receiverId) => {
@@ -97,51 +96,7 @@ const getConversationService = async (userId) => {
   //     conversations.pop();
   // }
 
-  const result = conversations.map((conv) => {
-    const isSelf = conv.type === "self";
-    const isGroup = conv.type === "group";
-
-    if (isSelf) {
-      const user = conv.participants[0];
-
-      return {
-        _id: conv._id,
-        name: `${formatName(user.fullName)} (You)`,
-        avatar: user.avatar || null,
-        participants: conv.participants,
-        type: conv.type,
-        lastMessage: conv.lastMessage || null,
-        updatedAt: conv.updatedAt,
-      };
-    }
-
-    if (isGroup) {
-      return {
-        _id: conv._id,
-        name: conv.name,
-        avatar: conv.avatar || null,
-        participants: conv.participants,
-        type: conv.type,
-        admins: conv.admins || [],
-        lastMessage: conv.lastMessage || null,
-        updatedAt: conv.updatedAt,
-      };
-    }
-
-    const otherUser = conv.participants.find(
-      (p) => p._id.toString() !== userId.toString(),
-    );
-
-    return {
-      _id: conv._id,
-      name: formatName(otherUser?.fullName || ""),
-      avatar: otherUser?.avatar || null,
-      participants: conv.participants,
-      type: conv.type,
-      lastMessage: conv.lastMessage || null,
-      updatedAt: conv.updatedAt,
-    };
-  });
+  const result = conversations.map((conv) => formatConversation(conv, userId));
 
   // const nextCursor =
   //     conversations.length > 0
@@ -169,43 +124,7 @@ const getConversationByIdService = async (userId, conversationId) => {
     throw new ApiError(403, "Not allowed or conversation not found");
   }
 
-  const isSelf = conversation.type === "self";
-  const isGroup = conversation.type === "group";
-
-  if (isSelf) {
-    const user = conversation.participants[0];
-
-    return {
-      _id: conversation._id,
-      name: `${formatName(user.fullName)} (You)`,
-      avatar: user.avatar || null,
-      participants: conversation.participants,
-      type: conversation.type,
-    };
-  }
-
-  if (isGroup) {
-    return {
-      _id: conversation._id,
-      name: conversation.name,
-      avatar: conversation.avatar || null,
-      participants: conversation.participants,
-      type: conversation.type,
-      admins: conversation.admins || [],
-    };
-  }
-
-  const otherUser = conversation.participants.find(
-    (p) => p._id.toString() !== userId.toString(),
-  );
-
-  return {
-    _id: conversation._id,
-    name: formatName(otherUser?.fullName || ""),
-    avatar: otherUser?.avatar || null,
-    participants: conversation.participants,
-    type: conversation.type,
-  };
+  return formatConversation(conversation, userId);
 };
 
 const getConversationMediaService = async (userId, conversationId) => {
@@ -450,9 +369,7 @@ const updateGroupAvatarService = async (
   await conversation.save();
 
   if (oldAvatar?.publicId) {
-    cloudinary.uploader
-      .destroy(oldAvatar.publicId)
-      .catch((err) => console.error("Old group avatar deletion failed:", err));
+    deleteFromCloudinary(oldAvatar.publicId);
   }
 
   await conversation.populate("participants", USER_PUBLIC_FIELDS);
@@ -490,7 +407,7 @@ const deleteGroupAvatarService = async (userId, conversationId) => {
   conversation.avatar = null;
   await conversation.save();
 
-  await cloudinary.uploader.destroy(oldAvatar.publicId);
+  await deleteFromCloudinary(oldAvatar.publicId);
 
   await conversation.populate("participants", USER_PUBLIC_FIELDS);
   return conversation;
@@ -619,14 +536,7 @@ const leaveGroupService = async (userId, conversationId) => {
   // If group is empty, delete it
   if (conversation.participants.length === 0) {
     if (conversation.avatar?.publicId) {
-      await cloudinary.uploader
-        .destroy(conversation.avatar.publicId)
-        .catch((err) => {
-          console.error(
-            "Cloudinary group avatar destroy failed during leave:",
-            err,
-          );
-        });
+      await deleteFromCloudinary(conversation.avatar.publicId);
     }
 
     // Delete all messages and their media
@@ -635,12 +545,7 @@ const leaveGroupService = async (userId, conversationId) => {
       if (msg.media && msg.media.length > 0) {
         for (const med of msg.media) {
           if (med.publicId) {
-            await cloudinary.uploader.destroy(med.publicId).catch((err) => {
-              console.error(
-                "Cloudinary media destroy failed during leave:",
-                err,
-              );
-            });
+            await deleteFromCloudinary(med.publicId);
           }
         }
       }
@@ -692,14 +597,7 @@ const deleteGroupService = async (userId, conversationId) => {
   }
 
   if (conversation.avatar?.publicId) {
-    await cloudinary.uploader
-      .destroy(conversation.avatar.publicId)
-      .catch((err) => {
-        console.error(
-          "Cloudinary group avatar destroy failed during delete:",
-          err,
-        );
-      });
+    await deleteFromCloudinary(conversation.avatar.publicId);
   }
 
   // Delete all messages and their media
@@ -708,12 +606,7 @@ const deleteGroupService = async (userId, conversationId) => {
     if (msg.media && msg.media.length > 0) {
       for (const med of msg.media) {
         if (med.publicId) {
-          await cloudinary.uploader.destroy(med.publicId).catch((err) => {
-            console.error(
-              "Cloudinary media destroy failed during delete:",
-              err,
-            );
-          });
+          await deleteFromCloudinary(med.publicId);
         }
       }
     }

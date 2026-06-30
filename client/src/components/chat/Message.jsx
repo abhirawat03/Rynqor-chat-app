@@ -1,6 +1,7 @@
 // Renders a single chat message (system notification, text, media, or mixed layouts).
 import { memo, useState } from "react";
 import MessageMedia from "./MessageMedia";
+import Avatar from "../common/Avatar.jsx";
 
 const Message = memo(
   ({
@@ -76,23 +77,13 @@ const Message = memo(
           {!isOwn && (
             <div className="w-8 shrink-0 flex justify-center mb-1">
               {!hideAvatar ? (
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-800 text-xs font-semibold overflow-hidden select-none border border-border/50"
+                <Avatar
+                  avatar={message.senderId?.avatar}
+                  name={senderName}
+                  size="sm"
+                  className="border border-border/50"
                   title={senderName}
-                >
-                  {message.senderId?.avatar?.url ? (
-                    <img
-                      src={message.senderId.avatar.url}
-                      alt={senderName}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span className="text-muted-foreground">
-                      {senderName.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
+                />
               ) : null}
             </div>
           )}

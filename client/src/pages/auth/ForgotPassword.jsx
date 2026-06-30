@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { forgotPassword, resetPassword } from "../../services/authService.js";
+import { emailRegex, passwordRegex } from "../../utils/validation.js";
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
@@ -33,7 +34,6 @@ const ForgotPassword = () => {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       setError("Invalid email format");
       return;
@@ -87,8 +87,7 @@ const ForgotPassword = () => {
       return;
     }
 
-    const complexityRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
-    if (!complexityRegex.test(newPassword)) {
+    if (!passwordRegex.test(newPassword)) {
       setError(
         "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       );
@@ -122,13 +121,13 @@ const ForgotPassword = () => {
 
   const emailInvalid =
     touched.email &&
-    (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    (!email.trim() || !emailRegex.test(email));
   const otpInvalid =
     touched.otp && (otp.trim().length !== 6 || !/^\d+$/.test(otp.trim()));
   const newPasswordInvalid =
     touched.newPassword &&
     (newPassword.length < 8 ||
-      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/.test(newPassword));
+      !passwordRegex.test(newPassword));
   const confirmPasswordInvalid =
     touched.confirmPassword && confirmPassword !== newPassword;
 

@@ -1,7 +1,6 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import cloudinary from "cloudinary";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { formatName } from "../utils/format.js";
 import { RefreshToken } from "../models/refreshToken.model.js";
 
@@ -69,16 +68,12 @@ const updateAvatarService = async (userId, avatarLocalPath) => {
     if (!updatedUser) throw new Error("DB update failed");
 
     if (oldAvatar?.publicId) {
-      cloudinary.uploader
-        .destroy(oldAvatar.publicId)
-        .catch((err) => console.error("Old avatar deletion failed:", err));
+      deleteFromCloudinary(oldAvatar.publicId);
     }
 
     return updatedUser;
   } catch (error) {
-    cloudinary.uploader
-      .destroy(uploaded.publicId)
-      .catch((err) => console.error("Rollback delete failed:", err));
+    deleteFromCloudinary(uploaded.publicId);
 
     throw new ApiError(500, "Avatar update failed");
   }
@@ -91,11 +86,7 @@ const deleteAvatarService = async (userId) => {
     throw new ApiError(400, "No avatar to delete");
   }
 
-  try {
-    await cloudinary.uploader.destroy(user.avatar.publicId);
-  } catch (err) {
-    console.error("Cloudinary delete failed:", err);
-  }
+  await deleteFromCloudinary(user.avatar.publicId);
 
   return await User.findByIdAndUpdate(
     userId,
@@ -129,7 +120,7 @@ const changePasswordService = async (userId, oldPassword, newPassword) => {
   return null;
 };
 
-const searchUserService = async (search, currentUserId) => {
+const searchUserService = async (search) => {
   const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
   const query = {
@@ -139,10 +130,6 @@ const searchUserService = async (search, currentUserId) => {
       { fullName: { $regex: `^${escapedSearch}`, $options: "i" } },
     ],
   };
-
-  if (currentUserId) {
-    query._id = { $ne: currentUserId };
-  }
 
   const users = await User.find(query)
     .select("username fullName avatar bio")
@@ -165,11 +152,9 @@ const deleteAccountService = async (userId, password) => {
   const isPasswordValid = await user.isPasswordCorrect(password);
   if (!isPasswordValid) throw new ApiError(400, "Incorrect password");
 
-  // 1. Delete Cloudinary avatar (non-blocking) — no longer needed
+  // 1. Delete Cloudinary avatar (non-blocking)
   if (user.avatar?.publicId) {
-    cloudinary.uploader
-      .destroy(user.avatar.publicId)
-      .catch((err) => console.error("Avatar deletion failed on account delete:", err));
+    deleteFromCloudinary(user.avatar.publicId);
   }
 
   // 2. Revoke all active sessions across all devices

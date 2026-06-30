@@ -9,6 +9,7 @@ import {
 } from "../services/user.service.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { invalidateCache } from "../middleware/cache.middleware.js";
+import { clearAuthCookies } from "../utils/cookie.js";
 
 const getUser = async (req, res) => {
   const { id } = req.params;
@@ -53,7 +54,7 @@ const changePassword = async (req, res) => {
 
 const searchUsers = async (req, res) => {
   const { search } = req.query;
-  const users = await searchUserService(search, req.user?._id);
+  const users = await searchUserService(search);
   return res
     .status(200)
     .json(new ApiResponse(200, users, "Users fetched successfully"));
@@ -64,17 +65,9 @@ const deleteAccount = async (req, res) => {
 
   await deleteAccountService(req.user?._id, password);
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    path: "/",
-  };
+  clearAuthCookies(res);
 
   return res
-    .clearCookie("accessToken", cookieOptions)
-    .clearCookie("refreshToken", cookieOptions)
-    .clearCookie("sessionId", cookieOptions)
     .status(200)
     .json(new ApiResponse(200, null, "Account deleted successfully"));
 };
