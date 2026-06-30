@@ -320,6 +320,8 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
                   transition-transform
                   duration-200
                   cursor-pointer
+                  outline-none
+                  focus:outline-none
 
                   hover:scale-[1.02]
                   active:scale-[0.98]

@@ -307,6 +307,8 @@ const ProfilePage = () => {
                 className="
                   relative
                   cursor-pointer
+                  outline-none
+                  focus:outline-none
 
                   transition-transform
                   duration-200
