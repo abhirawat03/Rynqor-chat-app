@@ -7,8 +7,6 @@ import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js
 const USER_PUBLIC_FIELDS = "_id username fullName avatar lastSeen isDeleted";
 const createConversationService = async (userId, receiverId) => {
   const isSelfChat = userId.toString() === receiverId.toString();
-  // if(userId === receiverId) throw new ApiError(400, "Cannot chat with yourself");
-
   let conversation;
 
   if (isSelfChat) {
@@ -62,17 +60,6 @@ const createConversationService = async (userId, receiverId) => {
 };
 
 const getConversationService = async (userId) => {
-  // const PAGE_SIZE = 20;
-
-  // const query = {
-  //     participants: userId,
-  // }
-
-  // if (cursor) {
-  //     query.updatedAt = {
-  //         $lt: new Date(cursor),
-  //     };
-  // }
   const conversations = await Conversation.find({
     participants: userId,
   })
@@ -85,31 +72,9 @@ const getConversationService = async (userId) => {
       },
     })
     .sort({ updatedAt: -1 })
-    // .limit(PAGE_SIZE + 1)
     .lean();
 
-  // const hasMore =
-  //     conversations.length >
-  //     PAGE_SIZE;
-
-  // if (hasMore) {
-  //     conversations.pop();
-  // }
-
   const result = conversations.map((conv) => formatConversation(conv, userId));
-
-  // const nextCursor =
-  //     conversations.length > 0
-  //         ? conversations[
-  //             conversations.length -1
-  //         ].updatedAt
-  //         : null;
-
-  // return {
-  //     conversations: result,
-  //     nextCursor,
-  //     hasMore,
-  // };
 
   return result;
 };
