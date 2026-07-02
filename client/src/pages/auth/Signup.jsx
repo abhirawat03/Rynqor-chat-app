@@ -245,7 +245,7 @@ const Signup = () => {
       <div className="relative">
         <input
           type="text"
-          autoFocus
+
           id="fullName"
           name="fullName"
           autoComplete="off"
