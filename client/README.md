@@ -8,6 +8,7 @@ The frontend client for **Rynqor**—a MERN real-time chat application. Built wi
 
 - **Real-Time Synchronized Gateway:** Implements a single-instance Socket.IO connection wrapped in a React Context, automatically synchronizing user presence, message receipt, typing states, and handling tab-visibility state syncing.
 - **Optimistic UI Engine:** Messages appear instantly in the chat view with a `sending` state. In case of socket delivery failure, the UI rolls back automatically and labels the message as `failed`.
+- **Session Recovery Guard:** Configures `retry` limits on the current user query to coordinate with the Axios token-refresh interceptor. This prevents accidental redirects to the login screen when access tokens are silently refreshed in the background.
 - **Inverted Virtualized Feeds:** Implements `react-virtuoso` for smooth, lag-free scrolling through thousands of messages, using inverse scrolling behavior for instant bottom pinning.
 - **Resilient Panel Boundaries:** Utilizes panel-level React `ErrorBoundary` wrappers to prevent isolated component crashes from disrupting root-level navigation.
 - **Zero-Flicker Themes:** Synchronizes system theme preferences (dark/light mode) with CSS Custom Properties and direct class injection, eliminating paint flashes during initial page load.
@@ -71,7 +72,8 @@ Rynqor separates network requests from component UI elements using a three-tier 
 ### TanStack Query Cache Structure
 
 - **Active Conversations (`["conversations"]`):** Keeps track of all open chat threads. New socket messages trigger cache invalidations, re-sorting conversations dynamically by the latest message timestamp.
-- **Paginated Message Feed (`["messages", conversationId]`):** Uses cursor-based pagination parameters (`pageParam`) to request subsequent pages as the user scrolls up.
+- **Paginated Message Feed (`["messages", conversationId]`):** Uses cursor-based pagination parameters (`pageParam`) to request subsequent pages as the user scrolls up. Configured with a `staleTime` of 5 minutes to prevent redundant network fetches during in-session room switching while keeping history fresh.
+- **Cached User Profiles (`["user", userId]`):** Tuned with a `staleTime` of 24 hours to match the server-side Redis cache TTL, eliminating wasteful client-side refetches for static user profile metadata.
 - **Cache Handlers:** When messages are sent/received, helper modules (`updateMessagesCache.js`, `updateConversationCache.js`) manipulate the TanStack cache directly, avoiding expensive full-page refetches.
 
 ---
