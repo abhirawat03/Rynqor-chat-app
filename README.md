@@ -10,6 +10,7 @@ Rynqor is a high-performance, real-time MERN chat application built with **React
 - **Group & Direct Conversations** — Create direct chats, self-note chats, and named group conversations with admin roles.
 - **Horizontal Scaling with Redis** — Socket.IO Redis Adapter scales WebSocket connections across multiple server nodes with multi-tab presence tracking.
 - **Atomic DB Transactions** — MongoDB sessions/transactions guarantee referential integrity when writing messages and updating conversation activity pointers.
+- **Hybrid Caching Architecture** — Combines a 24-hour server-side Redis cache with event-driven invalidation (cleared on profile updates or new media uploads) and client-side TanStack Query stale-time tuning, reducing redundant database queries and latency.
 - **Silent JWT Rotation** — HTTP-Only cookie-based auth with automatic access-token refresh loops; zero user interruption.
 - **Session Management** — Per-device refresh token tracking with remote logout support. Password change force-revokes all active sessions.
 - **Email Verification** — OTP-based email verification via Resend (togglable per environment). Unverified accounts auto-expire via MongoDB TTL index.
@@ -179,6 +180,20 @@ sequenceDiagram
     Note over DB: Conversations and messages preserved,<br/>sender shown as "Deleted Account"
 ```
 
+### 4. Hybrid Caching Architecture
+
+```mermaid
+graph TD
+    Client["React Frontend"] -->|1. Fetch Request| ClientCache{"React Query Cache"}
+    ClientCache -->|Hit < 5m/24h| Render["Render from memory (0ms)"]
+    ClientCache -->|Miss / Stale| Axios["HTTP Axios Call"]
+    Axios -->|2. Check Redis| Redis{"Redis Cache"}
+    Redis -->|Hit < 24h| ReturnRedis["Return cached JSON (~5ms)"]
+    Redis -->|Miss / Expired| Mongo["MongoDB Query (~100ms)"]
+    Mongo -->|3. Populate cache| Redis
+    Mongo -->|Return JSON| Client
+```
+
 ---
 
 ## 📊 Database Models
@@ -284,7 +299,7 @@ erDiagram
 | `DELETE` | `/avatar` | ✅ | Remove current avatar |
 | `PATCH` | `/change-password` | ✅ | Change password + revoke all sessions |
 | `DELETE` | `/account` | ✅ | Soft-delete account (password confirm) |
-| `GET` | `/:id` | ✅ | Get public user profile (Redis-cached) |
+| `GET` | `/:id` | ✅ | Get public user profile (Redis-cached, 24h TTL) |
 
 ### Conversations — `/api/v1/conversations`
 | Method | Route | Auth | Description |
@@ -295,6 +310,7 @@ erDiagram
 | `POST` | `/group` | ✅ | Create group conversation |
 | `PATCH` | `/group/:id` | ✅ | Update group info |
 | `DELETE` | `/:id` | ✅ | Delete conversation |
+| `GET` | `/:conversationId/media` | ✅ | Get conversation shared media (Redis-cached, 24h TTL) |
 
 ### Messages — `/api/v1/messages`
 | Method | Route | Auth | Description |
