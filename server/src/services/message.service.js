@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Message } from "../models/message.model.js";
 import { Conversation } from "../models/conversation.model.js";
 import { getConversationByIdService } from "./conversation.service.js";
+import { invalidateCache } from "../middleware/cache.middleware.js";
 
 // Orchestrates message creation and conversation updates within an atomic MongoDB transaction
 // to guarantee consistency (preventing orphaned messages or outdated conversation references).
@@ -46,6 +47,13 @@ const sendMessageService = async (userId, payload) => {
         { session },
       );
     });
+
+    // Invalidate shared media cache when a new media message is saved
+    if (media.length > 0) {
+      invalidateCache("media", conversationId).catch((err) =>
+        console.error("❌ Failed to invalidate media cache:", err.message)
+      );
+    }
 
     return message;
   } catch (error) {

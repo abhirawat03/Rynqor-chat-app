@@ -42,6 +42,6 @@ router
   .delete(authLimiter, validate(deleteAccountSchema), deleteAccount);
 router
   .route("/:id")
-  .get(validate(getUserSchema), cacheMiddleware("users", 300), getUser);
+  .get(validate(getUserSchema), cacheMiddleware("users", 86400), getUser);
 
 export default router;

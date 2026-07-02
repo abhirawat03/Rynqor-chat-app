@@ -9,6 +9,8 @@ const useUserQuery = (id) => {
     queryFn: () => getUser(id),
 
     enabled: !!id,
+    // User profiles only change on explicit update — match server Redis TTL
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
   });
 };
 

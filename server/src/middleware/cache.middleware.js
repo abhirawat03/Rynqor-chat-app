@@ -10,7 +10,7 @@ export const cacheMiddleware = (prefix, ttlSeconds = 300) => {
       return next();
     }
 
-    const keyId = req.params.id || req.params.userId || req.user?._id;
+    const keyId = req.params.id || req.params.conversationId || req.params.userId || req.user?._id;
     if (!keyId) {
       return next();
     }

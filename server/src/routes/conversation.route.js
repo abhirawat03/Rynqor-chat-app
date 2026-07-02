@@ -30,6 +30,7 @@ import {
   addParticipantsSchema,
   demoteAdminSchema,
 } from "../schemas/conversation.schema.js";
+import { cacheMiddleware } from "../middleware/cache.middleware.js";
 
 const router = Router();
 
@@ -46,7 +47,7 @@ router
 
 router
   .route("/:conversationId/media")
-  .get(validate(conversationIdSchema), getConversationMedia);
+  .get(validate(conversationIdSchema), cacheMiddleware("media", 86400), getConversationMedia);
 
 // Group Management Routes
 router
