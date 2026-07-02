@@ -6,7 +6,9 @@ export const useCurrentUserQuery = () => {
     queryKey: ["currentUser"],
     queryFn: getCurrentUser,
 
-    retry: false,
+    // Allow 1 retry so the Axios token-refresh interceptor has time to
+    // refresh the access token and re-fetch before React Query marks it failed.
+    retry: 1,
 
     staleTime: 1000 * 60 * 5,
 
