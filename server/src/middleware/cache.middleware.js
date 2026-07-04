@@ -5,8 +5,8 @@ export const getCacheKey = (prefix, id) => `cache:${prefix}:${id}`;
 export const cacheMiddleware = (prefix, ttlSeconds = 300) => {
   return async (req, res, next) => {
     const redisClient = getRedisClient();
-    if (!redisClient) {
-      // Redis is not active/connected; bypass caching silently
+    if (!redisClient || !redisClient.isOpen) {
+      // Redis is not active/connected or went offline; bypass caching silently
       return next();
     }
 
@@ -49,7 +49,7 @@ export const cacheMiddleware = (prefix, ttlSeconds = 300) => {
 
 export const invalidateCache = async (prefix, id) => {
   const redisClient = getRedisClient();
-  if (!redisClient) return;
+  if (!redisClient || !redisClient.isOpen) return;
 
   const key = getCacheKey(prefix, id);
   try {

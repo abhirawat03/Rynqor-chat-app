@@ -59,7 +59,7 @@ export const registerHandlers = async (io, socket) => {
   // ---------------------------------------------------
   const redisClient = getRedisClient();
 
-  if (redisClient) {
+  if (redisClient && redisClient.isOpen) {
     try {
       // Check if user was already active on another open browser tab
       const wasOnline = await redisClient.sIsMember("online_users", userId);
@@ -272,7 +272,7 @@ export const registerHandlers = async (io, socket) => {
   socket.on("disconnect", async () => {
     const lastSeen = new Date();
 
-    if (redisClient) {
+    if (redisClient && redisClient.isOpen) {
       try {
         await redisClient.sRem(`user:sockets:${userId}`, socket.id);
         const tabCount = await redisClient.sCard(`user:sockets:${userId}`);
