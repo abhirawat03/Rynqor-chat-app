@@ -10,7 +10,7 @@ Rynqor is a high-performance, real-time MERN chat application built with **React
 - **Group & Direct Conversations** — Create direct chats, self-note chats, and named group conversations with admin roles.
 - **Horizontal Scaling with Redis** — Socket.IO Redis Adapter scales WebSocket connections across multiple server nodes with multi-tab presence tracking.
 - **Atomic DB Transactions** — MongoDB sessions/transactions guarantee referential integrity when writing messages and updating conversation activity pointers.
-- **Hybrid Caching Architecture** — Combines a 24-hour server-side Redis cache with event-driven invalidation (cleared on profile updates or new media uploads) and client-side TanStack Query stale-time tuning, reducing redundant database queries and latency.
+- **Hybrid Caching Architecture** — Combines a 24-hour server-side Redis cache with event-driven invalidation (cleared on profile updates or new media uploads) and client-side TanStack Query stale-time tuning. Includes **dynamic self-healing fail-safes** that automatically bypass Redis and fallback to MongoDB and local memory maps if the cache server goes offline at runtime.
 - **Silent JWT Rotation** — HTTP-Only cookie-based auth with automatic access-token refresh loops; zero user interruption.
 - **Session Management** — Per-device refresh token tracking with remote logout support. Password change force-revokes all active sessions.
 - **Email Verification** — OTP-based email verification via Resend (togglable per environment). Unverified accounts auto-expire via MongoDB TTL index.
