@@ -9,6 +9,7 @@ The frontend client for **Rynqor**—a MERN real-time chat application. Built wi
 - **Real-Time Synchronized Gateway:** Implements a single-instance Socket.IO connection wrapped in a React Context, automatically synchronizing user presence, message receipt, typing states, and handling tab-visibility state syncing.
 - **Optimistic UI Engine:** Messages appear instantly in the chat view with a `sending` state. In case of socket delivery failure, the UI rolls back automatically and labels the message as `failed`.
 - **Session Recovery Guard:** Configures `retry` limits on the current user query to coordinate with the Axios token-refresh interceptor. This prevents accidental redirects to the login screen when access tokens are silently refreshed in the background.
+- **Direct Client-to-Cloud Uploads:** Uploads message media directly to Cloudinary using secure backend-signed credentials, completely bypassing the Express server's memory and disk systems. Includes a parallel queue that aggregates upload progress for a smooth single-bar UI indicator.
 - **Inverted Virtualized Feeds:** Implements `react-virtuoso` for smooth, lag-free scrolling through thousands of messages, using inverse scrolling behavior for instant bottom pinning.
 - **Resilient Panel Boundaries:** Utilizes panel-level React `ErrorBoundary` wrappers to prevent isolated component crashes from disrupting root-level navigation.
 - **Zero-Flicker Themes:** Synchronizes system theme preferences (dark/light mode) with CSS Custom Properties and direct class injection, eliminating paint flashes during initial page load.
@@ -75,6 +76,14 @@ Rynqor separates network requests from component UI elements using a three-tier 
 - **Paginated Message Feed (`["messages", conversationId]`):** Uses cursor-based pagination parameters (`pageParam`) to request subsequent pages as the user scrolls up. Configured with a `staleTime` of 5 minutes to prevent redundant network fetches during in-session room switching while keeping history fresh.
 - **Cached User Profiles (`["user", userId]`):** Tuned with a `staleTime` of 24 hours to match the server-side Redis cache TTL, eliminating wasteful client-side refetches for static user profile metadata.
 - **Cache Handlers:** When messages are sent/received, helper modules (`updateMessagesCache.js`, `updateConversationCache.js`) manipulate the TanStack cache directly, avoiding expensive full-page refetches.
+
+### Direct-to-Cloud Upload Pipeline
+
+The client bypasses the server for media file processing:
+1. Requests a secure, temporary upload signature from Express (`GET /messages/upload-signature`).
+2. Concurrently sends file binaries directly to Cloudinary using standard `multipart/form-data` POST requests.
+3. Computes the combined upload progress in real-time by tracking loaded/total bytes dynamically across all concurrent requests to avoid progress values exceeding 100%.
+4. Returns the validated URLs and media details to the message mutation for storage in MongoDB.
 
 ---
 
