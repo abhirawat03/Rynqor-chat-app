@@ -10,7 +10,7 @@ export const Skeleton = ({ className = "", ...props }) => {
 // Skeleton loader for a single sidebar ChatItem
 export const ChatItemSkeleton = () => {
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-transparent bg-surface">
+    <div className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-transparent">
       {/* Avatar circular skeleton */}
       <Skeleton className="h-14 w-14 rounded-full shrink-0" />
       {/* Content text skeletons */}
