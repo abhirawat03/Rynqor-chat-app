@@ -18,6 +18,7 @@ const uploadMessageMedia = async ({ files, onUploadProgress }) => {
   const { signature, timestamp, folder, apiKey, cloudName } = response;
 
   const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+  const totalSizes = new Array(files.length).fill(0);
   const loadedBytes = new Array(files.length).fill(0);
 
   // 2. Perform direct parallel uploads to Cloudinary's API
@@ -39,10 +40,15 @@ const uploadMessageMedia = async ({ files, onUploadProgress }) => {
         onUploadProgress: (progressEvent) => {
           if (onUploadProgress) {
             loadedBytes[index] = progressEvent.loaded;
+            totalSizes[index] = progressEvent.total;
+
             const currentLoaded = loadedBytes.reduce((sum, val) => sum + val, 0);
+            // Fall back to raw file size sum if some requests have not started/resolved total bytes yet
+            const currentTotal = totalSizes.reduce((sum, val) => sum + val, 0) || totalSize;
+
             onUploadProgress({
               loaded: currentLoaded,
-              total: totalSize,
+              total: currentTotal,
             });
           }
         },
