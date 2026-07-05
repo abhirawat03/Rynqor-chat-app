@@ -1,8 +1,7 @@
-// Base animated skeleton block (using lighter, softer light-mode colors)
 export const Skeleton = ({ className = "", ...props }) => {
   return (
     <div
-      className={`animate-pulse rounded-md bg-zinc-100 dark:bg-zinc-800/35 ${className}`}
+      className={`animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-800/35 ${className}`}
       {...props}
     />
   );
