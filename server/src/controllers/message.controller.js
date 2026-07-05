@@ -88,4 +88,28 @@ const getMessage = async (req, res) => {
     .json(new ApiResponse(200, message, "Message fetched successfully"));
 };
 
-export { uploadMessageMedia, getMessage };
+const getUploadSignature = async (req, res) => {
+  const timestamp = Math.round(new Date().getTime() / 1000);
+  const folder = "Rynqor/messages";
+
+  const paramsToSign = {
+    timestamp,
+    folder,
+  };
+
+  const signature = cloudinary.utils.api_sign_request(
+    paramsToSign,
+    process.env.CLOUDINARY_API_SECRET
+  );
+
+  return res.status(200).json({
+    success: true,
+    signature,
+    timestamp,
+    folder,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+  });
+};
+
+export { uploadMessageMedia, getMessage, getUploadSignature };
