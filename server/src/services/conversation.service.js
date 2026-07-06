@@ -296,7 +296,7 @@ const demoteAdminService = async (userId, conversationId, targetUserId) => {
 const updateGroupAvatarService = async (
   userId,
   conversationId,
-  avatarLocalPath,
+  { url, publicId },
 ) => {
   const conversation = await Conversation.findOne({
     _id: conversationId,
@@ -319,16 +319,11 @@ const updateGroupAvatarService = async (
     throw new ApiError(403, "Only admins can update group avatar");
   }
 
-  const uploaded = await uploadOnCloudinary(avatarLocalPath, "Rynqor/avatar");
-  if (!uploaded?.url || !uploaded?.publicId) {
-    throw new ApiError(400, "Error uploading group avatar");
-  }
-
   const oldAvatar = conversation.avatar;
 
   conversation.avatar = {
-    url: uploaded.url,
-    publicId: uploaded.publicId,
+    url,
+    publicId,
   };
 
   await conversation.save();

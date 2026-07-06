@@ -39,44 +39,33 @@ const updateProfileService = async (userId, updateData) => {
   return updatedUser;
 };
 
-const updateAvatarService = async (userId, avatarLocalPath) => {
+const updateAvatarService = async (userId, { url, publicId }) => {
   const user = await User.findById(userId).select("avatar").lean();
   if (!user) throw new ApiError(404, "User not found");
 
-  const uploaded = await uploadOnCloudinary(avatarLocalPath, "Rynqor/avatar");
-  if (!uploaded?.url || !uploaded?.publicId) {
-    throw new ApiError(400, "Error uploading avatar");
-  }
-
   const oldAvatar = user?.avatar;
-  try {
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      {
-        $set: {
-          avatar: {
-            url: uploaded.url,
-            publicId: uploaded.publicId,
-          },
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        avatar: {
+          url,
+          publicId,
         },
       },
-      { new: true, runValidators: true },
-    )
-      .select("username fullName avatar bio")
-      .lean();
+    },
+    { new: true, runValidators: true },
+  )
+    .select("username fullName avatar bio")
+    .lean();
 
-    if (!updatedUser) throw new Error("DB update failed");
+  if (!updatedUser) throw new ApiError(500, "Avatar update failed");
 
-    if (oldAvatar?.publicId) {
-      deleteFromCloudinary(oldAvatar.publicId);
-    }
-
-    return updatedUser;
-  } catch (error) {
-    deleteFromCloudinary(uploaded.publicId);
-
-    throw new ApiError(500, "Avatar update failed");
+  if (oldAvatar?.publicId) {
+    deleteFromCloudinary(oldAvatar.publicId);
   }
+
+  return updatedUser;
 };
 
 const deleteAvatarService = async (userId) => {

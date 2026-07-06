@@ -17,7 +17,6 @@ import {
 } from "../controllers/conversation.controller.js";
 import { verifyJwt } from "../middleware/verifyJwt.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
-import { handleSingleUpload } from "../middleware/upload.middleware.js";
 import { uploadLimiter } from "../middleware/rateLimiter.middleware.js";
 import {
   createConversationSchema,
@@ -72,7 +71,7 @@ router
 
 router
   .route("/:conversationId/avatar")
-  .patch(uploadLimiter, handleSingleUpload("avatar"), updateGroupAvatar)
+  .patch(uploadLimiter, updateGroupAvatar)
   .delete(validate(conversationIdSchema), deleteGroupAvatar);
 
 router

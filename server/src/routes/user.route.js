@@ -9,8 +9,6 @@ import {
   updateProfile,
 } from "../controllers/user.controller.js";
 import { verifyJwt } from "../middleware/verifyJwt.middleware.js";
-import { upload } from "../middleware/multer.middleware.js";
-import { handleSingleUpload } from "../middleware/upload.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 import {
   changePasswordSchema,
@@ -32,7 +30,7 @@ router.route("/search").get(validate(searchUsersSchema), searchUsers);
 router.route("/profile").patch(validate(updateProfileSchema), updateProfile);
 router
   .route("/avatar")
-  .patch(uploadLimiter, handleSingleUpload("avatar"), updateAvatar)
+  .patch(uploadLimiter, updateAvatar)
   .delete(deleteAvatar);
 router
   .route("/change-password")

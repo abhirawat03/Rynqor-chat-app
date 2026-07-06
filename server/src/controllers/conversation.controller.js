@@ -221,11 +221,19 @@ const removeParticipant = async (req, res) => {
 const updateGroupAvatar = async (req, res) => {
   const userId = req.user._id;
   const { conversationId } = req.params;
+  const { url, publicId } = req.body;
+
+  if (!url || !publicId) {
+    return res.status(400).json({
+      success: false,
+      message: "url and publicId are required",
+    });
+  }
 
   const conversation = await updateGroupAvatarService(
     userId,
     conversationId,
-    req.file?.path,
+    { url, publicId },
   );
 
   // Create system message

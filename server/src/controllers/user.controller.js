@@ -26,7 +26,15 @@ const updateProfile = async (req, res) => {
 };
 
 const updateAvatar = async (req, res) => {
-  const user = await updateAvatarService(req.user?._id, req.file?.path);
+  const { url, publicId } = req.body;
+  if (!url || !publicId) {
+    return res.status(400).json({
+      success: false,
+      message: "url and publicId are required",
+    });
+  }
+
+  const user = await updateAvatarService(req.user?._id, { url, publicId });
   await invalidateCache("users", req.user?._id);
   return res
     .status(200)
