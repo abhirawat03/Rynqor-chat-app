@@ -206,10 +206,7 @@ const GroupProfilePage = ({ conversationId, onClose, onMemberClick }) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("avatar", file);
-
-    updateGroupAvatarMutate({ conversationId, formData });
+    updateGroupAvatarMutate({ conversationId, file });
   };
 
   // LOADING

@@ -206,11 +206,7 @@ const ProfilePage = () => {
 
     setPreviewAvatar(previewUrl);
 
-    const formData = new FormData();
-
-    formData.append("avatar", file);
-
-    updateAvatarMutation(formData, {
+    updateAvatarMutation(file, {
       onSuccess: () => {
         setPreviewAvatar(null);
       },
