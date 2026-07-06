@@ -79,11 +79,11 @@ Rynqor separates network requests from component UI elements using a three-tier 
 
 ### Direct-to-Cloud Upload Pipeline
 
-The client bypasses the server for media file processing:
-1. Requests a secure, temporary upload signature from Express (`GET /messages/upload-signature`).
+The client bypasses the server for all media and avatar file processing:
+1. Requests a secure, temporary upload signature from Express (`GET /messages/upload-signature?type=avatar|message`). The query type determines the target Cloudinary folder (`Rynqor/avatar` or `Rynqor/messages`) and enforces strict image validation for avatars.
 2. Concurrently sends file binaries directly to Cloudinary using standard `multipart/form-data` POST requests.
 3. Computes the combined upload progress in real-time by tracking loaded/total bytes dynamically across all concurrent requests to avoid progress values exceeding 100%.
-4. Returns the validated URLs and media details to the message mutation for storage in MongoDB.
+4. Returns the validated URLs and media details to the mutation for storage in MongoDB.
 
 ---
 

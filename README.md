@@ -317,7 +317,6 @@ erDiagram
 |---|---|---|---|
 | `GET` | `/:conversationId` | ✅ | Paginated message history |
 | `GET` | `/upload-signature` | ✅ | Get secure Cloudinary upload signature |
-| `POST` | `/upload` | ✅ | Upload media attachment (Legacy server fallback) |
 
 ---
 
