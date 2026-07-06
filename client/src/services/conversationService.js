@@ -1,4 +1,5 @@
 import Api from "./api.js";
+import { uploadSingleToCloud } from "./uploadService.js";
 
 const createConversation = async (receiverId) => {
   const res = await Api.post(`/conversations`, {
@@ -62,16 +63,17 @@ const removeParticipant = async ({ conversationId, participantId }) => {
   return res.data.data;
 };
 
-const updateGroupAvatar = async ({ conversationId, formData }) => {
+const updateGroupAvatar = async ({ conversationId, file }) => {
   if (!conversationId) throw new Error("Missing conversationId");
+
+  const { url, publicId } = await uploadSingleToCloud(file, "avatar");
+
   const res = await Api.patch(
     `/conversations/${conversationId}/avatar`,
-    formData,
     {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    },
+      url,
+      publicId,
+    }
   );
   return res.data.data;
 };

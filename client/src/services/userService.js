@@ -1,4 +1,5 @@
 import Api from "./api.js";
+import { uploadSingleToCloud } from "./uploadService.js";
 
 const getUser = async (id) => {
   const res = await Api.get(`/users/${id}`);
@@ -10,8 +11,14 @@ const updateProfile = async (payload) => {
   return res.data.data;
 };
 
-const updateAvatar = async (payload) => {
-  const res = await Api.patch("/users/avatar", payload);
+const updateAvatar = async (file) => {
+  const { url, publicId } = await uploadSingleToCloud(file, "avatar");
+
+  const res = await Api.patch("/users/avatar", {
+    url,
+    publicId,
+  });
+
   return res.data.data;
 };
 
