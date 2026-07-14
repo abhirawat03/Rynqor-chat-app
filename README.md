@@ -281,7 +281,7 @@ erDiagram
 | `POST` | `/login` | — | Login, sets HttpOnly cookies |
 | `POST` | `/verify-email` | — | Verify email OTP |
 | `POST` | `/resend-verification` | — | Resend verification OTP |
-| `GET` | `/check-username` | — | Check username availability |
+| `GET` | `/check-username` | — | Check username availability (rate-limited: 30 req/min) |
 | `POST` | `/forgot-password` | — | Send password-reset OTP |
 | `POST` | `/reset-password` | — | Reset password + revoke all sessions |
 | `POST` | `/refresh-token` | — | Rotate access/refresh token pair |
@@ -343,7 +343,7 @@ erDiagram
 ## 🔒 Security Highlights
 
 - **HttpOnly Cookies** — Access, refresh, and session tokens are never accessible to JavaScript.
-- **Rate Limiting** — Auth and upload routes are protected by per-IP rate limiters.
+- **Rate Limiting** — Auth and upload routes are protected by per-IP rate limiters. The public `/check-username` endpoint has a dedicated limiter (30 req/min) to block username enumeration by scrapers.
 - **Force Logout on Password Change** — All active sessions across all devices are revoked on password change or reset.
 - **Soft Delete Guard** — Deleted accounts cannot log in and are excluded from all search results.
 - **Zod Validation** — Every request body, query, and param is validated against strict schemas before reaching controllers.
