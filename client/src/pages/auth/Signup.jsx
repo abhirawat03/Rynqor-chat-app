@@ -92,7 +92,7 @@ const Signup = () => {
       } catch {
         setUsernameAvailability({ status: "idle", message: "" });
       }
-    }, 300);
+    }, 600);
 
     return () => clearTimeout(timer);
   }, [formData.username]);
