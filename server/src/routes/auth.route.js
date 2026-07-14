@@ -24,7 +24,7 @@ import {
   verifyEmailSchema,
   resendVerificationSchema,
 } from "../schemas/auth.schema.js";
-import { authLimiter } from "../middleware/rateLimiter.middleware.js";
+import { authLimiter, usernameLimiter } from "../middleware/rateLimiter.middleware.js";
 
 const router = Router();
 
@@ -37,7 +37,7 @@ router
   .route("/resend-verification")
   .post(authLimiter, validate(resendVerificationSchema), resendVerification);
 router.route("/refresh-token").post(authLimiter, refreshAccessToken);
-router.route("/check-username").get(checkUsernameAvailability);
+router.route("/check-username").get(usernameLimiter, checkUsernameAvailability);
 router
   .route("/forgot-password")
   .post(authLimiter, validate(forgotPasswordSchema), forgotPassword);

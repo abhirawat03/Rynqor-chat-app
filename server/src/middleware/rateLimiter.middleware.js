@@ -39,3 +39,17 @@ export const apiLimiter = rateLimit({
   },
   message: "Too many requests. Please try again in a minute.",
 });
+
+// Dedicated limiter for username availability checks (30 requests per minute)
+// Prevents scrapers from enumerating taken usernames via the public endpoint
+export const usernameLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { trustProxy: false },
+  handler: (req, res, next, options) => {
+    next(new ApiError(429, options.message, "TOO_MANY_REQUESTS"));
+  },
+  message: "Too many username checks. Please slow down.",
+});
